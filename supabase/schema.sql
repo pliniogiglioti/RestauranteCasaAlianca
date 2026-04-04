@@ -11,7 +11,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- ============================================================
 CREATE TABLE IF NOT EXISTS public.configuracoes (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  nome_restaurante TEXT NOT NULL DEFAULT 'Restaurante Casa Aliana',
+  nome_restaurante TEXT NOT NULL DEFAULT 'Restaurante Casa Aliança',
   logo_url TEXT,
   cor_primaria TEXT DEFAULT '#f2700f',
   descricao TEXT,

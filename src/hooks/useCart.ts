@@ -75,7 +75,7 @@ export const useCart = create<CartStore>()(
       setObservacaoGeral: (observacaoGeral) => set({ observacaoGeral }),
 
       clearCart: () =>
-        set({ items: [], observacaoGeral: '', mesaId: '', mesaNumero: 0, mesaSlug: '' }),
+        set({ items: [], observacaoGeral: '' }),
 
       totalItens: () =>
         get().items.reduce((acc, i) => acc + i.quantidade, 0),

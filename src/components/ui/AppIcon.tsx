@@ -6,24 +6,28 @@ interface AppIconProps {
 }
 
 const sizeMap = {
-  sm: { container: 'w-7 h-7 rounded-lg', text: 'text-sm', img: 'text-sm' },
-  md: { container: 'w-9 h-9 rounded-xl', text: 'text-xl', img: 'text-xl' },
-  lg: { container: 'w-16 h-16 rounded-2xl', text: 'text-4xl', img: 'text-4xl' },
+  sm: { text: 'text-xl',  img: 'w-7 h-7' },
+  md: { text: 'text-2xl', img: 'w-9 h-9' },
+  lg: { text: 'text-6xl', img: 'w-20 h-20' },
 }
 
 export function AppIcon({ size = 'md', className = '' }: AppIconProps) {
   const { iconeApp, iconeUrl } = useConfiguracoes()
   const s = sizeMap[size]
 
+  if (iconeUrl) {
+    return (
+      <img
+        src={iconeUrl}
+        alt="ícone"
+        className={`${s.img} object-contain shrink-0 ${className}`}
+      />
+    )
+  }
+
   return (
-    <div
-      className={`${s.container} bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shrink-0 overflow-hidden ${className}`}
-    >
-      {iconeUrl ? (
-        <img src={iconeUrl} alt="ícone" className="w-full h-full object-cover" />
-      ) : (
-        <span className={`${s.text} leading-none`}>{iconeApp || '🍽️'}</span>
-      )}
-    </div>
+    <span className={`${s.text} leading-none shrink-0 ${className}`}>
+      {iconeApp || '🍽️'}
+    </span>
   )
 }

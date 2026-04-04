@@ -65,7 +65,7 @@ export function WelcomePage() {
         </div>
 
         {/* Restaurant name */}
-        <h1 className="text-3xl font-bold text-white font-display mb-1">Casa Aliana</h1>
+        <h1 className="text-3xl font-bold text-white font-display mb-1">Casa Aliança</h1>
         <p className="text-gray-400 text-sm mb-8">Sabores que aquecem o coração</p>
 
         {/* Mesa badge */}

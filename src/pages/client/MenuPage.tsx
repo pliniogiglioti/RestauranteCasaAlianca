@@ -89,7 +89,7 @@ export function MenuPage() {
               <UtensilsCrossed size={14} className="text-white" />
             </div>
             <div>
-              <p className="text-xs text-gray-500 leading-none">Casa Aliana</p>
+              <p className="text-xs text-gray-500 leading-none">Casa Aliança</p>
               <div className="flex items-center gap-1 mt-0.5">
                 <MapPin size={10} className="text-brand-500" />
                 <span className="text-xs font-bold text-gray-800">Mesa {mesaNumero || '—'}</span>

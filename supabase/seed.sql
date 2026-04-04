@@ -5,7 +5,7 @@
 
 -- Configuração inicial
 INSERT INTO public.configuracoes (nome_restaurante, descricao, telefone, endereco) VALUES
-('Restaurante Casa Aliana', 'O melhor da culinária caseira com amor e sabor.', '(11) 99999-9999', 'Rua das Flores, 123 - São Paulo, SP');
+('Restaurante Casa Aliança', 'O melhor da culinária caseira com amor e sabor.', '(11) 99999-9999', 'Rua das Flores, 123 - São Paulo, SP');
 
 -- Mesas
 INSERT INTO public.mesas (numero, slug, ativo) VALUES
@@ -70,6 +70,6 @@ INSERT INTO public.pratos (nome, descricao, imagem_url, preco, categoria_id, ati
 
 -- Banners
 INSERT INTO public.banners (titulo, subtitulo, imagem_url, link_opcional, ordem, ativo) VALUES
-('Bem-vindo ao Casa Aliana', 'Sabores que aquecem o coração', 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=80', null, 1, true),
+('Bem-vindo ao Casa Aliança', 'Sabores que aquecem o coração', 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=80', null, 1, true),
 ('Feijoada aos Sábados', 'Feijoada completa com todos os acompanhamentos tradicionais', 'https://images.unsplash.com/photo-1547592180-85f173990554?w=1200&q=80', null, 2, true),
 ('Frutos do Mar Frescos', 'Direto do mar para a sua mesa todos os dias', 'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?w=1200&q=80', null, 3, true);

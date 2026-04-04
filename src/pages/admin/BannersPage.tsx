@@ -275,7 +275,7 @@ export function BannersPage() {
             />
           </div>
 
-          <Input label="Título" value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Ex: Bem-vindo ao Casa Aliana" required />
+          <Input label="Título" value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Ex: Bem-vindo ao Casa Aliança" required />
           <Input label="Subtítulo (opcional)" value={subtitulo} onChange={(e) => setSubtitulo(e.target.value)} placeholder="Ex: Os melhores sabores para você" />
           <Input label="Link (opcional)" value={linkOpcional} onChange={(e) => setLinkOpcional(e.target.value)} placeholder="https://..." />
           <Toggle checked={ativo} onChange={setAtivo} label="Banner ativo (visível no cardápio)" />

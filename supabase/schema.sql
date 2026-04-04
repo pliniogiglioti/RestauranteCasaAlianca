@@ -11,7 +11,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- ============================================================
 CREATE TABLE IF NOT EXISTS public.configuracoes (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  nome_restaurante TEXT NOT NULL DEFAULT 'Restaurante Casa Aliana',
+  nome_restaurante TEXT NOT NULL DEFAULT 'Restaurante Casa Aliança',
   logo_url TEXT,
   cor_primaria TEXT DEFAULT '#f2700f',
   descricao TEXT,
@@ -297,6 +297,33 @@ CREATE POLICY "Admin acesso total configuracoes"
   TO authenticated
   USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid()))
   WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid()));
+
+-- ============================================================
+-- GRANTS EXPLÍCITOS (necessário para role anon funcionar com RLS)
+-- ============================================================
+GRANT USAGE ON SCHEMA public TO anon;
+GRANT USAGE ON SCHEMA public TO authenticated;
+
+-- Leitura pública (cardápio)
+GRANT SELECT ON public.mesas TO anon;
+GRANT SELECT ON public.categorias TO anon;
+GRANT SELECT ON public.pratos TO anon;
+GRANT SELECT ON public.banners TO anon;
+GRANT SELECT ON public.configuracoes TO anon;
+
+-- Clientes podem criar pedidos (sem login)
+GRANT INSERT ON public.pedidos TO anon;
+GRANT INSERT ON public.pedido_itens TO anon;
+
+-- Admin (authenticated)
+GRANT ALL ON public.mesas TO authenticated;
+GRANT ALL ON public.categorias TO authenticated;
+GRANT ALL ON public.pratos TO authenticated;
+GRANT ALL ON public.banners TO authenticated;
+GRANT ALL ON public.pedidos TO authenticated;
+GRANT ALL ON public.pedido_itens TO authenticated;
+GRANT ALL ON public.configuracoes TO authenticated;
+GRANT ALL ON public.profiles TO authenticated;
 
 -- ============================================================
 -- STORAGE BUCKETS

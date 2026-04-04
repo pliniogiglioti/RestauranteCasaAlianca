@@ -75,7 +75,7 @@ export function AdminLayout() {
             <div className="w-7 h-7 rounded-lg bg-brand-500 flex items-center justify-center">
               <UtensilsCrossed size={14} className="text-white" />
             </div>
-            <span className="font-semibold text-gray-900 text-sm">Casa Aliana Admin</span>
+            <span className="font-semibold text-gray-900 text-sm">Casa Aliança Admin</span>
           </div>
         </header>
 
@@ -106,7 +106,7 @@ function SidebarContent({
             <UtensilsCrossed size={18} className="text-white" />
           </div>
           <div>
-            <p className="text-white font-semibold text-sm leading-tight">Casa Aliana</p>
+            <p className="text-white font-semibold text-sm leading-tight">Casa Aliança</p>
             <p className="text-gray-400 text-xs">Painel Admin</p>
           </div>
         </div>

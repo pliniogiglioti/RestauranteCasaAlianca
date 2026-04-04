@@ -23,6 +23,47 @@ export async function getPratosAtivos(): Promise<PratoComCategoria[]> {
   return (data ?? []) as unknown as PratoComCategoria[]
 }
 
+export async function getBebidasParaUpsell(): Promise<PratoComCategoria[]> {
+  // Busca bebidas ordenando pelas mais pedidas (via contagem em pedido_itens)
+  const { data: bebidasPedidas, error: erroContagem } = await supabase
+    .from('pedido_itens')
+    .select('prato_id, quantidade')
+
+  let idsMaisVendidos: string[] = []
+
+  if (!erroContagem && bebidasPedidas) {
+    // Agrupa por prato_id e soma quantidades
+    const contagem: Record<string, number> = {}
+    for (const item of bebidasPedidas as { prato_id: string | null; quantidade: number }[]) {
+      if (item.prato_id) {
+        contagem[item.prato_id] = (contagem[item.prato_id] ?? 0) + item.quantidade
+      }
+    }
+    idsMaisVendidos = Object.keys(contagem).sort((a, b) => contagem[b] - contagem[a])
+  }
+
+  const { data, error } = await supabase
+    .from('pratos')
+    .select(`*, categoria:categorias!inner(*)`)
+    .eq('ativo', true)
+    .eq('categorias.slug', 'bebidas')
+
+  if (error) throw error
+  const bebidas = (data ?? []) as unknown as PratoComCategoria[]
+
+  if (idsMaisVendidos.length === 0) return bebidas
+
+  // Ordena: mais pedidas primeiro, depois o restante
+  return bebidas.sort((a, b) => {
+    const posA = idsMaisVendidos.indexOf(a.id)
+    const posB = idsMaisVendidos.indexOf(b.id)
+    if (posA === -1 && posB === -1) return 0
+    if (posA === -1) return 1
+    if (posB === -1) return -1
+    return posA - posB
+  })
+}
+
 export async function getPratoDodia(dia: DiaSemana): Promise<PratoComCategoria[]> {
   const { data, error } = await supabase
     .from('pratos')

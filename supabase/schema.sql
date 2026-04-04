@@ -299,6 +299,33 @@ CREATE POLICY "Admin acesso total configuracoes"
   WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid()));
 
 -- ============================================================
+-- GRANTS EXPLÍCITOS (necessário para role anon funcionar com RLS)
+-- ============================================================
+GRANT USAGE ON SCHEMA public TO anon;
+GRANT USAGE ON SCHEMA public TO authenticated;
+
+-- Leitura pública (cardápio)
+GRANT SELECT ON public.mesas TO anon;
+GRANT SELECT ON public.categorias TO anon;
+GRANT SELECT ON public.pratos TO anon;
+GRANT SELECT ON public.banners TO anon;
+GRANT SELECT ON public.configuracoes TO anon;
+
+-- Clientes podem criar pedidos (sem login)
+GRANT INSERT ON public.pedidos TO anon;
+GRANT INSERT ON public.pedido_itens TO anon;
+
+-- Admin (authenticated)
+GRANT ALL ON public.mesas TO authenticated;
+GRANT ALL ON public.categorias TO authenticated;
+GRANT ALL ON public.pratos TO authenticated;
+GRANT ALL ON public.banners TO authenticated;
+GRANT ALL ON public.pedidos TO authenticated;
+GRANT ALL ON public.pedido_itens TO authenticated;
+GRANT ALL ON public.configuracoes TO authenticated;
+GRANT ALL ON public.profiles TO authenticated;
+
+-- ============================================================
 -- STORAGE BUCKETS
 -- ============================================================
 -- Execute após criar o projeto no Supabase:

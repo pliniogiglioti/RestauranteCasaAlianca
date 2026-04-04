@@ -1,8 +1,10 @@
-import { X, Minus, Plus, Trash2, ShoppingCart, MessageSquare } from 'lucide-react'
+import { X, Minus, Plus, Trash2, ShoppingCart, MessageSquare, Zap } from 'lucide-react'
 import { formatCurrency } from '@/types'
 import { useCart } from '@/hooks/useCart'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getBebidasParaUpsell } from '@/services/pratos'
+import type { PratoComCategoria } from '@/types'
 
 interface CartDrawerProps {
   isOpen: boolean
@@ -48,7 +50,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         `}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100 bg-white">
+        <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100 bg-white shrink-0">
           <div className="flex items-center gap-2">
             <ShoppingCart size={18} className="text-brand-500" />
             <h2 className="font-bold text-gray-900">Seu Pedido</h2>
@@ -73,7 +75,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           </div>
         </div>
 
-        {/* Items */}
+        {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto">
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-6">
@@ -85,10 +87,10 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             </div>
           ) : (
             <div className="p-4 space-y-3">
+              {/* Items */}
               {items.map((item) => (
                 <div key={item.prato.id} className="bg-gray-50 rounded-2xl p-3">
                   <div className="flex gap-3">
-                    {/* Image */}
                     <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0">
                       {item.prato.imagem_url ? (
                         <img
@@ -103,7 +105,6 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                       )}
                     </div>
 
-                    {/* Info */}
                     <div className="flex-1 min-w-0">
                       <h4 className="font-semibold text-gray-900 text-sm line-clamp-1">
                         {item.prato.nome}
@@ -116,7 +117,6 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                       </p>
                     </div>
 
-                    {/* Remove */}
                     <button
                       onClick={() => removeItem(item.prato.id)}
                       className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
@@ -125,9 +125,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     </button>
                   </div>
 
-                  {/* Quantity + obs */}
                   <div className="flex items-center justify-between mt-2">
-                    {/* Quantity control */}
                     <div className="flex items-center gap-2 bg-white rounded-full shadow-sm border border-gray-200 p-1">
                       <button
                         onClick={() => updateQuantidade(item.prato.id, item.quantidade - 1)}
@@ -146,7 +144,6 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                       </button>
                     </div>
 
-                    {/* Obs button */}
                     <button
                       onClick={() =>
                         setEditingObs(editingObs === item.prato.id ? null : item.prato.id)
@@ -162,7 +159,6 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     </button>
                   </div>
 
-                  {/* Obs input */}
                   {editingObs === item.prato.id && (
                     <textarea
                       className="w-full mt-2 text-xs border border-gray-200 rounded-xl px-3 py-2 resize-none focus:outline-none focus:ring-1 focus:ring-brand-400 bg-white"
@@ -174,6 +170,9 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                   )}
                 </div>
               ))}
+
+              {/* ─── Upsell: Bebidas ────────────────────────── */}
+              <UpsellBebidas />
 
               {/* Observação geral */}
               <div className="bg-gray-50 rounded-2xl p-3">
@@ -195,7 +194,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
         {/* Footer */}
         {items.length > 0 && (
-          <div className="p-4 border-t border-gray-100 bg-white space-y-3">
+          <div className="p-4 border-t border-gray-100 bg-white space-y-3 shrink-0">
             <div className="flex items-center justify-between">
               <span className="text-gray-600 font-medium">Total</span>
               <span className="text-brand-600 font-bold text-xl">
@@ -215,7 +214,120 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   )
 }
 
-// Floating cart button
+// ─── Upsell Bebidas Carousel ─────────────────────────────────
+function UpsellBebidas() {
+  const [bebidas, setBebidas] = useState<PratoComCategoria[]>([])
+  const { items, addItem } = useCart()
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    getBebidasParaUpsell()
+      .then(setBebidas)
+      .catch(() => {/* silencioso */})
+  }, [])
+
+  // Filtra bebidas que já estão no carrinho para não duplicar no upsell
+  const bebidasParaMostrar = bebidas.filter(
+    (b) => !items.some((i) => i.prato.id === b.id)
+  )
+
+  if (bebidasParaMostrar.length === 0) return null
+
+  return (
+    <div className="rounded-2xl overflow-hidden border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50">
+      {/* Header */}
+      <div className="flex items-center gap-2 px-3 pt-3 pb-2">
+        <div className="w-5 h-5 rounded-full bg-brand-500 flex items-center justify-center">
+          <Zap size={11} className="text-white" />
+        </div>
+        <p className="text-xs font-bold text-gray-800">Adicionar bebida?</p>
+        <span className="text-xs text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full font-medium ml-auto">
+          Mais pedidas
+        </span>
+      </div>
+
+      {/* Scroll carousel */}
+      <div
+        ref={scrollRef}
+        className="flex gap-2.5 overflow-x-auto px-3 pb-3 scrollbar-hide"
+        style={{ WebkitOverflowScrolling: 'touch' }}
+      >
+        {bebidasParaMostrar.map((bebida, index) => (
+          <DrinkCard key={bebida.id} bebida={bebida} index={index} onAdd={addItem} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function DrinkCard({
+  bebida,
+  index,
+  onAdd,
+}: {
+  bebida: PratoComCategoria
+  index: number
+  onAdd: (prato: PratoComCategoria) => void
+}) {
+  const [added, setAdded] = useState(false)
+
+  function handleAdd() {
+    onAdd(bebida)
+    setAdded(true)
+    setTimeout(() => setAdded(false), 1500)
+  }
+
+  return (
+    <div className="flex-none w-28 bg-white rounded-xl overflow-hidden shadow-sm border border-amber-100">
+      {/* Rank badge para os 3 primeiros */}
+      <div className="relative">
+        <div className="aspect-square overflow-hidden bg-gray-100">
+          {bebida.imagem_url ? (
+            <img
+              src={bebida.imagem_url}
+              alt={bebida.nome}
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-3xl bg-gradient-to-br from-blue-50 to-blue-100">
+              🥤
+            </div>
+          )}
+        </div>
+
+        {index < 3 && (
+          <div className="absolute top-1 left-1 bg-brand-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">
+            #{index + 1}
+          </div>
+        )}
+      </div>
+
+      <div className="p-2">
+        <p className="text-gray-800 text-xs font-semibold line-clamp-2 leading-tight min-h-[2rem]">
+          {bebida.nome}
+        </p>
+        <p className="text-brand-600 font-bold text-xs mt-1">
+          {formatCurrency(bebida.preco)}
+        </p>
+        <button
+          onClick={handleAdd}
+          className={`
+            w-full mt-2 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95
+            ${added
+              ? 'bg-green-500 text-white'
+              : 'bg-brand-500 hover:bg-brand-600 text-white'
+            }
+          `}
+        >
+          {added ? '✓ Adicionado' : '+ Adicionar'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ─── Floating Cart Button ─────────────────────────────────────
 interface FloatingCartButtonProps {
   onClick: () => void
 }

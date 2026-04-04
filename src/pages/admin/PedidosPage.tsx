@@ -207,19 +207,19 @@ export function PedidosPage() {
               className={`bg-white rounded-2xl shadow-sm border-2 transition-all ${
                 group.temAberto
                   ? 'border-brand-400 shadow-brand-100'
-                  : 'border-green-400 shadow-green-50'
+                  : 'border-gray-200'
               }`}
             >
               {/* Cabeçalho da mesa */}
               <div
                 className={`flex items-center gap-3 px-4 py-3 rounded-t-xl ${
-                  group.temAberto ? 'bg-brand-50' : 'bg-green-50'
+                  group.temAberto ? 'bg-brand-50' : 'bg-gray-50'
                 }`}
               >
                 {/* Número grande */}
                 <div
                   className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
-                    group.temAberto ? 'bg-brand-500' : 'bg-green-500'
+                    group.temAberto ? 'bg-brand-500' : 'bg-gray-300'
                   }`}
                 >
                   <span className="text-white font-black text-xl leading-none">
@@ -229,7 +229,7 @@ export function PedidosPage() {
 
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-gray-900 text-sm">Mesa {group.mesaNumero || '?'}</p>
-                  <p className={`text-xs font-medium ${group.temAberto ? 'text-brand-600' : 'text-green-600'}`}>
+                  <p className={`text-xs font-medium ${group.temAberto ? 'text-brand-600' : 'text-gray-400'}`}>
                     {group.temAberto ? '● Em atendimento' : '✓ Livre'}
                   </p>
                 </div>

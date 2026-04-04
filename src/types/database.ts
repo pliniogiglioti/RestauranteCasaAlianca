@@ -96,6 +96,8 @@ export interface ProfileRow {
 export interface ConfiguracaoRow {
   id: string
   nome_restaurante: string
+  slogan: string | null
+  icone_app: string | null
   logo_url: string | null
   cor_primaria: string | null
   descricao: string | null

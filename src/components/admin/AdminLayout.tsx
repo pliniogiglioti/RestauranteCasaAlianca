@@ -11,8 +11,10 @@ import {
   Menu,
   X,
   ChevronRight,
+  Settings,
 } from 'lucide-react'
 import { signOut } from '@/hooks/useAuth'
+import { useConfiguracoes } from '@/hooks/useConfiguracoes'
 import toast from 'react-hot-toast'
 
 const navItems = [
@@ -22,6 +24,7 @@ const navItems = [
   { to: '/admin/pratos', label: 'Pratos', icon: UtensilsCrossed },
   { to: '/admin/banners', label: 'Banners', icon: Image },
   { to: '/admin/pedidos', label: 'Pedidos', icon: ClipboardList },
+  { to: '/admin/configuracoes', label: 'Configurações', icon: Settings },
 ]
 
 export function AdminLayout() {
@@ -71,12 +74,7 @@ export function AdminLayout() {
           >
             <Menu size={20} />
           </button>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-brand-500 flex items-center justify-center">
-              <UtensilsCrossed size={14} className="text-white" />
-            </div>
-            <span className="font-semibold text-gray-900 text-sm">Casa Aliança Admin</span>
-          </div>
+          <MobileHeaderLogo />
         </header>
 
         {/* Page content */}
@@ -84,6 +82,18 @@ export function AdminLayout() {
           <Outlet />
         </main>
       </div>
+    </div>
+  )
+}
+
+function MobileHeaderLogo() {
+  const { nomeRestaurante, iconeApp } = useConfiguracoes()
+  return (
+    <div className="flex items-center gap-2">
+      <div className="w-7 h-7 rounded-lg bg-brand-500 flex items-center justify-center">
+        <span className="text-sm leading-none">{iconeApp}</span>
+      </div>
+      <span className="font-semibold text-gray-900 text-sm">{nomeRestaurante} Admin</span>
     </div>
   )
 }
@@ -97,16 +107,18 @@ function SidebarContent({
   onClose: () => void
   showClose?: boolean
 }) {
+  const { nomeRestaurante, iconeApp } = useConfiguracoes()
+
   return (
     <>
       {/* Logo */}
       <div className="flex items-center justify-between px-5 py-5 border-b border-gray-800">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-brand-500 flex items-center justify-center">
-            <UtensilsCrossed size={18} className="text-white" />
+            <span className="text-xl leading-none">{iconeApp}</span>
           </div>
           <div>
-            <p className="text-white font-semibold text-sm leading-tight">Casa Aliança</p>
+            <p className="text-white font-semibold text-sm leading-tight">{nomeRestaurante}</p>
             <p className="text-gray-400 text-xs">Painel Admin</p>
           </div>
         </div>

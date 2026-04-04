@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { QrCode, UtensilsCrossed, ArrowRight, MapPin } from 'lucide-react'
+import { QrCode, ArrowRight, MapPin } from 'lucide-react'
 import { getMesaBySlug } from '@/services/mesas'
 import { useCart } from '@/hooks/useCart'
+import { useConfiguracoes } from '@/hooks/useConfiguracoes'
 import type { Mesa } from '@/types'
 import { PageLoading } from '@/components/ui/LoadingSpinner'
 
@@ -10,6 +11,7 @@ export function WelcomePage() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
   const { setMesa } = useCart()
+  const { nomeRestaurante, slogan, iconeApp } = useConfiguracoes()
   const [mesa, setMesaData] = useState<Mesa | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -61,12 +63,12 @@ export function WelcomePage() {
       <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-sm mx-auto">
         {/* Logo/Icon */}
         <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-2xl shadow-brand-500/30 mb-8">
-          <UtensilsCrossed size={44} className="text-white" />
+          <span className="text-5xl leading-none">{iconeApp}</span>
         </div>
 
         {/* Restaurant name */}
-        <h1 className="text-3xl font-bold text-white font-display mb-1">Casa Aliança</h1>
-        <p className="text-gray-400 text-sm mb-8">Sabores que aquecem o coração</p>
+        <h1 className="text-3xl font-bold text-white font-display mb-1">{nomeRestaurante}</h1>
+        <p className="text-gray-400 text-sm mb-8">{slogan}</p>
 
         {/* Mesa badge */}
         <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-6 py-4 mb-8 w-full">

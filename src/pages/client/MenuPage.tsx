@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ShoppingCart, MapPin, UtensilsCrossed, Clock } from 'lucide-react'
+import { ShoppingCart, MapPin, Clock } from 'lucide-react'
 import { BannerSlider } from '@/components/client/BannerSlider'
 import { CategoryFilter } from '@/components/client/CategoryFilter'
 import { DishCard } from '@/components/client/DishCard'
@@ -11,6 +11,7 @@ import { DishModal } from '@/components/client/DishModal'
 import { useCardapio } from '@/hooks/useCardapio'
 import { useCart } from '@/hooks/useCart'
 import { usePedidoAtivo } from '@/hooks/usePedidoAtivo'
+import { useConfiguracoes } from '@/hooks/useConfiguracoes'
 import { SectionLoading } from '@/components/ui/LoadingSpinner'
 import type { PratoComCategoria } from '@/types'
 
@@ -28,6 +29,7 @@ export function MenuPage() {
   const { pratos, pratosDoDia, categorias, banners, loading, error } = useCardapio()
   const { mesaNumero, totalItens } = useCart()
   const { pedido } = usePedidoAtivo()
+  const { nomeRestaurante, iconeApp } = useConfiguracoes()
 
   const [search, setSearch] = useState('')
   const [selectedCategoria, setSelectedCategoria] = useState<string | null>(null)
@@ -89,10 +91,10 @@ export function MenuPage() {
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center">
-              <UtensilsCrossed size={14} className="text-white" />
+              <span className="text-sm leading-none">{iconeApp}</span>
             </div>
             <div>
-              <p className="text-xs text-gray-500 leading-none">Casa Aliança</p>
+              <p className="text-xs text-gray-500 leading-none">{nomeRestaurante}</p>
               <div className="flex items-center gap-1 mt-0.5">
                 <MapPin size={10} className="text-brand-500" />
                 <span className="text-xs font-bold text-gray-800">Mesa {mesaNumero || '—'}</span>

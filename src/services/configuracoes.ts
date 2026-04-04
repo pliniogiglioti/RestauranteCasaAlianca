@@ -2,28 +2,26 @@ import { supabase } from '@/lib/supabase'
 import type { Configuracao } from '@/types'
 
 export async function getConfiguracao(): Promise<Configuracao | null> {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('configuracoes')
     .select('*')
     .limit(1)
-    .single()
+    .maybeSingle()
 
-  if (error) return null
-  return data as Configuracao
+  return data as Configuracao | null
 }
 
-export async function updateConfiguracao(
-  id: string,
-  config: Partial<Omit<Configuracao, 'id' | 'created_at' | 'updated_at'>>
-): Promise<Configuracao> {
-  const { data, error } = await supabase
-    .from('configuracoes')
+export async function upsertConfiguracao(
+  config: Partial<Omit<Configuracao, 'created_at' | 'updated_at'>>,
+  id?: string
+): Promise<void> {
+  if (id) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .update(config as any)
-    .eq('id', id)
-    .select()
-    .single()
-
-  if (error) throw error
-  return data as Configuracao
+    const { error } = await supabase.from('configuracoes').update(config as any).eq('id', id)
+    if (error) throw error
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await supabase.from('configuracoes').insert(config as any)
+    if (error) throw error
+  }
 }

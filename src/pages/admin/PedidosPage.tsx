@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { RefreshCw, Eye, Clock, ChevronDown } from 'lucide-react'
+import { RefreshCw, Eye, Clock } from 'lucide-react'
 import { getPedidos, atualizarStatusPedido } from '@/services/pedidos'
 import { PageHeader } from '@/components/admin/PageHeader'
 import { Button } from '@/components/ui/Button'
@@ -121,7 +121,7 @@ export function PedidosPage() {
           {pedidosFiltrados.map((pedido) => (
             <div
               key={pedido.id}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
+              className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
             >
               <div className="flex items-center gap-4 px-4 py-4">
                 {/* Mesa */}
@@ -170,25 +170,15 @@ export function PedidosPage() {
                     <Eye size={15} />
                   </button>
 
-                  <div className="relative group">
-                    <button className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border border-gray-200 hover:border-brand-300 text-gray-700 hover:text-brand-700 transition-colors bg-white">
-                      Alterar
-                      <ChevronDown size={13} />
-                    </button>
-                    <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-xl border border-gray-100 z-20 hidden group-hover:block">
-                      {STATUS_OPTIONS.map((s) => (
-                        <button
-                          key={s.value}
-                          onClick={() => handleStatusChange(pedido.id, s.value)}
-                          className={`w-full text-left px-3 py-2.5 text-sm hover:bg-gray-50 transition-colors first:rounded-t-xl last:rounded-b-xl ${
-                            pedido.status === s.value ? 'text-brand-600 font-semibold bg-brand-50' : 'text-gray-700'
-                          }`}
-                        >
-                          {s.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  <select
+                    value={pedido.status}
+                    onChange={(e) => handleStatusChange(pedido.id, e.target.value as StatusPedido)}
+                    className="text-sm font-medium border border-gray-200 rounded-xl px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent cursor-pointer hover:border-brand-300 transition-colors"
+                  >
+                    {STATUS_OPTIONS.map((s) => (
+                      <option key={s.value} value={s.value}>{s.label}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>

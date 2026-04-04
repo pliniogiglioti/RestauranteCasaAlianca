@@ -85,9 +85,10 @@ const ORDEM_STATUS: StatusPedido[] = [
 
 export function OrderStatusPage() {
   const navigate = useNavigate()
-  const { pedido, limparPedido } = usePedidoAtivo()
+  const { pedido, limparPedido, atualizarStatus } = usePedidoAtivo()
   const { mesaSlug } = useCart()
-  const [status, setStatus] = useState<StatusPedido | null>(null)
+  // Use stored status as initial value — always shows something even if SELECT policy isn't applied
+  const [status, setStatus] = useState<StatusPedido | null>(pedido?.status ?? null)
   const [valorTotal, setValorTotal] = useState<number>(0)
   const [loading, setLoading] = useState(true)
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date())
@@ -96,7 +97,7 @@ export function OrderStatusPage() {
   const mesaNumero = pedido?.mesaNumero
   const pedidoId = pedido?.pedidoId
 
-  // Busca status inicial
+  // Busca status inicial do banco (confirma o estado real)
   useEffect(() => {
     if (!pedidoId) {
       setLoading(false)
@@ -112,10 +113,11 @@ export function OrderStatusPage() {
         if (data) {
           setStatus(data.status as StatusPedido)
           setValorTotal(data.valor_total as number)
+          atualizarStatus(data.status as StatusPedido)
         }
         setLoading(false)
       })
-  }, [pedidoId])
+  }, [pedidoId, atualizarStatus])
 
   // Realtime: escuta mudanças de status
   useEffect(() => {
@@ -134,6 +136,7 @@ export function OrderStatusPage() {
         (payload) => {
           const novo = payload.new as { status: StatusPedido; valor_total: number }
           setStatus(novo.status)
+          atualizarStatus(novo.status)
           setLastUpdate(new Date())
 
           // Limpa o pedido ativo ao finalizar
@@ -147,7 +150,7 @@ export function OrderStatusPage() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [pedidoId, limparPedido])
+  }, [pedidoId, limparPedido, atualizarStatus])
 
   if (!pedidoId || !pedido) {
     return (

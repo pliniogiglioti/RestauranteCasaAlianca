@@ -29,6 +29,7 @@ export function OrderSummaryPage() {
         mesaNumero: mesaNumero ?? 0,
         mesaSlug: mesaSlug ?? '',
         criadoEm: new Date().toISOString(),
+        status: 'recebido',
       })
       clearCart()
       toast.success('Pedido enviado com sucesso!')

@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { RefreshCw, Eye, Clock, ChevronDown } from 'lucide-react'
+import { RefreshCw, Eye, Clock, CheckCircle2, ChefHat, Utensils } from 'lucide-react'
 import { getPedidos, atualizarStatusPedido } from '@/services/pedidos'
 import { PageHeader } from '@/components/admin/PageHeader'
 import { Button } from '@/components/ui/Button'
@@ -12,10 +12,55 @@ import toast from 'react-hot-toast'
 
 const STATUS_OPTIONS = STATUS_PEDIDO
 
+// Statuses que mantêm a mesa "em aberto"
+const STATUS_ABERTO: StatusPedido[] = ['recebido', 'em_preparo', 'pronto', 'entregue']
+
+interface MesaGroup {
+  mesaNumero: number
+  mesaId: string | null
+  pedidos: PedidoCompleto[]
+  temAberto: boolean
+}
+
+function agruparPorMesa(pedidos: PedidoCompleto[]): MesaGroup[] {
+  const map = new Map<string, MesaGroup>()
+
+  for (const pedido of pedidos) {
+    const key = pedido.mesa?.id ?? 'sem-mesa'
+    const numero = pedido.mesa?.numero ?? 0
+
+    if (!map.has(key)) {
+      map.set(key, {
+        mesaNumero: numero,
+        mesaId: pedido.mesa?.id ?? null,
+        pedidos: [],
+        temAberto: false,
+      })
+    }
+
+    const group = map.get(key)!
+    group.pedidos.push(pedido)
+    if (STATUS_ABERTO.includes(pedido.status)) {
+      group.temAberto = true
+    }
+  }
+
+  return Array.from(map.values()).sort((a, b) => a.mesaNumero - b.mesaNumero)
+}
+
+const STATUS_ICON: Record<StatusPedido, React.ReactNode> = {
+  recebido: <Clock size={12} />,
+  em_preparo: <ChefHat size={12} />,
+  pronto: <CheckCircle2 size={12} />,
+  entregue: <Utensils size={12} />,
+  finalizado: <CheckCircle2 size={12} />,
+}
+
 export function PedidosPage() {
   const [pedidos, setPedidos] = useState<PedidoCompleto[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [viewMode, setViewMode] = useState<'mesas' | 'lista'>('mesas')
   const [statusFilter, setStatusFilter] = useState<StatusPedido | 'todos'>('todos')
   const [detailPedido, setDetailPedido] = useState<PedidoCompleto | null>(null)
 
@@ -35,7 +80,6 @@ export function PedidosPage() {
 
   useEffect(() => {
     carregar()
-    // Auto-refresh every 30s
     const interval = setInterval(() => carregar(true), 30000)
     return () => clearInterval(interval)
   }, [carregar])
@@ -64,6 +108,8 @@ export function PedidosPage() {
     return acc
   }, {} as Record<string, number>)
 
+  const mesaGroups = agruparPorMesa(pedidosFiltrados)
+
   if (loading) return <SectionLoading />
 
   return (
@@ -72,14 +118,36 @@ export function PedidosPage() {
         title="Pedidos"
         subtitle="Gerencie os pedidos do restaurante"
         action={
-          <Button
-            variant="outline"
-            onClick={() => carregar(true)}
-            loading={refreshing}
-          >
-            <RefreshCw size={15} />
-            Atualizar
-          </Button>
+          <div className="flex items-center gap-2">
+            {/* View toggle */}
+            <div className="flex bg-gray-100 rounded-xl p-1 gap-1">
+              <button
+                onClick={() => setViewMode('mesas')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  viewMode === 'mesas'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Por Mesa
+              </button>
+              <button
+                onClick={() => setViewMode('lista')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  viewMode === 'lista'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Lista
+              </button>
+            </div>
+
+            <Button variant="outline" onClick={() => carregar(true)} loading={refreshing}>
+              <RefreshCw size={15} />
+              Atualizar
+            </Button>
+          </div>
         }
       />
 
@@ -110,18 +178,105 @@ export function PedidosPage() {
         ))}
       </div>
 
-      {/* Pedidos list */}
       {pedidosFiltrados.length === 0 ? (
         <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
           <Clock size={40} className="text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500 font-medium">Nenhum pedido encontrado</p>
         </div>
+      ) : viewMode === 'mesas' ? (
+        /* ── Agrupado por mesa ── */
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {mesaGroups.map((group) => (
+            <div
+              key={group.mesaId ?? 'sem-mesa'}
+              className={`bg-white rounded-2xl shadow-sm border-2 transition-all ${
+                group.temAberto
+                  ? 'border-brand-400 shadow-brand-100'
+                  : 'border-green-400 shadow-green-50'
+              }`}
+            >
+              {/* Mesa header */}
+              <div
+                className={`flex items-center justify-between px-4 py-3 rounded-t-2xl ${
+                  group.temAberto ? 'bg-brand-50' : 'bg-green-50'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`w-9 h-9 rounded-xl flex flex-col items-center justify-center ${
+                      group.temAberto
+                        ? 'bg-brand-500 text-white'
+                        : 'bg-green-500 text-white'
+                    }`}
+                  >
+                    <span className="text-xs font-medium leading-none">Mesa</span>
+                    <span className="text-sm font-black leading-tight">{group.mesaNumero || '?'}</span>
+                  </div>
+                  <div>
+                    <p className="font-bold text-gray-900 text-sm">Mesa {group.mesaNumero || '?'}</p>
+                    <p className={`text-xs font-medium ${group.temAberto ? 'text-brand-600' : 'text-green-600'}`}>
+                      {group.temAberto ? '● Em atendimento' : '✓ Livre'}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs text-gray-500 bg-white rounded-lg px-2 py-1 border border-gray-200">
+                  {group.pedidos.length} pedido{group.pedidos.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+
+              {/* Pedidos da mesa */}
+              <div className="divide-y divide-gray-50">
+                {group.pedidos.map((pedido) => (
+                  <div key={pedido.id} className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      {/* Status icon */}
+                      <div className="shrink-0">
+                        <StatusBadge status={pedido.status} />
+                      </div>
+
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-gray-900 text-xs">
+                          #{pedido.id.split('-')[0].toUpperCase()}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {pedido.itens?.length ?? 0} iten{(pedido.itens?.length ?? 0) !== 1 ? 's' : ''} · {formatCurrency(pedido.valor_total)}
+                        </p>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          onClick={() => setDetailPedido(pedido)}
+                          className="p-1.5 rounded-lg text-gray-400 hover:text-brand-600 hover:bg-brand-50 transition-colors border border-gray-200"
+                          title="Ver detalhes"
+                        >
+                          <Eye size={13} />
+                        </button>
+                        <select
+                          value={pedido.status}
+                          onChange={(e) => handleStatusChange(pedido.id, e.target.value as StatusPedido)}
+                          className="text-xs font-medium border border-gray-200 rounded-lg px-2 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-400 cursor-pointer hover:border-brand-300 transition-colors"
+                        >
+                          {STATUS_OPTIONS.map((s) => (
+                            <option key={s.value} value={s.value}>{s.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
+        /* ── Lista simples ── */
         <div className="space-y-3">
           {pedidosFiltrados.map((pedido) => (
             <div
               key={pedido.id}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
+              className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
             >
               <div className="flex items-center gap-4 px-4 py-4">
                 {/* Mesa */}
@@ -136,7 +291,7 @@ export function PedidosPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-semibold text-gray-900 text-sm">
-                      Pedido #{pedido.id.split('-')[0].toUpperCase()}
+                      #{pedido.id.split('-')[0].toUpperCase()}
                     </span>
                     <StatusBadge status={pedido.status} />
                   </div>
@@ -149,9 +304,9 @@ export function PedidosPage() {
                         minute: '2-digit',
                       })}
                     </span>
-                    <span className="text-xs text-gray-400">•</span>
+                    <span className="text-xs text-gray-400">·</span>
                     <span className="text-xs text-gray-500">
-                      {pedido.itens?.length ?? 0} ite{(pedido.itens?.length ?? 0) !== 1 ? 'ns' : 'm'}
+                      {pedido.itens?.length ?? 0} iten{(pedido.itens?.length ?? 0) !== 1 ? 's' : ''}
                     </span>
                   </div>
                 </div>
@@ -169,26 +324,15 @@ export function PedidosPage() {
                   >
                     <Eye size={15} />
                   </button>
-
-                  <div className="relative group">
-                    <button className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border border-gray-200 hover:border-brand-300 text-gray-700 hover:text-brand-700 transition-colors bg-white">
-                      Alterar
-                      <ChevronDown size={13} />
-                    </button>
-                    <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl shadow-xl border border-gray-100 z-20 hidden group-hover:block">
-                      {STATUS_OPTIONS.map((s) => (
-                        <button
-                          key={s.value}
-                          onClick={() => handleStatusChange(pedido.id, s.value)}
-                          className={`w-full text-left px-3 py-2.5 text-sm hover:bg-gray-50 transition-colors first:rounded-t-xl last:rounded-b-xl ${
-                            pedido.status === s.value ? 'text-brand-600 font-semibold bg-brand-50' : 'text-gray-700'
-                          }`}
-                        >
-                          {s.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  <select
+                    value={pedido.status}
+                    onChange={(e) => handleStatusChange(pedido.id, e.target.value as StatusPedido)}
+                    className="text-sm font-medium border border-gray-200 rounded-xl px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent cursor-pointer hover:border-brand-300 transition-colors"
+                  >
+                    {STATUS_OPTIONS.map((s) => (
+                      <option key={s.value} value={s.value}>{s.label}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>
@@ -205,7 +349,6 @@ export function PedidosPage() {
       >
         {detailPedido && (
           <div className="space-y-4">
-            {/* Header info */}
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-gray-50 rounded-xl p-3">
                 <p className="text-xs text-gray-500 mb-0.5">Mesa</p>
@@ -227,7 +370,6 @@ export function PedidosPage() {
               </div>
             </div>
 
-            {/* Items */}
             <div>
               <h3 className="font-semibold text-gray-900 text-sm mb-2">Itens</h3>
               <div className="space-y-2">
@@ -251,7 +393,6 @@ export function PedidosPage() {
               </div>
             </div>
 
-            {/* Observação geral */}
             {detailPedido.observacao_geral && (
               <div>
                 <h3 className="font-semibold text-gray-900 text-sm mb-2">Observação Geral</h3>
@@ -261,7 +402,6 @@ export function PedidosPage() {
               </div>
             )}
 
-            {/* Change status */}
             <div>
               <h3 className="font-semibold text-gray-900 text-sm mb-2">Alterar Status</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -269,12 +409,13 @@ export function PedidosPage() {
                   <button
                     key={s.value}
                     onClick={() => handleStatusChange(detailPedido.id, s.value)}
-                    className={`px-3 py-2 rounded-xl text-xs font-medium transition-all border ${
+                    className={`px-3 py-2 rounded-xl text-xs font-medium transition-all border flex items-center gap-1.5 ${
                       detailPedido.status === s.value
                         ? 'bg-brand-500 text-white border-brand-500 shadow-sm'
                         : 'bg-white text-gray-600 border-gray-200 hover:border-brand-300 hover:text-brand-600'
                     }`}
                   >
+                    {STATUS_ICON[s.value]}
                     {s.label}
                   </button>
                 ))}

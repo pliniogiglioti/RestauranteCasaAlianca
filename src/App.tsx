@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 
@@ -15,62 +16,76 @@ import { CategoriasPage } from '@/pages/admin/CategoriasPage'
 import { PratosPage } from '@/pages/admin/PratosPage'
 import { BannersPage } from '@/pages/admin/BannersPage'
 import { PedidosPage } from '@/pages/admin/PedidosPage'
+import { ConfiguracoesPage } from '@/pages/admin/ConfiguracoesPage'
 
 // Admin layout & guard
 import { AdminLayout } from '@/components/admin/AdminLayout'
 import { ProtectedRoute } from '@/components/admin/ProtectedRoute'
 
+// Config hook
+import { useConfiguracoes } from '@/hooks/useConfiguracoes'
+
+// Carrega configurações do banco uma vez ao iniciar o app
+function ConfigProvider({ children }: { children: React.ReactNode }) {
+  const fetch = useConfiguracoes((s) => s.fetch)
+  useEffect(() => { void fetch() }, [fetch])
+  return <>{children}</>
+}
+
 export default function App() {
   return (
     <BrowserRouter>
-      <Toaster
-        position="top-center"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: '#1f2937',
-            color: '#f9fafb',
-            borderRadius: '12px',
-            fontSize: '14px',
-          },
-          success: {
-            iconTheme: { primary: '#22c55e', secondary: '#f9fafb' },
-          },
-          error: {
-            iconTheme: { primary: '#ef4444', secondary: '#f9fafb' },
-          },
-        }}
-      />
+      <ConfigProvider>
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            duration: 3000,
+            style: {
+              background: '#1f2937',
+              color: '#f9fafb',
+              borderRadius: '12px',
+              fontSize: '14px',
+            },
+            success: {
+              iconTheme: { primary: '#22c55e', secondary: '#f9fafb' },
+            },
+            error: {
+              iconTheme: { primary: '#ef4444', secondary: '#f9fafb' },
+            },
+          }}
+        />
 
-      <Routes>
-        {/* Client routes */}
-        <Route path="/mesa/:slug" element={<WelcomePage />} />
-        <Route path="/mesa/:slug/cardapio" element={<MenuPage />} />
-        <Route path="/pedido/resumo" element={<OrderSummaryPage />} />
-        <Route path="/pedido/status" element={<OrderStatusPage />} />
+        <Routes>
+          {/* Client routes */}
+          <Route path="/mesa/:slug" element={<WelcomePage />} />
+          <Route path="/mesa/:slug/cardapio" element={<MenuPage />} />
+          <Route path="/pedido/resumo" element={<OrderSummaryPage />} />
+          <Route path="/pedido/status" element={<OrderStatusPage />} />
 
-        {/* Admin routes */}
-        <Route path="/admin/login" element={<LoginPage />} />
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute>
-              <AdminLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<DashboardPage />} />
-          <Route path="mesas" element={<MesasPage />} />
-          <Route path="categorias" element={<CategoriasPage />} />
-          <Route path="pratos" element={<PratosPage />} />
-          <Route path="banners" element={<BannersPage />} />
-          <Route path="pedidos" element={<PedidosPage />} />
-        </Route>
+          {/* Admin routes */}
+          <Route path="/admin/login" element={<LoginPage />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<DashboardPage />} />
+            <Route path="mesas" element={<MesasPage />} />
+            <Route path="categorias" element={<CategoriasPage />} />
+            <Route path="pratos" element={<PratosPage />} />
+            <Route path="banners" element={<BannersPage />} />
+            <Route path="pedidos" element={<PedidosPage />} />
+            <Route path="configuracoes" element={<ConfiguracoesPage />} />
+          </Route>
 
-        {/* Default redirect */}
-        <Route path="/" element={<Navigate to="/admin" replace />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          {/* Default redirect */}
+          <Route path="/" element={<Navigate to="/admin" replace />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </ConfigProvider>
     </BrowserRouter>
   )
 }

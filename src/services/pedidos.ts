@@ -7,30 +7,31 @@ export interface CriarPedidoInput {
   itens: CartItem[]
 }
 
-export async function criarPedido(input: CriarPedidoInput): Promise<Pedido> {
+export async function criarPedido(input: CriarPedidoInput): Promise<{ id: string }> {
   const valor_total = input.itens.reduce(
     (acc, item) => acc + item.prato.preco * item.quantidade,
     0
   )
 
-  const { data: pedido, error: pedidoError } = await supabase
+  // Gera o UUID no cliente para não precisar de SELECT após INSERT
+  // (anon não tem política de SELECT em pedidos — evita erro 42501)
+  const pedidoId = crypto.randomUUID()
+
+  const { error: pedidoError } = await supabase
     .from('pedidos')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .insert({
+      id: pedidoId,
       mesa_id: input.mesa_id,
       observacao_geral: input.observacao_geral ?? null,
       valor_total,
       status: 'recebido',
     } as any)
-    .select()
-    .single()
 
   if (pedidoError) throw pedidoError
 
-  const pedidoData = pedido as Pedido
-
   const itens = input.itens.map((item) => ({
-    pedido_id: pedidoData.id,
+    pedido_id: pedidoId,
     prato_id: item.prato.id,
     nome_prato: item.prato.nome,
     quantidade: item.quantidade,
@@ -42,7 +43,7 @@ export async function criarPedido(input: CriarPedidoInput): Promise<Pedido> {
   const { error: itensError } = await supabase.from('pedido_itens').insert(itens as any)
   if (itensError) throw itensError
 
-  return pedidoData
+  return { id: pedidoId }
 }
 
 export async function getPedidos(): Promise<PedidoCompleto[]> {

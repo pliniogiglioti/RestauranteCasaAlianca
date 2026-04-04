@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
-import { useParams } from 'react-router-dom'
-import { ShoppingCart, MapPin, UtensilsCrossed } from 'lucide-react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { ShoppingCart, MapPin, UtensilsCrossed, Clock } from 'lucide-react'
 import { BannerSlider } from '@/components/client/BannerSlider'
 import { CategoryFilter } from '@/components/client/CategoryFilter'
 import { DishCard } from '@/components/client/DishCard'
@@ -10,6 +10,7 @@ import { CartDrawer, FloatingCartButton } from '@/components/client/CartDrawer'
 import { DishModal } from '@/components/client/DishModal'
 import { useCardapio } from '@/hooks/useCardapio'
 import { useCart } from '@/hooks/useCart'
+import { usePedidoAtivo } from '@/hooks/usePedidoAtivo'
 import { SectionLoading } from '@/components/ui/LoadingSpinner'
 import type { PratoComCategoria } from '@/types'
 
@@ -23,8 +24,10 @@ interface CategoriaGrupo {
 
 export function MenuPage() {
   const { slug: _slug } = useParams<{ slug: string }>()
+  const navigate = useNavigate()
   const { pratos, pratosDoDia, categorias, banners, loading, error } = useCardapio()
   const { mesaNumero, totalItens } = useCart()
+  const { pedido } = usePedidoAtivo()
 
   const [search, setSearch] = useState('')
   const [selectedCategoria, setSelectedCategoria] = useState<string | null>(null)
@@ -97,17 +100,29 @@ export function MenuPage() {
             </div>
           </div>
 
-          <button
-            onClick={() => setCartOpen(true)}
-            className="relative p-2.5 bg-brand-500 rounded-xl text-white shadow-sm hover:bg-brand-600 active:scale-95 transition-all"
-          >
-            <ShoppingCart size={18} />
-            {totalItens() > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white text-xs font-black rounded-full flex items-center justify-center shadow-md">
-                {totalItens() > 9 ? '9+' : totalItens()}
-              </span>
+          <div className="flex items-center gap-2">
+            {pedido && (
+              <button
+                onClick={() => navigate('/pedido/status')}
+                className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-3 py-2 rounded-xl hover:bg-amber-100 active:scale-95 transition-all animate-pulse-soft"
+              >
+                <Clock size={13} />
+                Meu Pedido
+              </button>
             )}
-          </button>
+
+            <button
+              onClick={() => setCartOpen(true)}
+              className="relative p-2.5 bg-brand-500 rounded-xl text-white shadow-sm hover:bg-brand-600 active:scale-95 transition-all"
+            >
+              <ShoppingCart size={18} />
+              {totalItens() > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white text-xs font-black rounded-full flex items-center justify-center shadow-md">
+                  {totalItens() > 9 ? '9+' : totalItens()}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
 
         <div className="px-4 pb-3">

@@ -1,16 +1,17 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, CheckCircle, MapPin, UtensilsCrossed, MessageSquare, Clock } from 'lucide-react'
+import { ArrowLeft, CheckCircle, MapPin, UtensilsCrossed, MessageSquare } from 'lucide-react'
 import { formatCurrency } from '@/types'
 import { useCart } from '@/hooks/useCart'
+import { usePedidoAtivo } from '@/hooks/usePedidoAtivo'
 import { criarPedido } from '@/services/pedidos'
 import toast from 'react-hot-toast'
 
 export function OrderSummaryPage() {
   const navigate = useNavigate()
   const { items, observacaoGeral, mesaId, mesaNumero, mesaSlug, totalValor, clearCart } = useCart()
+  const { salvarPedido } = usePedidoAtivo()
   const [loading, setLoading] = useState(false)
-  const [pedidoId, setPedidoId] = useState<string | null>(null)
 
   async function handleConfirmar() {
     if (items.length === 0) return
@@ -22,60 +23,21 @@ export function OrderSummaryPage() {
         observacao_geral: observacaoGeral || undefined,
         itens: items,
       })
-      setPedidoId(pedido.id)
+      salvarPedido({
+        pedidoId: pedido.id,
+        mesaId,
+        mesaNumero: mesaNumero ?? 0,
+        mesaSlug: mesaSlug ?? '',
+        criadoEm: new Date().toISOString(),
+      })
       clearCart()
       toast.success('Pedido enviado com sucesso!')
+      navigate('/pedido/status', { replace: true })
     } catch {
       toast.error('Erro ao enviar o pedido. Tente novamente.')
     } finally {
       setLoading(false)
     }
-  }
-
-  // Success state
-  if (pedidoId) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 flex flex-col items-center justify-center p-6">
-        <div className="max-w-sm w-full text-center">
-          <div className="w-20 h-20 rounded-full bg-green-500 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-200">
-            <CheckCircle size={40} className="text-white" />
-          </div>
-
-          <h1 className="text-2xl font-bold text-gray-900 font-display mb-2">
-            Pedido Enviado!
-          </h1>
-          <p className="text-gray-500 mb-6">
-            Seu pedido foi recebido e está sendo preparado com carinho.
-          </p>
-
-          <div className="bg-white rounded-2xl p-4 shadow-sm border border-green-100 mb-6">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-500">Pedido</span>
-              <span className="font-mono font-bold text-gray-900 text-xs">
-                #{pedidoId.split('-')[0].toUpperCase()}
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-sm mt-2">
-              <span className="text-gray-500">Mesa</span>
-              <span className="font-bold text-gray-900">Mesa {mesaNumero}</span>
-            </div>
-            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
-              <Clock size={14} className="text-amber-500" />
-              <span className="text-amber-700 text-xs font-medium">
-                Aguarde, um garçom trará seu pedido em breve
-              </span>
-            </div>
-          </div>
-
-          <button
-            onClick={() => navigate(`/mesa/${mesaSlug}/cardapio`)}
-            className="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-brand-200 transition-all"
-          >
-            Voltar ao Cardápio
-          </button>
-        </div>
-      </div>
-    )
   }
 
   if (items.length === 0) {

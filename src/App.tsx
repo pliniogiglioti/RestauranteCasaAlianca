@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast'
 import { WelcomePage } from '@/pages/client/WelcomePage'
 import { MenuPage } from '@/pages/client/MenuPage'
 import { OrderSummaryPage } from '@/pages/client/OrderSummaryPage'
+import { OrderStatusPage } from '@/pages/client/OrderStatusPage'
 
 // Admin pages
 import { LoginPage } from '@/pages/admin/LoginPage'
@@ -46,6 +47,7 @@ export default function App() {
         <Route path="/mesa/:slug" element={<WelcomePage />} />
         <Route path="/mesa/:slug/cardapio" element={<MenuPage />} />
         <Route path="/pedido/resumo" element={<OrderSummaryPage />} />
+        <Route path="/pedido/status" element={<OrderStatusPage />} />
 
         {/* Admin routes */}
         <Route path="/admin/login" element={<LoginPage />} />

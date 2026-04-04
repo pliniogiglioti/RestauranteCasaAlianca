@@ -63,7 +63,7 @@ export function WelcomePage() {
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-sm mx-auto">
         {/* Logo/Icon */}
-        <AppIcon size="lg" className="!w-24 !h-24 !rounded-3xl shadow-2xl shadow-brand-500/30 mb-8" />
+        <AppIcon size="lg" className="mb-8" />
 
         {/* Restaurant name */}
         <h1 className="text-3xl font-bold text-white font-display mb-1">{nomeRestaurante}</h1>

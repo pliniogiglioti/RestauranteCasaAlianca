@@ -119,11 +119,11 @@ export function ConfiguracoesPage() {
 
       {/* Preview */}
       <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 flex items-center gap-4 shadow-lg">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-xl shadow-brand-500/30 shrink-0 overflow-hidden">
+        <div className="shrink-0 flex items-center justify-center w-16 h-16">
           {exibeImagem ? (
-            <img src={iconeUrlVal} alt="ícone" className="w-full h-full object-cover" />
+            <img src={iconeUrlVal} alt="ícone" className="w-full h-full object-contain" />
           ) : (
-            <span className="text-4xl leading-none">{exibeEmoji}</span>
+            <span className="text-5xl leading-none">{exibeEmoji}</span>
           )}
         </div>
         <div>

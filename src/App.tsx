@@ -24,6 +24,8 @@ import { ProtectedRoute } from '@/components/admin/ProtectedRoute'
 
 // Config hook
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
+import { usePedidoAtivo } from '@/hooks/usePedidoAtivo'
+import { supabase } from '@/lib/supabase'
 
 // Carrega configurações do banco uma vez ao iniciar o app
 function ConfigProvider({ children }: { children: React.ReactNode }) {
@@ -32,10 +34,41 @@ function ConfigProvider({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+// Escuta o Realtime do pedido ativo em qualquer página.
+// Quando o admin finaliza, limpa o pedido do cliente automaticamente.
+function PedidoWatcher() {
+  const { pedido, limparPedido, atualizarStatus } = usePedidoAtivo()
+  const pedidoId = pedido?.pedidoId
+
+  useEffect(() => {
+    if (!pedidoId) return
+
+    const channel = supabase
+      .channel(`watcher-${pedidoId}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'pedidos', filter: `id=eq.${pedidoId}` },
+        (payload) => {
+          const novo = payload.new as { status: string }
+          atualizarStatus(novo.status as import('@/types').StatusPedido)
+          if (novo.status === 'finalizado') {
+            setTimeout(limparPedido, 4000)
+          }
+        }
+      )
+      .subscribe()
+
+    return () => { void supabase.removeChannel(channel) }
+  }, [pedidoId, limparPedido, atualizarStatus])
+
+  return null
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <ConfigProvider>
+        <PedidoWatcher />
         <Toaster
           position="top-center"
           toastOptions={{

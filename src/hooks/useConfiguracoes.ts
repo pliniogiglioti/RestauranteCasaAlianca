@@ -7,6 +7,7 @@ interface ConfigStore {
   nomeRestaurante: string
   slogan: string
   iconeApp: string
+  iconeUrl: string   // URL da imagem PNG (prioridade sobre emoji)
   telefone: string
   endereco: string
   fetch: () => Promise<void>
@@ -20,6 +21,7 @@ export const useConfiguracoes = create<ConfigStore>()(
       nomeRestaurante: 'Casa Aliança',
       slogan: 'Sabores que aquecem o coração',
       iconeApp: '🍽️',
+      iconeUrl: '',
       telefone: '',
       endereco: '',
 
@@ -32,6 +34,7 @@ export const useConfiguracoes = create<ConfigStore>()(
             nomeRestaurante: data.nome_restaurante || 'Casa Aliança',
             slogan: data.slogan || 'Sabores que aquecem o coração',
             iconeApp: data.icone_app || '🍽️',
+            iconeUrl: data.logo_url || '',
             telefone: data.telefone || '',
             endereco: data.endereco || '',
           })

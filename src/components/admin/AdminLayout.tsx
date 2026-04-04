@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { signOut } from '@/hooks/useAuth'
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
+import { AppIcon } from '@/components/ui/AppIcon'
 import toast from 'react-hot-toast'
 
 const navItems = [
@@ -87,12 +88,10 @@ export function AdminLayout() {
 }
 
 function MobileHeaderLogo() {
-  const { nomeRestaurante, iconeApp } = useConfiguracoes()
+  const { nomeRestaurante } = useConfiguracoes()
   return (
     <div className="flex items-center gap-2">
-      <div className="w-7 h-7 rounded-lg bg-brand-500 flex items-center justify-center">
-        <span className="text-sm leading-none">{iconeApp}</span>
-      </div>
+      <AppIcon size="sm" />
       <span className="font-semibold text-gray-900 text-sm">{nomeRestaurante} Admin</span>
     </div>
   )
@@ -107,16 +106,14 @@ function SidebarContent({
   onClose: () => void
   showClose?: boolean
 }) {
-  const { nomeRestaurante, iconeApp } = useConfiguracoes()
+  const { nomeRestaurante } = useConfiguracoes()
 
   return (
     <>
       {/* Logo */}
       <div className="flex items-center justify-between px-5 py-5 border-b border-gray-800">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-brand-500 flex items-center justify-center">
-            <span className="text-xl leading-none">{iconeApp}</span>
-          </div>
+          <AppIcon size="md" />
           <div>
             <p className="text-white font-semibold text-sm leading-tight">{nomeRestaurante}</p>
             <p className="text-gray-400 text-xs">Painel Admin</p>

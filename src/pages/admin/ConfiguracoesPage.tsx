@@ -1,27 +1,67 @@
-import { useState, useEffect } from 'react'
-import { Settings, Save, Store, Smile, Phone, MapPin } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Settings, Save, Store, Upload, Phone, MapPin, X } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 import { upsertConfiguracao } from '@/services/configuracoes'
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
 import toast from 'react-hot-toast'
 
 export function ConfiguracoesPage() {
-  const { id, nomeRestaurante, slogan, iconeApp, telefone, endereco, fetch: fetchConfig, setConfig } =
+  const { id, nomeRestaurante, slogan, iconeApp, iconeUrl, telefone, endereco, fetch: fetchConfig, setConfig } =
     useConfiguracoes()
 
   const [nome, setNome] = useState(nomeRestaurante)
   const [sloganVal, setSloganVal] = useState(slogan)
   const [icone, setIcone] = useState(iconeApp)
+  const [iconeUrlVal, setIconeUrlVal] = useState(iconeUrl)
   const [tel, setTel] = useState(telefone)
   const [end, setEnd] = useState(endereco)
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     setNome(nomeRestaurante)
     setSloganVal(slogan)
     setIcone(iconeApp)
+    setIconeUrlVal(iconeUrl)
     setTel(telefone)
     setEnd(endereco)
-  }, [nomeRestaurante, slogan, iconeApp, telefone, endereco])
+  }, [nomeRestaurante, slogan, iconeApp, iconeUrl, telefone, endereco])
+
+  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Selecione uma imagem PNG, JPG ou WebP')
+      return
+    }
+
+    try {
+      setUploading(true)
+      const ext = file.name.split('.').pop()
+      const path = `logo/icone-${Date.now()}.${ext}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('imagens')
+        .upload(path, file, { upsert: true })
+
+      if (uploadError) throw uploadError
+
+      const { data } = supabase.storage.from('imagens').getPublicUrl(path)
+      setIconeUrlVal(data.publicUrl)
+      toast.success('Imagem carregada!')
+    } catch {
+      toast.error('Erro ao fazer upload da imagem')
+    } finally {
+      setUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  function removerImagem() {
+    setIconeUrlVal('')
+  }
 
   async function handleSalvar() {
     if (!nome.trim()) {
@@ -36,6 +76,7 @@ export function ConfiguracoesPage() {
           nome_restaurante: nome.trim(),
           slogan: sloganVal.trim(),
           icone_app: icone.trim() || '🍽️',
+          logo_url: iconeUrlVal || null,
           telefone: tel.trim(),
           endereco: end.trim(),
         },
@@ -46,6 +87,7 @@ export function ConfiguracoesPage() {
         nomeRestaurante: nome.trim(),
         slogan: sloganVal.trim(),
         iconeApp: icone.trim() || '🍽️',
+        iconeUrl: iconeUrlVal,
         telefone: tel.trim(),
         endereco: end.trim(),
       })
@@ -57,6 +99,10 @@ export function ConfiguracoesPage() {
       setSaving(false)
     }
   }
+
+  // O que exibir no preview: imagem > emoji
+  const exibeImagem = !!iconeUrlVal
+  const exibeEmoji = icone || '🍽️'
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -73,8 +119,12 @@ export function ConfiguracoesPage() {
 
       {/* Preview */}
       <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 flex items-center gap-4 shadow-lg">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-xl shadow-brand-500/30 shrink-0">
-          <span className="text-4xl leading-none">{icone || '🍽️'}</span>
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-xl shadow-brand-500/30 shrink-0 overflow-hidden">
+          {exibeImagem ? (
+            <img src={iconeUrlVal} alt="ícone" className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-4xl leading-none">{exibeEmoji}</span>
+          )}
         </div>
         <div>
           <p className="text-white font-bold text-xl leading-tight">{nome || 'Nome do Restaurante'}</p>
@@ -120,30 +170,102 @@ export function ConfiguracoesPage() {
         </div>
 
         {/* Ícone */}
-        <div className="p-5 space-y-3">
+        <div className="p-5 space-y-4">
           <h2 className="font-semibold text-gray-900 text-sm flex items-center gap-2">
-            <Smile size={15} className="text-brand-500" />
+            <Upload size={15} className="text-brand-500" />
             Ícone do aplicativo
           </h2>
 
-          <p className="text-xs text-gray-500">
-            Cole um emoji ou caractere. Aparece no cabeçalho, boas-vindas e painel admin.
-          </p>
+          {/* Upload de imagem */}
+          <div>
+            <p className="text-xs text-gray-500 mb-3">
+              Envie uma imagem PNG, JPG ou WebP. Ela aparece no cabeçalho, boas-vindas e painel admin.
+            </p>
 
-          <div className="flex items-center gap-4">
+            {iconeUrlVal ? (
+              /* Imagem carregada */
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-brand-200 shrink-0">
+                  <img src={iconeUrlVal} alt="ícone" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900 mb-2">Imagem carregada</p>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                      className="text-xs font-medium text-brand-600 bg-brand-50 hover:bg-brand-100 border border-brand-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
+                    >
+                      <Upload size={12} />
+                      {uploading ? 'Enviando...' : 'Trocar imagem'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={removerImagem}
+                      className="text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
+                    >
+                      <X size={12} />
+                      Remover
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* Área de upload */
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="w-full border-2 border-dashed border-gray-300 hover:border-brand-400 rounded-xl py-8 flex flex-col items-center gap-2 transition-colors group"
+              >
+                <div className="w-12 h-12 rounded-xl bg-gray-100 group-hover:bg-brand-50 flex items-center justify-center transition-colors">
+                  {uploading ? (
+                    <svg className="animate-spin h-5 w-5 text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                  ) : (
+                    <Upload size={20} className="text-gray-400 group-hover:text-brand-500 transition-colors" />
+                  )}
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-medium text-gray-700 group-hover:text-brand-600 transition-colors">
+                    {uploading ? 'Enviando...' : 'Clique para enviar o ícone'}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-0.5">PNG, JPG ou WebP</p>
+                </div>
+              </button>
+            )}
+
             <input
-              type="text"
-              value={icone}
-              onChange={(e) => setIcone(e.target.value)}
-              placeholder="🍽️"
-              maxLength={4}
-              className="w-24 rounded-xl border border-gray-300 px-4 py-3 text-3xl text-center placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent transition-all"
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              onChange={handleUpload}
+              className="hidden"
             />
-            <div className="text-sm text-gray-500 leading-relaxed">
-              <p>Digite ou cole qualquer emoji.</p>
-              <p className="text-xs text-gray-400 mt-0.5">Ex: 🍕 🥘 🏠 ⭐</p>
-            </div>
           </div>
+
+          {/* Fallback emoji (usado se não houver imagem) */}
+          {!iconeUrlVal && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Ou use um emoji como fallback
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="text"
+                  value={icone}
+                  onChange={(e) => setIcone(e.target.value)}
+                  placeholder="🍽️"
+                  maxLength={4}
+                  className="w-20 rounded-xl border border-gray-300 px-3 py-2.5 text-2xl text-center placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent transition-all"
+                />
+                <p className="text-xs text-gray-400">Usado quando não há imagem enviada.</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Contato */}
@@ -154,9 +276,7 @@ export function ConfiguracoesPage() {
           </h2>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Telefone / WhatsApp
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Telefone / WhatsApp</label>
             <input
               type="text"
               value={tel}
@@ -185,7 +305,7 @@ export function ConfiguracoesPage() {
       {/* Botão salvar */}
       <button
         onClick={handleSalvar}
-        disabled={saving}
+        disabled={saving || uploading}
         className="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white font-bold py-4 rounded-2xl shadow-lg shadow-brand-200 transition-all flex items-center justify-center gap-2"
       >
         {saving ? (

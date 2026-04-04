@@ -12,6 +12,7 @@ import { useCardapio } from '@/hooks/useCardapio'
 import { useCart } from '@/hooks/useCart'
 import { usePedidoAtivo } from '@/hooks/usePedidoAtivo'
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
+import { AppIcon } from '@/components/ui/AppIcon'
 import { SectionLoading } from '@/components/ui/LoadingSpinner'
 import type { PratoComCategoria } from '@/types'
 
@@ -29,7 +30,7 @@ export function MenuPage() {
   const { pratos, pratosDoDia, categorias, banners, loading, error } = useCardapio()
   const { mesaNumero, totalItens } = useCart()
   const { pedido } = usePedidoAtivo()
-  const { nomeRestaurante, iconeApp } = useConfiguracoes()
+  const { nomeRestaurante } = useConfiguracoes()
 
   const [search, setSearch] = useState('')
   const [selectedCategoria, setSelectedCategoria] = useState<string | null>(null)
@@ -90,9 +91,7 @@ export function MenuPage() {
       <header className="bg-white sticky top-0 z-20 shadow-sm border-b border-gray-100">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center">
-              <span className="text-sm leading-none">{iconeApp}</span>
-            </div>
+            <AppIcon size="sm" />
             <div>
               <p className="text-xs text-gray-500 leading-none">{nomeRestaurante}</p>
               <div className="flex items-center gap-1 mt-0.5">

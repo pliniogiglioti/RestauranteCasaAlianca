@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from 'react'
-import { RefreshCw, Eye, Clock, CheckCircle2, ChefHat, Utensils } from 'lucide-react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
+import { RefreshCw, Eye, Clock, CheckCircle2, ChefHat, Utensils, AlertTriangle } from 'lucide-react'
 import { getPedidos, atualizarStatusPedido } from '@/services/pedidos'
 import { PageHeader } from '@/components/admin/PageHeader'
 import { Button } from '@/components/ui/Button'
@@ -11,20 +11,20 @@ import type { PedidoCompleto, StatusPedido } from '@/types'
 import toast from 'react-hot-toast'
 
 const STATUS_OPTIONS = STATUS_PEDIDO
-
-// Statuses que mantêm a mesa "em aberto"
 const STATUS_ABERTO: StatusPedido[] = ['recebido', 'em_preparo', 'pronto', 'entregue']
 
 interface MesaGroup {
   mesaNumero: number
   mesaId: string | null
-  pedidos: PedidoCompleto[]
-  temAberto: boolean
+  pedidoAtual: PedidoCompleto        // mais recente
+  pedidosAnteriores: PedidoCompleto[] // mais antigos
+  temAberto: boolean                  // só considera o pedidoAtual
 }
 
 function agruparPorMesa(pedidos: PedidoCompleto[]): MesaGroup[] {
   const map = new Map<string, MesaGroup>()
 
+  // Agrupa
   for (const pedido of pedidos) {
     const key = pedido.mesa?.id ?? 'sem-mesa'
     const numero = pedido.mesa?.numero ?? 0
@@ -33,26 +33,33 @@ function agruparPorMesa(pedidos: PedidoCompleto[]): MesaGroup[] {
       map.set(key, {
         mesaNumero: numero,
         mesaId: pedido.mesa?.id ?? null,
-        pedidos: [],
+        pedidoAtual: pedido,
+        pedidosAnteriores: [],
         temAberto: false,
       })
+    } else {
+      map.get(key)!.pedidosAnteriores.push(pedido)
     }
+  }
 
-    const group = map.get(key)!
-    group.pedidos.push(pedido)
-    if (STATUS_ABERTO.includes(pedido.status)) {
-      group.temAberto = true
-    }
+  // Para cada grupo: ordena por created_at desc e recalcula pedidoAtual
+  for (const group of map.values()) {
+    const todos = [group.pedidoAtual, ...group.pedidosAnteriores].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )
+    group.pedidoAtual = todos[0]
+    group.pedidosAnteriores = todos.slice(1)
+    group.temAberto = STATUS_ABERTO.includes(group.pedidoAtual.status)
   }
 
   return Array.from(map.values()).sort((a, b) => a.mesaNumero - b.mesaNumero)
 }
 
 const STATUS_ICON: Record<StatusPedido, React.ReactNode> = {
-  recebido: <Clock size={12} />,
+  recebido:  <Clock size={12} />,
   em_preparo: <ChefHat size={12} />,
-  pronto: <CheckCircle2 size={12} />,
-  entregue: <Utensils size={12} />,
+  pronto:    <CheckCircle2 size={12} />,
+  entregue:  <Utensils size={12} />,
   finalizado: <CheckCircle2 size={12} />,
 }
 
@@ -91,13 +98,23 @@ export function PedidosPage() {
         prev.map((p) => (p.id === pedidoId ? { ...p, status } : p))
       )
       if (detailPedido?.id === pedidoId) {
-        setDetailPedido((prev) => prev ? { ...prev, status } : prev)
+        setDetailPedido((prev) => (prev ? { ...prev, status } : prev))
       }
       toast.success('Status atualizado!')
     } catch {
       toast.error('Erro ao atualizar status')
     }
   }
+
+  // Numeração sequencial: #1, #2, #3... por ordem de criação
+  const numeroPedido = useMemo(() => {
+    const sorted = [...pedidos].sort(
+      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    )
+    const map = new Map<string, number>()
+    sorted.forEach((p, i) => map.set(p.id, i + 1))
+    return map
+  }, [pedidos])
 
   const pedidosFiltrados = statusFilter === 'todos'
     ? pedidos
@@ -119,7 +136,6 @@ export function PedidosPage() {
         subtitle="Gerencie os pedidos do restaurante"
         action={
           <div className="flex items-center gap-2">
-            {/* View toggle */}
             <div className="flex bg-gray-100 rounded-xl p-1 gap-1">
               <button
                 onClick={() => setViewMode('mesas')}
@@ -142,7 +158,6 @@ export function PedidosPage() {
                 Lista
               </button>
             </div>
-
             <Button variant="outline" onClick={() => carregar(true)} loading={refreshing}>
               <RefreshCw size={15} />
               Atualizar
@@ -184,7 +199,7 @@ export function PedidosPage() {
           <p className="text-gray-500 font-medium">Nenhum pedido encontrado</p>
         </div>
       ) : viewMode === 'mesas' ? (
-        /* ── Agrupado por mesa ── */
+        /* ── Por Mesa ── */
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {mesaGroups.map((group) => (
             <div
@@ -195,156 +210,142 @@ export function PedidosPage() {
                   : 'border-green-400 shadow-green-50'
               }`}
             >
-              {/* Mesa header */}
+              {/* Cabeçalho da mesa */}
               <div
-                className={`flex items-center justify-between px-4 py-3 rounded-t-2xl ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-t-xl ${
                   group.temAberto ? 'bg-brand-50' : 'bg-green-50'
                 }`}
               >
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`w-9 h-9 rounded-xl flex flex-col items-center justify-center ${
-                      group.temAberto
-                        ? 'bg-brand-500 text-white'
-                        : 'bg-green-500 text-white'
-                    }`}
-                  >
-                    <span className="text-xs font-medium leading-none">Mesa</span>
-                    <span className="text-sm font-black leading-tight">{group.mesaNumero || '?'}</span>
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-900 text-sm">Mesa {group.mesaNumero || '?'}</p>
-                    <p className={`text-xs font-medium ${group.temAberto ? 'text-brand-600' : 'text-green-600'}`}>
-                      {group.temAberto ? '● Em atendimento' : '✓ Livre'}
-                    </p>
-                  </div>
+                {/* Número grande */}
+                <div
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                    group.temAberto ? 'bg-brand-500' : 'bg-green-500'
+                  }`}
+                >
+                  <span className="text-white font-black text-xl leading-none">
+                    {group.mesaNumero || '?'}
+                  </span>
                 </div>
-                <span className="text-xs text-gray-500 bg-white rounded-lg px-2 py-1 border border-gray-200">
-                  {group.pedidos.length} pedido{group.pedidos.length !== 1 ? 's' : ''}
-                </span>
+
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-gray-900 text-sm">Mesa {group.mesaNumero || '?'}</p>
+                  <p className={`text-xs font-medium ${group.temAberto ? 'text-brand-600' : 'text-green-600'}`}>
+                    {group.temAberto ? '● Em atendimento' : '✓ Livre'}
+                  </p>
+                </div>
               </div>
 
-              {/* Pedidos da mesa */}
-              <div className="divide-y divide-gray-50">
-                {group.pedidos.map((pedido) => (
-                  <div key={pedido.id} className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      {/* Status icon */}
-                      <div className="shrink-0">
-                        <StatusBadge status={pedido.status} />
-                      </div>
+              {/* Pedido atual (o mais recente) */}
+              <div className="px-4 py-3">
+                <PedidoRow
+                  pedido={group.pedidoAtual}
+                  numero={numeroPedido.get(group.pedidoAtual.id) ?? 0}
+                  onDetail={() => setDetailPedido(group.pedidoAtual)}
+                  onStatusChange={handleStatusChange}
+                />
+              </div>
 
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-900 text-xs">
-                          #{pedido.id.split('-')[0].toUpperCase()}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {pedido.itens?.length ?? 0} iten{(pedido.itens?.length ?? 0) !== 1 ? 's' : ''} · {formatCurrency(pedido.valor_total)}
-                        </p>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                          onClick={() => setDetailPedido(pedido)}
-                          className="p-1.5 rounded-lg text-gray-400 hover:text-brand-600 hover:bg-brand-50 transition-colors border border-gray-200"
-                          title="Ver detalhes"
-                        >
-                          <Eye size={13} />
-                        </button>
-                        <select
-                          value={pedido.status}
-                          onChange={(e) => handleStatusChange(pedido.id, e.target.value as StatusPedido)}
-                          className="text-xs font-medium border border-gray-200 rounded-lg px-2 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-400 cursor-pointer hover:border-brand-300 transition-colors"
-                        >
-                          {STATUS_OPTIONS.map((s) => (
-                            <option key={s.value} value={s.value}>{s.label}</option>
-                          ))}
-                        </select>
-                      </div>
+              {/* Pedidos anteriores com pedido em aberto — alerta */}
+              {group.pedidosAnteriores.filter(p => STATUS_ABERTO.includes(p.status)).map((pedido) => (
+                <div key={pedido.id} className="px-4 pb-3">
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertTriangle size={13} className="text-amber-500 shrink-0" />
+                      <span className="text-xs font-semibold text-amber-700">
+                        Pedido #{numeroPedido.get(pedido.id) ?? '?'} ainda em aberto
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <StatusBadge status={pedido.status} />
+                      <button
+                        onClick={() => handleStatusChange(pedido.id, 'finalizado')}
+                        className="text-xs font-medium text-amber-700 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-lg transition-colors"
+                      >
+                        Finalizar
+                      </button>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           ))}
         </div>
       ) : (
-        /* ── Lista simples ── */
+        /* ── Lista ── */
         <div className="space-y-3">
-          {pedidosFiltrados.map((pedido) => (
-            <div
-              key={pedido.id}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center gap-4 px-4 py-4">
-                {/* Mesa */}
-                <div className="w-12 h-12 rounded-xl bg-brand-50 border border-brand-100 flex flex-col items-center justify-center shrink-0">
-                  <span className="text-xs text-brand-500 font-medium leading-none">Mesa</span>
-                  <span className="text-brand-700 font-black text-lg leading-tight">
-                    {pedido.mesa?.numero ?? '?'}
-                  </span>
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-semibold text-gray-900 text-sm">
-                      #{pedido.id.split('-')[0].toUpperCase()}
-                    </span>
-                    <StatusBadge status={pedido.status} />
-                  </div>
-                  <div className="flex items-center gap-3 mt-1">
-                    <span className="text-xs text-gray-500">
-                      {new Date(pedido.created_at).toLocaleString('pt-BR', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </span>
-                    <span className="text-xs text-gray-400">·</span>
-                    <span className="text-xs text-gray-500">
-                      {pedido.itens?.length ?? 0} iten{(pedido.itens?.length ?? 0) !== 1 ? 's' : ''}
+          {pedidosFiltrados
+            .slice()
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+            .map((pedido) => (
+              <div
+                key={pedido.id}
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-center gap-4 px-4 py-4">
+                  {/* Mesa */}
+                  <div className="w-12 h-12 rounded-xl bg-brand-50 border border-brand-100 flex flex-col items-center justify-center shrink-0">
+                    <span className="text-xs text-brand-500 font-medium leading-none">Mesa</span>
+                    <span className="text-brand-700 font-black text-lg leading-tight">
+                      {pedido.mesa?.numero ?? '?'}
                     </span>
                   </div>
-                </div>
 
-                {/* Total */}
-                <div className="text-right shrink-0">
-                  <p className="font-bold text-gray-900">{formatCurrency(pedido.valor_total)}</p>
-                </div>
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold text-gray-900 text-sm">
+                        Pedido #{numeroPedido.get(pedido.id) ?? '?'}
+                      </span>
+                      <StatusBadge status={pedido.status} />
+                    </div>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className="text-xs text-gray-500">
+                        {new Date(pedido.created_at).toLocaleString('pt-BR', {
+                          day: '2-digit', month: '2-digit',
+                          hour: '2-digit', minute: '2-digit',
+                        })}
+                      </span>
+                      <span className="text-xs text-gray-400">·</span>
+                      <span className="text-xs text-gray-500">
+                        {pedido.itens?.length ?? 0} iten{(pedido.itens?.length ?? 0) !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                  </div>
 
-                {/* Actions */}
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    onClick={() => setDetailPedido(pedido)}
-                    className="p-2 rounded-xl text-gray-400 hover:text-brand-600 hover:bg-brand-50 transition-colors border border-gray-200 hover:border-brand-200"
-                  >
-                    <Eye size={15} />
-                  </button>
-                  <select
-                    value={pedido.status}
-                    onChange={(e) => handleStatusChange(pedido.id, e.target.value as StatusPedido)}
-                    className="text-sm font-medium border border-gray-200 rounded-xl px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent cursor-pointer hover:border-brand-300 transition-colors"
-                  >
-                    {STATUS_OPTIONS.map((s) => (
-                      <option key={s.value} value={s.value}>{s.label}</option>
-                    ))}
-                  </select>
+                  {/* Total */}
+                  <div className="text-right shrink-0">
+                    <p className="font-bold text-gray-900">{formatCurrency(pedido.valor_total)}</p>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => setDetailPedido(pedido)}
+                      className="p-2 rounded-xl text-gray-400 hover:text-brand-600 hover:bg-brand-50 transition-colors border border-gray-200"
+                    >
+                      <Eye size={15} />
+                    </button>
+                    <select
+                      value={pedido.status}
+                      onChange={(e) => handleStatusChange(pedido.id, e.target.value as StatusPedido)}
+                      className="text-sm font-medium border border-gray-200 rounded-xl px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-400 cursor-pointer hover:border-brand-300 transition-colors"
+                    >
+                      {STATUS_OPTIONS.map((s) => (
+                        <option key={s.value} value={s.value}>{s.label}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       )}
 
-      {/* Pedido detail modal */}
+      {/* Modal de detalhes */}
       <Modal
         isOpen={!!detailPedido}
         onClose={() => setDetailPedido(null)}
-        title={`Pedido #${detailPedido?.id.split('-')[0].toUpperCase() ?? ''}`}
+        title={`Pedido #${detailPedido ? (numeroPedido.get(detailPedido.id) ?? '?') : ''} — Mesa ${detailPedido?.mesa?.numero ?? 'N/A'}`}
         size="lg"
       >
         {detailPedido && (
@@ -424,6 +425,52 @@ export function PedidosPage() {
           </div>
         )}
       </Modal>
+    </div>
+  )
+}
+
+// Sub-componente para linha de pedido no card da mesa
+function PedidoRow({
+  pedido,
+  numero,
+  onDetail,
+  onStatusChange,
+}: {
+  pedido: PedidoCompleto
+  numero: number
+  onDetail: () => void
+  onStatusChange: (id: string, status: StatusPedido) => void
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="font-semibold text-gray-900 text-sm">Pedido #{numero}</span>
+          <StatusBadge status={pedido.status} />
+        </div>
+        <p className="text-xs text-gray-400 mt-0.5">
+          {pedido.itens?.length ?? 0} iten{(pedido.itens?.length ?? 0) !== 1 ? 's' : ''} · {formatCurrency(pedido.valor_total)}
+        </p>
+      </div>
+
+      <div className="flex items-center gap-1.5 shrink-0">
+        <button
+          onClick={onDetail}
+          className="p-1.5 rounded-lg text-gray-400 hover:text-brand-600 hover:bg-brand-50 transition-colors border border-gray-200"
+          title="Ver detalhes"
+        >
+          <Eye size={13} />
+        </button>
+        <select
+          value={pedido.status}
+          onChange={(e) => onStatusChange(pedido.id, e.target.value as StatusPedido)}
+          className="text-xs font-medium border border-gray-200 rounded-lg px-2 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-400 cursor-pointer hover:border-brand-300 transition-colors"
+        >
+          {STATUS_PEDIDO.map((s) => (
+            <option key={s.value} value={s.value}>{s.label}</option>
+          ))}
+        </select>
+      </div>
     </div>
   )
 }

@@ -1,0 +1,123 @@
+import { useEffect, useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { QrCode, UtensilsCrossed, ArrowRight, MapPin } from 'lucide-react'
+import { getMesaBySlug } from '@/services/mesas'
+import { useCart } from '@/hooks/useCart'
+import type { Mesa } from '@/types'
+import { PageLoading } from '@/components/ui/LoadingSpinner'
+
+export function WelcomePage() {
+  const { slug } = useParams<{ slug: string }>()
+  const navigate = useNavigate()
+  const { setMesa } = useCart()
+  const [mesa, setMesaData] = useState<Mesa | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+
+  useEffect(() => {
+    if (!slug) {
+      setError(true)
+      setLoading(false)
+      return
+    }
+
+    getMesaBySlug(slug)
+      .then((data) => {
+        setMesaData(data)
+        setMesa(data.id, data.numero, data.slug)
+      })
+      .catch(() => setError(true))
+      .finally(() => setLoading(false))
+  }, [slug, setMesa])
+
+  if (loading) return <PageLoading />
+
+  if (error || !mesa) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-brand-50 to-orange-50 flex items-center justify-center p-6">
+        <div className="text-center max-w-xs">
+          <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+            <QrCode size={28} className="text-red-400" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Mesa não encontrada</h2>
+          <p className="text-gray-500 text-sm">
+            O QR Code escaneado não é válido. Solicite um novo ao garçom.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col items-center justify-center relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-32 -right-32 w-80 h-80 rounded-full bg-brand-500/10 blur-3xl" />
+        <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-gold-500/10 blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-brand-400/5 blur-3xl" />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-sm mx-auto">
+        {/* Logo/Icon */}
+        <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-2xl shadow-brand-500/30 mb-8">
+          <UtensilsCrossed size={44} className="text-white" />
+        </div>
+
+        {/* Restaurant name */}
+        <h1 className="text-3xl font-bold text-white font-display mb-1">Casa Aliana</h1>
+        <p className="text-gray-400 text-sm mb-8">Sabores que aquecem o coração</p>
+
+        {/* Mesa badge */}
+        <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-6 py-4 mb-8 w-full">
+          <div className="flex items-center justify-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-brand-500/20 border border-brand-500/30 flex items-center justify-center">
+              <MapPin size={18} className="text-brand-400" />
+            </div>
+            <div className="text-left">
+              <p className="text-gray-400 text-xs font-medium">Você está na</p>
+              <p className="text-white font-bold text-xl">Mesa {mesa.numero}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Welcome text */}
+        <div className="mb-8 text-center">
+          <p className="text-white/80 text-base leading-relaxed">
+            Bem-vindo ao nosso cardápio digital! Explore nossos pratos e faça seu pedido com facilidade.
+          </p>
+        </div>
+
+        {/* CTA Button */}
+        <button
+          onClick={() => navigate(`/mesa/${slug}/cardapio`)}
+          className="w-full bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 active:scale-[0.98] text-white font-bold py-4 px-8 rounded-2xl shadow-xl shadow-brand-500/30 transition-all duration-200 flex items-center justify-center gap-3 text-lg"
+        >
+          Ver Cardápio
+          <ArrowRight size={20} />
+        </button>
+
+        <p className="text-gray-500 text-xs mt-6">
+          Toque no botão acima para começar a navegar
+        </p>
+      </div>
+
+      {/* Bottom decoration */}
+      <div className="absolute bottom-6 left-0 right-0 flex justify-center">
+        <div className="flex gap-1.5">
+          {[...Array(3)].map((_, i) => (
+            <div
+              key={i}
+              className={`rounded-full bg-white/20 animate-pulse-soft`}
+              style={{
+                width: i === 1 ? '20px' : '8px',
+                height: '8px',
+                animationDelay: `${i * 0.3}s`,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}

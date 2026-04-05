@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from 'react'
-import { RefreshCw, Eye, Clock, CheckCircle2, ChefHat, Utensils, AlertTriangle } from 'lucide-react'
+import { RefreshCw, Eye, Clock, CheckCircle2, ChefHat, Utensils, AlertTriangle, Printer } from 'lucide-react'
 import { getPedidos, atualizarStatusPedido } from '@/services/pedidos'
 import { PageHeader } from '@/components/admin/PageHeader'
 import { Button } from '@/components/ui/Button'
@@ -90,6 +90,18 @@ export function PedidosPage() {
     const interval = setInterval(() => carregar(true), 30000)
     return () => clearInterval(interval)
   }, [carregar])
+
+  const isElectron = typeof window !== 'undefined' && !!window.electronAPI
+
+  async function handlePrint(pedidoId: string) {
+    if (!window.electronAPI) return
+    try {
+      await window.electronAPI.printPedido(pedidoId)
+      toast.success('Enviado para impressão!')
+    } catch {
+      toast.error('Erro ao imprimir pedido')
+    }
+  }
 
   async function handleStatusChange(pedidoId: string, status: StatusPedido) {
     try {
@@ -314,6 +326,15 @@ export function PedidosPage() {
                     >
                       <Eye size={15} />
                     </button>
+                    {isElectron && (
+                      <button
+                        onClick={() => handlePrint(pedido.id)}
+                        className="p-2 rounded-xl text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors border border-gray-200"
+                        title="Reimprimir pedido"
+                      >
+                        <Printer size={15} />
+                      </button>
+                    )}
                     <select
                       value={pedido.status}
                       onChange={(e) => handleStatusChange(pedido.id, e.target.value as StatusPedido)}
@@ -390,6 +411,17 @@ export function PedidosPage() {
                   {detailPedido.observacao_geral}
                 </p>
               </div>
+            )}
+
+            {isElectron && (
+              <Button
+                variant="outline"
+                onClick={() => handlePrint(detailPedido.id)}
+                className="w-full flex items-center gap-2 justify-center"
+              >
+                <Printer size={15} />
+                Reimprimir Pedido
+              </Button>
             )}
 
             <div>

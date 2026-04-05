@@ -493,6 +493,7 @@ ipcMain.handle('open-printer-selector', () => openPrinterSelector())
 // App lifecycle
 // ---------------------------------------------------------------------------
 app.whenReady().then(async () => {
+  Menu.setApplicationMenu(null)
   loadConfig()
   const trayIcon = await loadTrayIcon()
   createTray(trayIcon)

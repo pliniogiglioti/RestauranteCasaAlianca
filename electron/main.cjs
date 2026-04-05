@@ -64,24 +64,48 @@ function downloadBuffer(url) {
 // Fetch tray icon from configuracoes.icone_app, fall back to bundled icon
 // ---------------------------------------------------------------------------
 async function loadTrayIcon() {
-  const fallback = nativeImage.createFromPath(path.join(__dirname, 'icon.png'))
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return fallback
+  const fallbackPath = path.join(__dirname, 'icon.png')
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return nativeImage.createFromPath(fallbackPath)
 
   try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/configuracoes?select=icone_app&limit=1`,
-      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
-    )
-    const rows = await res.json()
-    const url = rows?.[0]?.icone_app
-    if (!url) return fallback
+    // Fetch the icon_app URL from configuracoes
+    const apiRes = await new Promise((resolve, reject) => {
+      const url = new URL(`${SUPABASE_URL}/rest/v1/configuracoes?select=icone_app&limit=1`)
+      const client = url.protocol === 'https:' ? https : http
+      client.get(url.toString(), {
+        headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+      }, (res) => {
+        const chunks = []
+        res.on('data', (c) => chunks.push(c))
+        res.on('end', () => resolve(JSON.parse(Buffer.concat(chunks).toString())))
+        res.on('error', reject)
+      }).on('error', reject)
+    })
 
-    const buf = await downloadBuffer(url)
-    const img = nativeImage.createFromBuffer(buf).resize({ width: 16, height: 16 })
-    return img.isEmpty() ? fallback : img
+    const iconUrl = apiRes?.[0]?.icone_app
+    if (!iconUrl) {
+      console.log('[tray] Nenhum icone_app configurado, usando padrão')
+      return nativeImage.createFromPath(fallbackPath)
+    }
+
+    console.log('[tray] Baixando ícone:', iconUrl)
+    const buf = await downloadBuffer(iconUrl)
+
+    // Save to temp file so nativeImage can detect the format correctly
+    const tmpIcon = path.join(app.getPath('temp'), 'tray-icon-tmp.png')
+    fs.writeFileSync(tmpIcon, buf)
+
+    const img = nativeImage.createFromPath(tmpIcon).resize({ width: 32, height: 32 })
+    if (img.isEmpty()) {
+      console.warn('[tray] Imagem vazia após resize, usando padrão')
+      return nativeImage.createFromPath(fallbackPath)
+    }
+
+    console.log('[tray] Ícone carregado do Supabase com sucesso')
+    return img
   } catch (err) {
     console.warn('[tray] Falha ao carregar ícone do Supabase:', err.message)
-    return fallback
+    return nativeImage.createFromPath(fallbackPath)
   }
 }
 

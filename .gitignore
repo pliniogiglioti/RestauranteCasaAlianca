@@ -30,6 +30,5 @@ npm-debug.log*
 # TypeScript
 *.tsbuildinfo
 
-git add .gitignore
-git commit -m "fix: remove release/ do git"
-git push origin main
+# Electron build output
+release/

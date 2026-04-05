@@ -1,6 +1,6 @@
 'use strict'
 
-const { app, BrowserWindow, Notification, ipcMain } = require('electron')
+const { app, BrowserWindow, Notification, ipcMain, Tray, Menu, nativeImage } = require('electron')
 const path = require('path')
 require('dotenv').config({ path: path.join(__dirname, '../.env') })
 
@@ -10,6 +10,57 @@ const IS_DEV = process.env.NODE_ENV === 'development'
 
 let mainWindow = null
 let supabase = null
+let tray = null
+
+// In-memory order history (last 100 orders)
+const orderHistory = []
+
+// ---------------------------------------------------------------------------
+// Tray icon (16x16 transparent PNG with a small coloured square)
+// ---------------------------------------------------------------------------
+function getTrayIcon() {
+  // Minimal 16x16 PNG: orange square — generated once at startup
+  const icon = nativeImage.createFromDataURL(
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAAI0lEQVQ4jWNgGAWDHfz/z8BACoxaMGrBqAWjFgxXC0YBAAeSAAFdzxwJAAAAAElFTkSuQmCC'
+  )
+  return icon
+}
+
+function createTray() {
+  tray = new Tray(getTrayIcon())
+  tray.setToolTip('Casa Aliança – Restaurante')
+
+  const buildMenu = () =>
+    Menu.buildFromTemplate([
+      {
+        label: mainWindow && mainWindow.isVisible() ? 'Ocultar janela' : 'Mostrar janela',
+        click: toggleWindow,
+      },
+      { type: 'separator' },
+      { label: 'Sair', click: () => app.quit() },
+    ])
+
+  tray.setContextMenu(buildMenu())
+
+  tray.on('click', toggleWindow)
+  tray.on('right-click', () => {
+    tray.setContextMenu(buildMenu())
+    tray.popUpContextMenu()
+  })
+}
+
+function toggleWindow() {
+  if (!mainWindow) {
+    createMainWindow()
+    return
+  }
+  if (mainWindow.isVisible()) {
+    mainWindow.hide()
+  } else {
+    mainWindow.show()
+    mainWindow.focus()
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Main window
@@ -34,6 +85,14 @@ function createMainWindow() {
   } else {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'))
   }
+
+  // Minimise to tray instead of closing
+  mainWindow.on('close', (e) => {
+    if (!app.isQuiting) {
+      e.preventDefault()
+      mainWindow.hide()
+    }
+  })
 
   mainWindow.on('closed', () => {
     mainWindow = null
@@ -196,13 +255,19 @@ async function printOrder(pedidoBasico) {
       }).show()
     }
 
-    // Also notify the renderer so it can show a toast
+    // Record in history (keep last 100)
+    const historyEntry = {
+      id: data.id,
+      mesa: data.mesa,
+      valor_total: data.valor_total,
+      impressoEm: new Date().toISOString(),
+    }
+    orderHistory.unshift(historyEntry)
+    if (orderHistory.length > 100) orderHistory.pop()
+
+    // Also notify the renderer so it can show a toast / update history
     if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('novo-pedido-impresso', {
-        id: data.id,
-        mesa: data.mesa,
-        valor_total: data.valor_total,
-      })
+      mainWindow.webContents.send('novo-pedido-impresso', historyEntry)
     }
   } catch (err) {
     console.error('[print] Erro inesperado:', err)
@@ -250,9 +315,15 @@ ipcMain.handle('print-pedido', async (_event, pedidoId) => {
 })
 
 // ---------------------------------------------------------------------------
+// IPC: histórico de pedidos impressos
+// ---------------------------------------------------------------------------
+ipcMain.handle('get-historico-pedidos', () => orderHistory)
+
+// ---------------------------------------------------------------------------
 // App lifecycle
 // ---------------------------------------------------------------------------
 app.whenReady().then(async () => {
+  createTray()
   createMainWindow()
   await setupRealtimeOrders()
 
@@ -261,6 +332,11 @@ app.whenReady().then(async () => {
   })
 })
 
+// Keep the app running in the tray when all windows are closed
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit()
+  // Do nothing — the tray keeps the process alive
+})
+
+app.on('before-quit', () => {
+  app.isQuiting = true
 })

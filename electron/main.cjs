@@ -459,6 +459,31 @@ async function setupRealtimeOrders() {
 }
 
 // ---------------------------------------------------------------------------
+// Report HTML printer (called from renderer with pre-built HTML)
+// ---------------------------------------------------------------------------
+async function printHTML(html) {
+  const tmpFile = path.join(app.getPath('temp'), `report-${Date.now()}.html`)
+  fs.writeFileSync(tmpFile, html, 'utf8')
+
+  const printWin = new BrowserWindow({
+    show: false,
+    width: 400,
+    height: 600,
+    webPreferences: { nodeIntegration: false, contextIsolation: true },
+  })
+
+  await printWin.loadFile(tmpFile)
+
+  printWin.webContents.print(
+    { silent: true, printBackground: false, deviceName: selectedPrinter || '' },
+    (success, reason) => {
+      if (!success) console.warn('[relatorio] Falha na impressão:', reason)
+      setTimeout(() => { printWin.destroy(); fs.unlink(tmpFile, () => {}) }, 2000)
+    }
+  )
+}
+
+// ---------------------------------------------------------------------------
 // IPC handlers
 // ---------------------------------------------------------------------------
 
@@ -493,6 +518,12 @@ ipcMain.handle('get-impressora', () => selectedPrinter)
 
 // Abrir diálogo de seleção de impressora (acionável pelo renderer)
 ipcMain.handle('open-printer-selector', () => openPrinterSelector())
+
+// Imprimir HTML arbitrário (relatório)
+ipcMain.handle('print-relatorio', async (_event, html) => {
+  await printHTML(html)
+  return { ok: true }
+})
 
 // ---------------------------------------------------------------------------
 // App lifecycle

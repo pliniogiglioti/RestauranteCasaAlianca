@@ -21,6 +21,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Abrir diálogo nativo de seleção de impressora (via menu do tray também)
   openPrinterSelector: () => ipcRenderer.invoke('open-printer-selector'),
 
+  // Imprimir HTML arbitrário (relatório do dia, etc.)
+  printRelatorio: (html) => ipcRenderer.invoke('print-relatorio', html),
+
   // Evento: novo pedido impresso automaticamente
   onNovoPedidoImpresso: (callback) => {
     ipcRenderer.on('novo-pedido-impresso', (_event, data) => callback(data))

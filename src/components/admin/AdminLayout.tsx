@@ -12,6 +12,7 @@ import {
   X,
   ChevronRight,
   Settings,
+  Printer,
 } from 'lucide-react'
 import { signOut } from '@/hooks/useAuth'
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
@@ -87,6 +88,24 @@ export function AdminLayout() {
   )
 }
 
+function PrinterStatus() {
+  const isElectron = typeof window !== 'undefined' && !!window.electronAPI
+
+  return (
+    <div className="px-3 pb-2 border-t border-gray-800 pt-3">
+      <div className="flex items-center gap-3 px-3 py-2">
+        <Printer size={18} className={isElectron ? 'text-green-400' : 'text-gray-600'} />
+        <div className="flex-1 min-w-0">
+          <p className="text-xs text-gray-500 leading-none mb-0.5">App Desktop</p>
+          <p className={`text-xs font-medium ${isElectron ? 'text-green-400' : 'text-gray-600'}`}>
+            {isElectron ? 'Online' : 'Offline'}
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function MobileHeaderLogo() {
   const { nomeRestaurante } = useConfiguracoes()
   return (
@@ -152,6 +171,9 @@ function SidebarContent({
           </NavLink>
         ))}
       </nav>
+
+      {/* Printer status (Electron only) */}
+      <PrinterStatus />
 
       {/* Sign out */}
       <div className="px-3 py-4 border-t border-gray-800">

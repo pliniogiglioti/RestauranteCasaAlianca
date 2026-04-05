@@ -4,6 +4,8 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
+  // Base relativa para funcionar tanto no browser (Vercel) quanto no Electron (file://)
+  base: process.env.ELECTRON ? './' : '/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

@@ -248,11 +248,10 @@ function createMainWindow() {
 // ---------------------------------------------------------------------------
 // Receipt HTML generator
 // ---------------------------------------------------------------------------
-function generateReceiptHTML(pedido) {
+function generateReceiptHTML(pedido, numeroPedido) {
   const mesa = pedido.mesa || {}
   const itens = pedido.itens || []
   const now = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
-  const shortId = (pedido.id || '').substring(0, 8).toUpperCase()
 
   const itensHTML = itens
     .map(
@@ -311,7 +310,7 @@ function generateReceiptHTML(pedido) {
   <div class="divider"></div>
   <div class="info">
     <p><strong>Mesa:</strong> ${mesa.numero || '—'}</p>
-    <p><strong>Pedido:</strong> #${shortId}</p>
+    <p><strong>Pedido:</strong> #${numeroPedido}</p>
     <p><strong>Data/Hora:</strong> ${now}</p>
   </div>
   <div class="divider"></div>
@@ -363,7 +362,14 @@ async function printOrder(pedidoBasico) {
       return
     }
 
-    const html = generateReceiptHTML(data)
+    // Número sequencial: conta quantos pedidos existem até este (por created_at)
+    const { count } = await supabase
+      .from('pedidos')
+      .select('id', { count: 'exact', head: true })
+      .lte('created_at', data.created_at)
+
+    const numeroPedido = count ?? 1
+    const html = generateReceiptHTML(data, numeroPedido)
 
     // Write HTML to a temp file — avoids data-URL size limits in Electron
     const tmpFile = path.join(app.getPath('temp'), `receipt-${data.id}.html`)
@@ -386,7 +392,7 @@ async function printOrder(pedidoBasico) {
       },
       (success, reason) => {
         if (!success) console.warn('[print] Falha na impressão:', reason)
-        else console.log(`[print] Pedido #${data.id.substring(0, 8)} impresso — impressora: ${selectedPrinter || 'padrão'}`)
+        else console.log(`[print] Pedido #${numeroPedido} impresso — impressora: ${selectedPrinter || 'padrão'}`)
         setTimeout(() => {
           printWin.destroy()
           fs.unlink(tmpFile, () => {})

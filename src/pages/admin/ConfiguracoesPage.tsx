@@ -5,7 +5,7 @@ import { upsertConfiguracao } from '@/services/configuracoes'
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
 import toast from 'react-hot-toast'
 
-const DOWNLOAD_URL = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/downloads/RestauranteCasaAliancaSetup.exe`
+const DOWNLOAD_URL = 'https://github.com/pliniogiglioti/RestauranteCasaAlianca/releases/latest/download/RestauranteCasaAliancaSetup.exe'
 
 function DownloadAppCard() {
   const isElectron = typeof window !== 'undefined' && !!window.electronAPI

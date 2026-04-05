@@ -1,15 +1,22 @@
 // Type declarations for the Electron preload API exposed via contextBridge
 interface ElectronAPI {
-  /** Trigger manual print of a specific order by ID */
   printPedido: (pedidoId: string) => Promise<{ ok: boolean }>
-
-  /** Subscribe to auto-print events (fires each time a new order is auto-printed) */
+  getHistoricoPedidos: () => Promise<Array<{
+    id: string
+    mesa: { numero: number } | null
+    valor_total: number
+    impressoEm: string
+  }>>
+  getPrinters: () => Promise<Array<{ name: string; isDefault: boolean }>>
+  getImpressora: () => Promise<string>
+  setImpressora: (printerName: string) => Promise<{ ok: boolean }>
+  openPrinterSelector: () => Promise<void>
   onNovoPedidoImpresso: (
-    callback: (data: { id: string; mesa: { numero: number } | null; valor_total: number }) => void
+    callback: (data: { id: string; mesa: { numero: number } | null; valor_total: number; impressoEm: string }) => void
   ) => void
-
-  /** Remove the onNovoPedidoImpresso listener */
+  onImpressoraAtualizada: (callback: (name: string) => void) => void
   removeNovoPedidoImpressoListener: () => void
+  removeImpressoraAtualizadaListener: () => void
 }
 
 interface Window {

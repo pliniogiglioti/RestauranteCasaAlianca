@@ -3,6 +3,8 @@
 const { app, BrowserWindow, Notification, ipcMain, Tray, Menu, nativeImage, dialog } = require('electron')
 const path = require('path')
 const fs = require('fs')
+const https = require('https')
+const http  = require('http')
 require('dotenv').config({ path: path.join(__dirname, '../.env') })
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL
@@ -41,11 +43,52 @@ function saveConfig() {
 }
 
 // ---------------------------------------------------------------------------
+// Download helper (follows redirects, returns Buffer)
+// ---------------------------------------------------------------------------
+function downloadBuffer(url) {
+  return new Promise((resolve, reject) => {
+    const client = url.startsWith('https') ? https : http
+    client.get(url, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        return downloadBuffer(res.headers.location).then(resolve).catch(reject)
+      }
+      const chunks = []
+      res.on('data', (c) => chunks.push(c))
+      res.on('end', () => resolve(Buffer.concat(chunks)))
+      res.on('error', reject)
+    }).on('error', reject)
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Fetch tray icon from configuracoes.icone_app, fall back to bundled icon
+// ---------------------------------------------------------------------------
+async function loadTrayIcon() {
+  const fallback = nativeImage.createFromPath(path.join(__dirname, 'icon.png'))
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return fallback
+
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/configuracoes?select=icone_app&limit=1`,
+      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
+    )
+    const rows = await res.json()
+    const url = rows?.[0]?.icone_app
+    if (!url) return fallback
+
+    const buf = await downloadBuffer(url)
+    const img = nativeImage.createFromBuffer(buf).resize({ width: 16, height: 16 })
+    return img.isEmpty() ? fallback : img
+  } catch (err) {
+    console.warn('[tray] Falha ao carregar ícone do Supabase:', err.message)
+    return fallback
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Tray
 // ---------------------------------------------------------------------------
-function createTray() {
-  const iconPath = path.join(__dirname, 'icon.png')
-  const icon = nativeImage.createFromPath(iconPath)
+function createTray(icon) {
   tray = new Tray(icon)
   tray.setToolTip('Casa Aliança – Restaurante')
 
@@ -57,6 +100,10 @@ function createTray() {
       },
       { type: 'separator' },
       { label: 'Selecionar impressora...', click: openPrinterSelector },
+      {
+        label: selectedPrinter ? `Impressora: ${selectedPrinter}` : 'Impressora: (padrão do sistema)',
+        enabled: false,
+      },
       { type: 'separator' },
       { label: 'Sair', click: () => app.quit() },
     ])
@@ -67,6 +114,27 @@ function createTray() {
     tray.setContextMenu(buildMenu())
     tray.popUpContextMenu()
   })
+}
+
+// Rebuild tray menu after printer changes so the status label updates
+function refreshTrayMenu() {
+  if (!tray) return
+  const buildMenu = () =>
+    Menu.buildFromTemplate([
+      {
+        label: mainWindow && mainWindow.isVisible() ? 'Ocultar janela' : 'Mostrar janela',
+        click: toggleWindow,
+      },
+      { type: 'separator' },
+      { label: 'Selecionar impressora...', click: openPrinterSelector },
+      {
+        label: selectedPrinter ? `Impressora: ${selectedPrinter}` : 'Impressora: (padrão do sistema)',
+        enabled: false,
+      },
+      { type: 'separator' },
+      { label: 'Sair', click: () => app.quit() },
+    ])
+  tray.setContextMenu(buildMenu())
 }
 
 function toggleWindow() {
@@ -106,6 +174,7 @@ async function openPrinterSelector() {
   if (response < choices.length) {
     selectedPrinter = choices[response]
     saveConfig()
+    refreshTrayMenu()
     console.log('[printer] Impressora selecionada:', selectedPrinter)
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('impressora-atualizada', selectedPrinter)
@@ -385,6 +454,7 @@ ipcMain.handle('get-printers', async () => {
 ipcMain.handle('set-impressora', (_event, printerName) => {
   selectedPrinter = printerName
   saveConfig()
+  refreshTrayMenu()
   console.log('[printer] Impressora definida via renderer:', printerName)
   return { ok: true }
 })
@@ -400,7 +470,8 @@ ipcMain.handle('open-printer-selector', () => openPrinterSelector())
 // ---------------------------------------------------------------------------
 app.whenReady().then(async () => {
   loadConfig()
-  createTray()
+  const trayIcon = await loadTrayIcon()
+  createTray(trayIcon)
   createMainWindow()
   await setupRealtimeOrders()
 

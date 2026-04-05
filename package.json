@@ -26,7 +26,8 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "public/favicon.ico"
+      "icon": "electron/icon.png",
+      "artifactName": "RestauranteCasaAliancaSetup.${ext}"
     },
     "mac": {
       "target": "dmg"

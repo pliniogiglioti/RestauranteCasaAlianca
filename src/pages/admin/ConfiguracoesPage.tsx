@@ -1,9 +1,44 @@
 import { useState, useEffect, useRef } from 'react'
-import { Settings, Save, Store, Upload, Phone, MapPin, X } from 'lucide-react'
+import { Settings, Save, Store, Upload, Phone, MapPin, X, Monitor, Download } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { upsertConfiguracao } from '@/services/configuracoes'
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
 import toast from 'react-hot-toast'
+
+const DOWNLOAD_URL = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/downloads/RestauranteCasaAliancaSetup.exe`
+
+function DownloadAppCard() {
+  const isElectron = typeof window !== 'undefined' && !!window.electronAPI
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <h2 className="font-semibold text-gray-900 text-sm flex items-center gap-2 mb-4">
+        <Monitor size={15} className="text-brand-500" />
+        App Desktop (Windows)
+      </h2>
+
+      <div className="flex items-center gap-4">
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isElectron ? 'bg-green-50' : 'bg-gray-100'}`}>
+          <Monitor size={20} className={isElectron ? 'text-green-500' : 'text-gray-400'} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-gray-900">RestauranteCasaAliancaSetup.exe</p>
+          <p className={`text-xs mt-0.5 ${isElectron ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
+            {isElectron ? '● App aberto neste computador' : '○ App não detectado neste computador'}
+          </p>
+        </div>
+        <a
+          href={DOWNLOAD_URL}
+          download="RestauranteCasaAliancaSetup.exe"
+          className="flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium rounded-xl transition-colors shrink-0"
+        >
+          <Download size={15} />
+          Baixar
+        </a>
+      </div>
+    </div>
+  )
+}
 
 export function ConfiguracoesPage() {
   const { id, nomeRestaurante, slogan, iconeApp, iconeUrl, telefone, endereco, fetch: fetchConfig, setConfig } =
@@ -301,6 +336,9 @@ export function ConfiguracoesPage() {
           </div>
         </div>
       </div>
+
+      {/* App Desktop Download */}
+      <DownloadAppCard />
 
       {/* Botão salvar */}
       <button

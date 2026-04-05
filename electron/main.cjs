@@ -14,6 +14,7 @@ const IS_DEV = process.env.NODE_ENV === 'development'
 let mainWindow = null
 let supabase = null
 let tray = null
+let appIcon = null  // nativeImage reutilizado na janela e no tray
 
 // Selected printer (persisted to userData/config.json)
 let selectedPrinter = ''
@@ -216,6 +217,7 @@ function createMainWindow() {
     minWidth: 900,
     minHeight: 600,
     title: 'Casa Aliança – Restaurante',
+    icon: appIcon || undefined,
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       nodeIntegration: false,
@@ -492,8 +494,8 @@ ipcMain.handle('open-printer-selector', () => openPrinterSelector())
 app.whenReady().then(async () => {
   Menu.setApplicationMenu(null)
   loadConfig()
-  const trayIcon = await loadTrayIcon()
-  createTray(trayIcon)
+  appIcon = await loadTrayIcon()
+  createTray(appIcon)
   createMainWindow()
   await setupRealtimeOrders()
 

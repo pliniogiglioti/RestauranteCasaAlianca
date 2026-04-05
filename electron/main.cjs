@@ -1,7 +1,8 @@
 'use strict'
 
-const { app, BrowserWindow, Notification, ipcMain, Tray, Menu, nativeImage } = require('electron')
+const { app, BrowserWindow, Notification, ipcMain, Tray, Menu, nativeImage, dialog } = require('electron')
 const path = require('path')
+const fs = require('fs')
 require('dotenv').config({ path: path.join(__dirname, '../.env') })
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL
@@ -12,22 +13,40 @@ let mainWindow = null
 let supabase = null
 let tray = null
 
+// Selected printer (persisted to userData/config.json)
+let selectedPrinter = ''
+
 // In-memory order history (last 100 orders)
 const orderHistory = []
 
 // ---------------------------------------------------------------------------
-// Tray icon (16x16 transparent PNG with a small coloured square)
+// Config persistence
 // ---------------------------------------------------------------------------
-function getTrayIcon() {
-  // Minimal 16x16 PNG: orange square — generated once at startup
-  const icon = nativeImage.createFromDataURL(
-    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAAI0lEQVQ4jWNgGAWDHfz/z8BACoxaMGrBqAWjFgxXC0YBAAeSAAFdzxwJAAAAAElFTkSuQmCC'
-  )
-  return icon
+function configPath() {
+  return path.join(app.getPath('userData'), 'config.json')
 }
 
+function loadConfig() {
+  try {
+    const raw = fs.readFileSync(configPath(), 'utf8')
+    const cfg = JSON.parse(raw)
+    selectedPrinter = cfg.impressora || ''
+  } catch {
+    // first run — no config yet
+  }
+}
+
+function saveConfig() {
+  fs.writeFileSync(configPath(), JSON.stringify({ impressora: selectedPrinter }), 'utf8')
+}
+
+// ---------------------------------------------------------------------------
+// Tray
+// ---------------------------------------------------------------------------
 function createTray() {
-  tray = new Tray(getTrayIcon())
+  const iconPath = path.join(__dirname, 'icon.png')
+  const icon = nativeImage.createFromPath(iconPath)
+  tray = new Tray(icon)
   tray.setToolTip('Casa Aliança – Restaurante')
 
   const buildMenu = () =>
@@ -37,11 +56,12 @@ function createTray() {
         click: toggleWindow,
       },
       { type: 'separator' },
+      { label: 'Selecionar impressora...', click: openPrinterSelector },
+      { type: 'separator' },
       { label: 'Sair', click: () => app.quit() },
     ])
 
   tray.setContextMenu(buildMenu())
-
   tray.on('click', toggleWindow)
   tray.on('right-click', () => {
     tray.setContextMenu(buildMenu())
@@ -62,6 +82,37 @@ function toggleWindow() {
   }
 }
 
+async function openPrinterSelector() {
+  // Need a visible window to enumerate printers
+  const win = mainWindow || new BrowserWindow({ show: false })
+  const printers = await win.webContents.getPrintersAsync()
+  if (!printers.length) {
+    dialog.showMessageBox({ message: 'Nenhuma impressora encontrada.' })
+    return
+  }
+
+  const choices = printers.map((p) => p.name)
+  const currentIdx = choices.indexOf(selectedPrinter)
+
+  const { response } = await dialog.showMessageBox({
+    type: 'question',
+    title: 'Selecionar impressora',
+    message: 'Escolha a impressora para impressão automática de pedidos:',
+    buttons: [...choices, 'Cancelar'],
+    defaultId: currentIdx >= 0 ? currentIdx : 0,
+    cancelId: choices.length,
+  })
+
+  if (response < choices.length) {
+    selectedPrinter = choices[response]
+    saveConfig()
+    console.log('[printer] Impressora selecionada:', selectedPrinter)
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('impressora-atualizada', selectedPrinter)
+    }
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Main window
 // ---------------------------------------------------------------------------
@@ -71,7 +122,7 @@ function createMainWindow() {
     height: 800,
     minWidth: 900,
     minHeight: 600,
-    title: 'Casa Aliana – Restaurante',
+    title: 'Casa Aliança – Restaurante',
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       nodeIntegration: false,
@@ -159,7 +210,7 @@ function generateReceiptHTML(pedido) {
 </head>
 <body>
   <div class="header">
-    <h1>CASA ALIANA</h1>
+    <h1>CASA ALIANÇA</h1>
     <p>Restaurante</p>
   </div>
   <div class="divider"></div>
@@ -195,12 +246,6 @@ function generateReceiptHTML(pedido) {
   }
   <div class="divider"></div>
   <div class="footer">Obrigado pela preferência!</div>
-  <script>
-    // Auto-print and close as soon as the page is rendered
-    window.onload = function () {
-      window.print()
-    }
-  </script>
 </body>
 </html>`
 }
@@ -212,7 +257,6 @@ async function printOrder(pedidoBasico) {
   if (!supabase) return
 
   try {
-    // Fetch full order details (the realtime payload only has the base row)
     const { data, error } = await supabase
       .from('pedidos')
       .select('*, mesa:mesas(*), itens:pedido_itens(*)')
@@ -226,6 +270,10 @@ async function printOrder(pedidoBasico) {
 
     const html = generateReceiptHTML(data)
 
+    // Write HTML to a temp file — avoids data-URL size limits in Electron
+    const tmpFile = path.join(app.getPath('temp'), `receipt-${data.id}.html`)
+    fs.writeFileSync(tmpFile, html, 'utf8')
+
     const printWin = new BrowserWindow({
       show: false,
       width: 400,
@@ -233,16 +281,24 @@ async function printOrder(pedidoBasico) {
       webPreferences: { nodeIntegration: false, contextIsolation: true },
     })
 
-    // Use a data URL so no file-system write is needed
-    await printWin.loadURL('data:text/html;charset=UTF-8,' + encodeURIComponent(html))
+    await printWin.loadFile(tmpFile)
+
+    // Wait for content to be fully rendered before printing
+    await new Promise((resolve) => printWin.webContents.once('did-finish-load', resolve))
 
     printWin.webContents.print(
-      { silent: true, printBackground: false, deviceName: '' },
+      {
+        silent: true,
+        printBackground: false,
+        deviceName: selectedPrinter || '',
+      },
       (success, reason) => {
         if (!success) console.warn('[print] Falha na impressão:', reason)
-        else console.log(`[print] Pedido #${data.id.substring(0, 8)} impresso com sucesso`)
-        // Close after a short delay to allow the print job to spool
-        setTimeout(() => printWin.destroy(), 2000)
+        else console.log(`[print] Pedido #${data.id.substring(0, 8)} impresso — impressora: ${selectedPrinter || 'padrão'}`)
+        setTimeout(() => {
+          printWin.destroy()
+          fs.unlink(tmpFile, () => {})
+        }, 2000)
       }
     )
 
@@ -265,7 +321,6 @@ async function printOrder(pedidoBasico) {
     orderHistory.unshift(historyEntry)
     if (orderHistory.length > 100) orderHistory.pop()
 
-    // Also notify the renderer so it can show a toast / update history
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('novo-pedido-impresso', historyEntry)
     }
@@ -285,7 +340,6 @@ async function setupRealtimeOrders() {
     return
   }
 
-  // Dynamic import handles ESM-only packages from CommonJS context
   const { createClient } = await import('@supabase/supabase-js')
   supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
@@ -307,22 +361,45 @@ async function setupRealtimeOrders() {
 }
 
 // ---------------------------------------------------------------------------
-// IPC: impressão manual a partir do renderer
+// IPC handlers
 // ---------------------------------------------------------------------------
+
+// Impressão manual a partir do renderer
 ipcMain.handle('print-pedido', async (_event, pedidoId) => {
   await printOrder({ id: pedidoId })
   return { ok: true }
 })
 
-// ---------------------------------------------------------------------------
-// IPC: histórico de pedidos impressos
-// ---------------------------------------------------------------------------
+// Histórico de pedidos impressos
 ipcMain.handle('get-historico-pedidos', () => orderHistory)
+
+// Lista de impressoras disponíveis
+ipcMain.handle('get-printers', async () => {
+  const win = mainWindow || BrowserWindow.getAllWindows()[0]
+  if (!win) return []
+  const printers = await win.webContents.getPrintersAsync()
+  return printers.map((p) => ({ name: p.name, isDefault: p.isDefault }))
+})
+
+// Salvar impressora selecionada
+ipcMain.handle('set-impressora', (_event, printerName) => {
+  selectedPrinter = printerName
+  saveConfig()
+  console.log('[printer] Impressora definida via renderer:', printerName)
+  return { ok: true }
+})
+
+// Retornar impressora atualmente selecionada
+ipcMain.handle('get-impressora', () => selectedPrinter)
+
+// Abrir diálogo de seleção de impressora (acionável pelo renderer)
+ipcMain.handle('open-printer-selector', () => openPrinterSelector())
 
 // ---------------------------------------------------------------------------
 // App lifecycle
 // ---------------------------------------------------------------------------
 app.whenReady().then(async () => {
+  loadConfig()
   createTray()
   createMainWindow()
   await setupRealtimeOrders()
@@ -334,7 +411,7 @@ app.whenReady().then(async () => {
 
 // Keep the app running in the tray when all windows are closed
 app.on('window-all-closed', () => {
-  // Do nothing — the tray keeps the process alive
+  // intentionally empty — tray keeps the process alive
 })
 
 app.on('before-quit', () => {

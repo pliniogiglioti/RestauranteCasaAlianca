@@ -390,7 +390,6 @@ export function PedidosPage() {
           group={mesaDetalhe}
           pedidos={pedidos}
           numeroPedido={numeroPedido}
-          isElectron={isElectron}
           onClose={() => setMesaDetalhe(null)}
           onDetail={setDetailPedido}
           onStatusChange={handleStatusChange}
@@ -416,12 +415,11 @@ export function PedidosPage() {
 // Modal: histórico da mesa com filtro de dia
 // ---------------------------------------------------------------------------
 function MesaDetalheModal({
-  group, pedidos, numeroPedido, isElectron, onClose, onDetail, onStatusChange, onPrint,
+  group, pedidos, numeroPedido, onClose, onDetail, onStatusChange, onPrint,
 }: {
   group: MesaGroup
   pedidos: PedidoCompleto[]
   numeroPedido: Map<string, number>
-  isElectron: boolean
   onClose: () => void
   onDetail: (p: PedidoCompleto) => void
   onStatusChange: (id: string, status: StatusPedido) => void

@@ -376,9 +376,6 @@ async function printOrder(pedidoBasico) {
 
     await printWin.loadFile(tmpFile)
 
-    // Wait for content to be fully rendered before printing
-    await new Promise((resolve) => printWin.webContents.once('did-finish-load', resolve))
-
     printWin.webContents.print(
       {
         silent: true,

@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 
 // Client pages
@@ -64,9 +64,11 @@ function PedidoWatcher() {
   return null
 }
 
+const Router = typeof window !== 'undefined' && !!window.electronAPI ? HashRouter : BrowserRouter
+
 export default function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <ConfigProvider>
         <PedidoWatcher />
         <Toaster
@@ -119,7 +121,7 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </ConfigProvider>
-    </BrowserRouter>
+    </Router>
   )
 }
 

@@ -10,8 +10,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .\"",
-    "electron:build": "tsc && vite build && electron-builder",
-    "electron:preview": "vite build && electron ."
+    "electron:build": "tsc && cross-env ELECTRON=true vite build && electron-builder",
+    "electron:preview": "cross-env ELECTRON=true vite build && electron ."
   },
   "build": {
     "appId": "com.casaaliana.restaurante",

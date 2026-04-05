@@ -243,6 +243,7 @@ export function PedidosPage() {
                   numero={numeroPedido.get(group.pedidoAtual.id) ?? 0}
                   onDetail={() => setDetailPedido(group.pedidoAtual)}
                   onStatusChange={handleStatusChange}
+                  onPrint={isElectron ? handlePrint : undefined}
                 />
               </div>
 
@@ -456,11 +457,13 @@ function PedidoRow({
   numero,
   onDetail,
   onStatusChange,
+  onPrint,
 }: {
   pedido: PedidoCompleto
   numero: number
   onDetail: () => void
   onStatusChange: (id: string, status: StatusPedido) => void
+  onPrint?: (id: string) => void
 }) {
   return (
     <div className="flex items-center gap-3">
@@ -482,6 +485,15 @@ function PedidoRow({
         >
           <Eye size={13} />
         </button>
+        {onPrint && (
+          <button
+            onClick={() => onPrint(pedido.id)}
+            className="p-1.5 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors border border-gray-200"
+            title="Reimprimir pedido"
+          >
+            <Printer size={13} />
+          </button>
+        )}
         <select
           value={pedido.status}
           onChange={(e) => onStatusChange(pedido.id, e.target.value as StatusPedido)}

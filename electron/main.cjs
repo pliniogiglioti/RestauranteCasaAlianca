@@ -84,8 +84,8 @@ async function loadTrayIcon() {
     })
 
     const iconUrl = apiRes?.[0]?.icone_app
-    if (!iconUrl) {
-      console.log('[tray] Nenhum icone_app configurado, usando padrão')
+    if (!iconUrl || !iconUrl.startsWith('http')) {
+      console.log('[tray] icone_app não é uma URL válida, usando padrão')
       return nativeImage.createFromPath(fallbackPath)
     }
 

@@ -57,14 +57,14 @@ export function DishCard({ prato, onDetails }: DishCardProps) {
           </p>
         )}
 
-        <div className="flex items-center justify-between mt-3 gap-2">
+        <div className="mt-3">
           <span className="text-brand-600 font-bold text-base">
             {formatCurrency(prato.preco)}
           </span>
 
           {/* Cart controls */}
           {quantidade > 0 ? (
-            <div className="flex items-center gap-2 bg-brand-50 rounded-full p-1">
+            <div className="flex items-center gap-2 bg-brand-50 rounded-full p-1 mt-2 w-fit">
               <button
                 onClick={() => updateQuantidade(prato.id, quantidade - 1)}
                 className="w-7 h-7 rounded-full bg-white shadow-sm flex items-center justify-center text-brand-600 hover:bg-brand-100 active:scale-95 transition-all"
@@ -84,7 +84,7 @@ export function DishCard({ prato, onDetails }: DishCardProps) {
           ) : (
             <button
               onClick={() => addItem(prato)}
-              className="flex items-center gap-1.5 bg-[#113917] hover:bg-[#0d2e13] active:bg-[#081d0c] text-white text-xs font-medium px-3 py-2 rounded-full shadow-sm active:scale-95 transition-all"
+              className="flex items-center gap-1.5 bg-[#113917] hover:bg-[#0d2e13] active:bg-[#081d0c] text-white text-xs font-medium px-3 py-2 rounded-full shadow-sm active:scale-95 transition-all mt-2 w-fit"
             >
               <ShoppingCart size={12} />
               Adicionar

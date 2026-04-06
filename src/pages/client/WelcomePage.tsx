@@ -20,6 +20,16 @@ export function WelcomePage() {
   const [error, setError] = useState(false)
 
   useEffect(() => {
+    const themeMeta = document.querySelector('meta[name="theme-color"]')
+    const previous = themeMeta?.getAttribute('content')
+    themeMeta?.setAttribute('content', '#f5f5f5')
+
+    return () => {
+      if (previous) themeMeta?.setAttribute('content', previous)
+    }
+  }, [])
+
+  useEffect(() => {
     if (!slug) {
       setError(true)
       setLoading(false)

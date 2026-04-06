@@ -37,22 +37,22 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-green-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#ebebeb] flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
           <AppIcon size="lg" className="mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-green-950 font-display">{nomeRestaurante}</h1>
-          <p className="text-green-800/80 text-sm mt-1">Painel Administrativo</p>
+          <h1 className="text-2xl font-bold text-[#474747] font-display">{nomeRestaurante}</h1>
+          <p className="text-[#474747]/80 text-sm mt-1">Painel Administrativo</p>
         </div>
 
         {/* Form */}
-        <div className="bg-white rounded-3xl p-6 shadow-2xl">
-          <h2 className="text-lg font-bold text-gray-900 mb-5">Entrar</h2>
+        <div className="bg-white rounded-3xl p-6 shadow-2xl border border-[#d8d8d8]">
+          <h2 className="text-lg font-bold text-[#474747] mb-5">Entrar</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-[#474747] mb-1.5">
                 Email
               </label>
               <div className="relative">
@@ -66,13 +66,13 @@ export function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="seu@email.com"
                   required
-                  className="block w-full rounded-xl border border-gray-300 bg-white pl-10 pr-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent transition-all"
+                  className="block w-full rounded-xl border border-[#cfcfcf] bg-white pl-10 pr-4 py-2.5 text-sm text-[#474747] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3a3a3a] focus:border-transparent transition-all"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-sm font-medium text-[#474747] mb-1.5">
                 Senha
               </label>
               <div className="relative">
@@ -86,7 +86,7 @@ export function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="block w-full rounded-xl border border-gray-300 bg-white pl-10 pr-10 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent transition-all"
+                  className="block w-full rounded-xl border border-[#cfcfcf] bg-white pl-10 pr-10 py-2.5 text-sm text-[#474747] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3a3a3a] focus:border-transparent transition-all"
                 />
                 <button
                   type="button"
@@ -118,7 +118,7 @@ export function LoginPage() {
           </form>
         </div>
 
-        <p className="text-center text-green-900/70 text-xs mt-6">
+        <p className="text-center text-[#474747]/70 text-xs mt-6">
           Acesso restrito aos administradores do restaurante
         </p>
       </div>

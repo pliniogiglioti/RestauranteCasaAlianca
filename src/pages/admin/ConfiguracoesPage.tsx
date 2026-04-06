@@ -18,12 +18,12 @@ function DownloadAppCard() {
       </h2>
 
       <div className="flex items-center gap-4">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isElectron ? 'bg-green-50' : 'bg-gray-100'}`}>
-          <Monitor size={20} className={isElectron ? 'text-green-500' : 'text-gray-400'} />
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isElectron ? 'bg-[#d9d9d9]' : 'bg-gray-100'}`}>
+          <Monitor size={20} className={isElectron ? 'text-[#3a3a3a]' : 'text-gray-400'} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-900">RestauranteCasaAliancaSetup.exe</p>
-          <p className={`text-xs mt-0.5 ${isElectron ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
+          <p className="text-sm font-medium text-[#474747]">RestauranteCasaAliancaSetup.exe</p>
+          <p className={`text-xs mt-0.5 ${isElectron ? 'text-[#3a3a3a] font-medium' : 'text-gray-400'}`}>
             {isElectron ? '● App aberto neste computador' : '○ App não detectado neste computador'}
           </p>
         </div>
@@ -143,17 +143,17 @@ export function ConfiguracoesPage() {
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-[#474747] flex items-center gap-2">
           <Settings size={22} className="text-brand-500" />
           Configurações
         </h1>
-        <p className="text-gray-500 text-sm mt-1">
+        <p className="text-[#474747]/75 text-sm mt-1">
           Personalize o nome, ícone e informações do restaurante.
         </p>
       </div>
 
       {/* Preview */}
-      <div className="bg-green-100 border border-green-200 rounded-2xl p-6 flex items-center gap-4 shadow-lg shadow-green-100">
+      <div className="bg-[#ebebeb] border border-[#d6d6d6] rounded-2xl p-6 flex items-center gap-4 shadow-lg shadow-gray-200">
         <div className="shrink-0 flex items-center justify-center w-16 h-16">
           {exibeImagem ? (
             <img src={iconeUrlVal} alt="ícone" className="w-full h-full object-contain" />
@@ -162,8 +162,8 @@ export function ConfiguracoesPage() {
           )}
         </div>
         <div>
-          <p className="text-green-950 font-bold text-xl leading-tight">{nome || 'Nome do Restaurante'}</p>
-          <p className="text-green-800/80 text-sm mt-0.5">{sloganVal || 'Seu slogan aqui'}</p>
+          <p className="text-[#474747] font-bold text-xl leading-tight">{nome || 'Nome do Restaurante'}</p>
+          <p className="text-[#474747]/80 text-sm mt-0.5">{sloganVal || 'Seu slogan aqui'}</p>
         </div>
       </div>
 

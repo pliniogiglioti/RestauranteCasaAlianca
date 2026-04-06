@@ -43,9 +43,9 @@ export function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-[#ebebeb] flex">
       {/* Sidebar Desktop */}
-      <aside className="hidden lg:flex flex-col w-64 bg-green-100 border-r border-green-200 min-h-screen fixed left-0 top-0 z-30">
+      <aside className="hidden lg:flex flex-col w-64 bg-[#ebebeb] border-r border-[#d6d6d6] min-h-screen fixed left-0 top-0 z-30">
         <SidebarContent onSignOut={handleSignOut} onClose={() => setSidebarOpen(false)} />
       </aside>
 
@@ -56,7 +56,7 @@ export function AdminLayout() {
             className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
           />
-          <aside className="relative flex flex-col w-72 bg-green-100 border-r border-green-200 min-h-screen z-50 animate-slide-down">
+          <aside className="relative flex flex-col w-72 bg-[#ebebeb] border-r border-[#d6d6d6] min-h-screen z-50 animate-slide-down">
             <SidebarContent
               onSignOut={handleSignOut}
               onClose={() => setSidebarOpen(false)}
@@ -69,10 +69,10 @@ export function AdminLayout() {
       {/* Main content */}
       <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
         {/* Mobile header */}
-        <header className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3 sticky top-0 z-20 shadow-sm">
+        <header className="lg:hidden bg-[#ebebeb] border-b border-[#d6d6d6] px-4 py-3 flex items-center gap-3 sticky top-0 z-20 shadow-sm">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-2 rounded-lg text-gray-600 hover:bg-gray-100"
+            className="p-2 rounded-lg text-[#474747] hover:bg-white/70"
           >
             <Menu size={20} />
           </button>
@@ -92,12 +92,12 @@ function PrinterStatus() {
   const isElectron = typeof window !== 'undefined' && !!window.electronAPI
 
   return (
-    <div className="px-3 pb-2 border-t border-green-200 pt-3">
+    <div className="px-3 pb-2 border-t border-[#d6d6d6] pt-3">
       <div className="flex items-center gap-3 px-3 py-2">
-        <Printer size={18} className={isElectron ? 'text-green-700' : 'text-green-500'} />
+        <Printer size={18} className={isElectron ? 'text-[#3a3a3a]' : 'text-[#6a6a6a]'} />
         <div className="flex-1 min-w-0">
-          <p className="text-xs text-green-800/70 leading-none mb-0.5">App Desktop</p>
-          <p className={`text-xs font-medium ${isElectron ? 'text-green-700' : 'text-green-600'}`}>
+          <p className="text-xs text-[#474747]/70 leading-none mb-0.5">App Desktop</p>
+          <p className={`text-xs font-medium ${isElectron ? 'text-[#3a3a3a]' : 'text-[#6a6a6a]'}`}>
             {isElectron ? 'Online' : 'Offline'}
           </p>
         </div>
@@ -111,7 +111,7 @@ function MobileHeaderLogo() {
   return (
     <div className="flex items-center gap-2">
       <AppIcon size="sm" />
-      <span className="font-semibold text-gray-900 text-sm">{nomeRestaurante} Admin</span>
+      <span className="font-semibold text-[#474747] text-sm">{nomeRestaurante} Admin</span>
     </div>
   )
 }
@@ -130,16 +130,16 @@ function SidebarContent({
   return (
     <>
       {/* Logo */}
-      <div className="flex items-center justify-between px-5 py-5 border-b border-green-200">
+      <div className="flex items-center justify-between px-5 py-5 border-b border-[#d6d6d6]">
         <div className="flex items-center gap-3">
           <AppIcon size="md" />
           <div>
-            <p className="text-green-950 font-semibold text-sm leading-tight">{nomeRestaurante}</p>
-            <p className="text-green-800/75 text-xs">Painel Admin</p>
+            <p className="text-[#474747] font-semibold text-sm leading-tight">{nomeRestaurante}</p>
+            <p className="text-[#474747]/75 text-xs">Painel Admin</p>
           </div>
         </div>
         {showClose && (
-          <button onClick={onClose} className="p-1.5 text-green-700 hover:text-green-950">
+          <button onClick={onClose} className="p-1.5 text-[#5f5f5f] hover:text-[#2f2f2f]">
             <X size={18} />
           </button>
         )}
@@ -156,8 +156,8 @@ function SidebarContent({
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 isActive
-                  ? 'bg-brand-500 text-white shadow-sm'
-                  : 'text-green-900 hover:text-green-950 hover:bg-white/70'
+                  ? 'bg-[#3a3a3a] text-white shadow-sm'
+                  : 'text-[#474747] hover:text-[#2f2f2f] hover:bg-white/70'
               }`
             }
           >
@@ -176,10 +176,10 @@ function SidebarContent({
       <PrinterStatus />
 
       {/* Sign out */}
-      <div className="px-3 py-4 border-t border-green-200">
+      <div className="px-3 py-4 border-t border-[#d6d6d6]">
         <button
           onClick={onSignOut}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-green-900 hover:text-green-950 hover:bg-white/70 transition-all"
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-[#474747] hover:text-[#2f2f2f] hover:bg-white/70 transition-all"
         >
           <LogOut size={18} />
           Sair

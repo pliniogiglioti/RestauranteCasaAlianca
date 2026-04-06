@@ -43,7 +43,7 @@ export function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-[#ebebeb] flex">
+    <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar Desktop */}
       <aside className="hidden lg:flex flex-col w-64 bg-[#ebebeb] border-r border-[#d6d6d6] min-h-screen fixed left-0 top-0 z-30">
         <SidebarContent onSignOut={handleSignOut} onClose={() => setSidebarOpen(false)} />
@@ -69,7 +69,7 @@ export function AdminLayout() {
       {/* Main content */}
       <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
         {/* Mobile header */}
-        <header className="lg:hidden bg-[#ebebeb] border-b border-[#d6d6d6] px-4 py-3 flex items-center gap-3 sticky top-0 z-20 shadow-sm">
+        <header className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3 sticky top-0 z-20 shadow-sm">
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-2 rounded-lg text-[#474747] hover:bg-white/70"

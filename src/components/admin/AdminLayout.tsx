@@ -156,8 +156,8 @@ function SidebarContent({
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 isActive
-                  ? 'bg-[#3a3a3a] text-white shadow-sm'
-                  : 'text-[#474747] hover:text-[#2f2f2f] hover:bg-[#ebebeb]'
+                  ? 'bg-[#113917] text-white shadow-sm'
+                  : 'text-[#474747] hover:text-[#113917] hover:bg-[#e8f0ea]'
               }`
             }
           >
@@ -179,7 +179,7 @@ function SidebarContent({
       <div className="px-3 py-4 border-t border-[#d6d6d6]">
         <button
           onClick={onSignOut}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-[#474747] hover:text-[#2f2f2f] hover:bg-[#ebebeb] transition-all"
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-[#474747] hover:text-[#113917] hover:bg-[#e8f0ea] transition-all"
         >
           <LogOut size={18} />
           Sair

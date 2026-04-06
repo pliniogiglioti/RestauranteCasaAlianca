@@ -101,3 +101,18 @@ export async function atualizarStatusPedido(id: string, status: StatusPedido): P
   if (error) throw error
   return data as Pedido
 }
+
+export async function atualizarComandaPedido(id: string, comanda: string | null): Promise<Pedido> {
+  const valor = comanda?.trim() ? comanda.trim() : null
+
+  const { data, error } = await supabase
+    .from('pedidos')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .update({ comanda_externa: valor } as any)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as Pedido
+}

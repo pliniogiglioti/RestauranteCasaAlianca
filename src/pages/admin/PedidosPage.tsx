@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import {
   RefreshCw, Eye, Clock, CheckCircle2, ChefHat, Utensils,
-  AlertTriangle, Printer, FileText, ChevronDown,
+  AlertTriangle, Printer, FileText, ChevronDown, ScanLine,
 } from 'lucide-react'
-import { getPedidos, atualizarStatusPedido } from '@/services/pedidos'
+import { getPedidos, atualizarStatusPedido, atualizarComandaPedido } from '@/services/pedidos'
 import { PageHeader } from '@/components/admin/PageHeader'
 import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
 import { StatusBadge } from '@/components/ui/Badge'
 import { SectionLoading } from '@/components/ui/LoadingSpinner'
@@ -179,6 +180,21 @@ export function PedidosPage() {
     }
   }
 
+  async function handleComandaSave(pedidoId: string, comanda: string) {
+    try {
+      const pedidoAtualizado = await atualizarComandaPedido(pedidoId, comanda)
+      setPedidos(prev => prev.map(p => (
+        p.id === pedidoId ? { ...p, comanda_externa: pedidoAtualizado.comanda_externa } : p
+      )))
+      if (detailPedido?.id === pedidoId) {
+        setDetailPedido(prev => prev ? { ...prev, comanda_externa: pedidoAtualizado.comanda_externa } : prev)
+      }
+      toast.success(pedidoAtualizado.comanda_externa ? 'Comanda vinculada!' : 'Comanda removida!')
+    } catch {
+      toast.error('Erro ao salvar comanda')
+    }
+  }
+
   const numeroPedido = useMemo(() => {
     const sorted = [...pedidos].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
     const map = new Map<string, number>()
@@ -260,6 +276,7 @@ export function PedidosPage() {
                       numero={numeroPedido.get(pedido.id) ?? 0}
                       onDetail={() => setDetailPedido(pedido)}
                       onStatusChange={handleStatusChange}
+                      onComandaSave={handleComandaSave}
                       onPrint={isElectron ? handlePrint : undefined}
                     />
                   ))}
@@ -301,7 +318,7 @@ export function PedidosPage() {
         <div className="space-y-3">
           {pedidosFiltrados.slice().sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).map(pedido => (
             <div key={pedido.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-4 px-4 py-4">
+              <div className="flex flex-col gap-4 px-4 py-4 xl:flex-row xl:items-center">
                 <div className="w-12 h-12 rounded-xl bg-brand-50 border border-brand-100 flex flex-col items-center justify-center shrink-0">
                   <span className="text-xs text-brand-500 font-medium leading-none">Mesa</span>
                   <span className="text-brand-700 font-black text-lg leading-tight">{pedido.mesa?.numero ?? '?'}</span>
@@ -319,6 +336,13 @@ export function PedidosPage() {
                 </div>
                 <div className="text-right shrink-0">
                   <p className="font-bold text-gray-900">{formatCurrency(pedido.valor_total)}</p>
+                </div>
+                <div className="w-full xl:w-80 shrink-0">
+                  <ComandaPedidoField
+                    pedidoId={pedido.id}
+                    comandaAtual={pedido.comanda_externa}
+                    onSave={handleComandaSave}
+                  />
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <button onClick={() => setDetailPedido(pedido)} className="p-2 rounded-xl text-gray-400 hover:text-brand-600 hover:bg-brand-50 transition-colors border border-gray-200"><Eye size={15} /></button>
@@ -345,6 +369,12 @@ export function PedidosPage() {
               <div className="bg-gray-50 rounded-xl p-3"><p className="text-xs text-gray-500 mb-0.5">Data/Hora</p><p className="font-semibold text-gray-900 text-sm">{new Date(detailPedido.created_at).toLocaleString('pt-BR')}</p></div>
               <div className="bg-gray-50 rounded-xl p-3"><p className="text-xs text-gray-500 mb-0.5">Total</p><p className="font-bold text-brand-600">{formatCurrency(detailPedido.valor_total)}</p></div>
             </div>
+            <ComandaPedidoField
+              pedidoId={detailPedido.id}
+              comandaAtual={detailPedido.comanda_externa}
+              onSave={handleComandaSave}
+              compact={false}
+            />
             <div>
               <h3 className="font-semibold text-gray-900 text-sm mb-2">Itens</h3>
               <div className="space-y-2">
@@ -393,6 +423,7 @@ export function PedidosPage() {
           onClose={() => setMesaDetalhe(null)}
           onDetail={setDetailPedido}
           onStatusChange={handleStatusChange}
+          onComandaSave={handleComandaSave}
           onPrint={isElectron ? handlePrint : undefined}
         />
       )}
@@ -415,7 +446,7 @@ export function PedidosPage() {
 // Modal: histórico da mesa com filtro de dia
 // ---------------------------------------------------------------------------
 function MesaDetalheModal({
-  group, pedidos, numeroPedido, onClose, onDetail, onStatusChange, onPrint,
+  group, pedidos, numeroPedido, onClose, onDetail, onStatusChange, onComandaSave, onPrint,
 }: {
   group: MesaGroup
   pedidos: PedidoCompleto[]
@@ -423,6 +454,7 @@ function MesaDetalheModal({
   onClose: () => void
   onDetail: (p: PedidoCompleto) => void
   onStatusChange: (id: string, status: StatusPedido) => void
+  onComandaSave: (id: string, comanda: string) => void
   onPrint?: (id: string) => void
 }) {
   const [data, setData] = useState(todayLocal())
@@ -466,6 +498,7 @@ function MesaDetalheModal({
                   numero={numeroPedido.get(pedido.id) ?? 0}
                   onDetail={() => { onClose(); onDetail(pedido) }}
                   onStatusChange={onStatusChange}
+                  onComandaSave={onComandaSave}
                   onPrint={onPrint}
                 />
               </div>
@@ -583,16 +616,17 @@ function RelatorioModal({
 // PedidoRow
 // ---------------------------------------------------------------------------
 function PedidoRow({
-  pedido, numero, onDetail, onStatusChange, onPrint,
+  pedido, numero, onDetail, onStatusChange, onComandaSave, onPrint,
 }: {
   pedido: PedidoCompleto
   numero: number
   onDetail: () => void
   onStatusChange: (id: string, status: StatusPedido) => void
+  onComandaSave: (id: string, comanda: string) => void
   onPrint?: (id: string) => void
 }) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-semibold text-gray-900 text-sm">Pedido #{numero}</span>
@@ -602,6 +636,13 @@ function PedidoRow({
           {pedido.itens?.length ?? 0} iten{(pedido.itens?.length ?? 0) !== 1 ? 's' : ''} · {formatCurrency(pedido.valor_total)}
           <span className="ml-2">{new Date(pedido.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
         </p>
+      </div>
+      <div className="w-full sm:w-72 shrink-0">
+        <ComandaPedidoField
+          pedidoId={pedido.id}
+          comandaAtual={pedido.comanda_externa}
+          onSave={onComandaSave}
+        />
       </div>
       <div className="flex items-center gap-1.5 shrink-0">
         <button onClick={onDetail} className="p-1.5 rounded-lg text-gray-400 hover:text-brand-600 hover:bg-brand-50 transition-colors border border-gray-200" title="Ver detalhes">
@@ -617,5 +658,55 @@ function PedidoRow({
         </select>
       </div>
     </div>
+  )
+}
+
+function ComandaPedidoField({
+  pedidoId, comandaAtual, onSave, compact = true,
+}: {
+  pedidoId: string
+  comandaAtual: string | null
+  onSave: (id: string, comanda: string) => void
+  compact?: boolean
+}) {
+  const [comanda, setComanda] = useState(comandaAtual ?? '')
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    setComanda(comandaAtual ?? '')
+  }, [comandaAtual])
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    if (saving) return
+    setSaving(true)
+    try {
+      await onSave(pedidoId, comanda)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className={compact ? 'flex items-center gap-2' : 'space-y-2'}>
+      <Input
+        value={comanda}
+        onChange={e => setComanda(e.target.value)}
+        placeholder="Passe a comanda no leitor"
+        label={compact ? undefined : 'Comanda externa'}
+        hint={compact ? undefined : 'Ao escanear, o leitor envia Enter e o pedido salva automaticamente.'}
+        leftIcon={<ScanLine size={16} />}
+        className={compact ? 'py-2 text-xs' : ''}
+      />
+      <Button
+        type="submit"
+        size="sm"
+        loading={saving}
+        variant="outline"
+        className={compact ? 'shrink-0' : 'w-full justify-center'}
+      >
+        Salvar
+      </Button>
+    </form>
   )
 }

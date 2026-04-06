@@ -106,6 +106,7 @@ CREATE TABLE IF NOT EXISTS public.pedidos (
   status           TEXT          NOT NULL DEFAULT 'recebido' CHECK (
     status IN ('recebido','em_preparo','pronto','entregue','finalizado')
   ),
+  comanda_externa  TEXT,
   observacao_geral TEXT,
   valor_total      NUMERIC(10,2) NOT NULL DEFAULT 0,
   created_at       TIMESTAMPTZ   DEFAULT NOW(),

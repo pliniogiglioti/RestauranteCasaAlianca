@@ -1,4 +1,4 @@
-import { Minus, Plus, Trash2, ShoppingCart, MessageSquare, Zap } from 'lucide-react'
+import { X, Minus, Plus, Trash2, ShoppingCart, MessageSquare, Zap } from 'lucide-react'
 import { formatCurrency } from '@/types'
 import { useCart } from '@/hooks/useCart'
 import { useState, useEffect, useRef } from 'react'
@@ -80,22 +80,26 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100 bg-white shrink-0">
-          <div className="flex items-center gap-2">
-            <ShoppingCart size={18} className="text-brand-500" />
+          <div className="flex items-center gap-2 min-w-0">
+            <ShoppingCart size={18} className="text-brand-500 shrink-0" />
             <h2 className="font-bold text-gray-900">Seu Pedido</h2>
             {totalItens() > 0 && (
-              <span className="bg-brand-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+              <span className="bg-brand-500 text-white text-xs font-bold min-w-5 h-5 px-1 rounded-full flex items-center justify-center">
                 {totalItens()}
               </span>
             )}
-          </div>
-          <div className="flex items-center gap-2">
             {mesaNumero > 0 && (
               <span className="text-xs bg-brand-50 text-brand-700 font-semibold px-2.5 py-1 rounded-full border border-brand-200">
                 Mesa {mesaNumero}
               </span>
             )}
           </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors shrink-0"
+          >
+            <X size={18} />
+          </button>
         </div>
 
         {/* Scrollable body */}

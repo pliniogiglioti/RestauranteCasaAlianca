@@ -133,6 +133,7 @@ export function PedidosPage() {
   const [viewMode, setViewMode] = useState<'mesas' | 'lista'>('mesas')
   const [statusFilter, setStatusFilter] = useState<StatusPedido | 'todos'>('todos')
   const [detailPedido, setDetailPedido] = useState<PedidoCompleto | null>(null)
+  const [comandaPedido, setComandaPedido] = useState<PedidoCompleto | null>(null)
   const [mesaDetalhe, setMesaDetalhe] = useState<MesaGroup | null>(null)
   const [showRelatorio, setShowRelatorio] = useState(false)
   const { nomeRestaurante } = useConfiguracoes()
@@ -275,8 +276,8 @@ export function PedidosPage() {
                       pedido={pedido}
                       numero={numeroPedido.get(pedido.id) ?? 0}
                       onDetail={() => setDetailPedido(pedido)}
+                      onOpenComanda={() => setComandaPedido(pedido)}
                       onStatusChange={handleStatusChange}
-                      onComandaSave={handleComandaSave}
                       onPrint={isElectron ? handlePrint : undefined}
                     />
                   ))}
@@ -337,15 +338,11 @@ export function PedidosPage() {
                 <div className="text-right shrink-0">
                   <p className="font-bold text-gray-900">{formatCurrency(pedido.valor_total)}</p>
                 </div>
-                <div className="w-full xl:w-80 shrink-0">
-                  <ComandaPedidoField
-                    pedidoId={pedido.id}
-                    comandaAtual={pedido.comanda_externa}
-                    onSave={handleComandaSave}
-                  />
-                </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <button onClick={() => setDetailPedido(pedido)} className="p-2 rounded-xl text-gray-400 hover:text-brand-600 hover:bg-brand-50 transition-colors border border-gray-200"><Eye size={15} /></button>
+                  <button onClick={() => setComandaPedido(pedido)} className="px-3 py-2 rounded-xl text-xs font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-colors border border-gray-200">
+                    {pedido.comanda_externa ? `Comanda ${pedido.comanda_externa}` : 'Vincular Comanda'}
+                  </button>
                   {isElectron && (
                     <button onClick={() => handlePrint(pedido.id)} className="p-2 rounded-xl text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors border border-gray-200" title="Reimprimir pedido"><Printer size={15} /></button>
                   )}
@@ -369,12 +366,16 @@ export function PedidosPage() {
               <div className="bg-gray-50 rounded-xl p-3"><p className="text-xs text-gray-500 mb-0.5">Data/Hora</p><p className="font-semibold text-gray-900 text-sm">{new Date(detailPedido.created_at).toLocaleString('pt-BR')}</p></div>
               <div className="bg-gray-50 rounded-xl p-3"><p className="text-xs text-gray-500 mb-0.5">Total</p><p className="font-bold text-brand-600">{formatCurrency(detailPedido.valor_total)}</p></div>
             </div>
-            <ComandaPedidoField
-              pedidoId={detailPedido.id}
-              comandaAtual={detailPedido.comanda_externa}
-              onSave={handleComandaSave}
-              compact={false}
-            />
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 p-3">
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Comanda externa</p>
+                <p className="font-semibold text-gray-900">{detailPedido.comanda_externa || 'Nenhuma comanda vinculada'}</p>
+              </div>
+              <Button variant="outline" onClick={() => setComandaPedido(detailPedido)}>
+                <ScanLine size={15} />
+                {detailPedido.comanda_externa ? 'Alterar Comanda' : 'Vincular Comanda'}
+              </Button>
+            </div>
             <div>
               <h3 className="font-semibold text-gray-900 text-sm mb-2">Itens</h3>
               <div className="space-y-2">
@@ -422,9 +423,18 @@ export function PedidosPage() {
           numeroPedido={numeroPedido}
           onClose={() => setMesaDetalhe(null)}
           onDetail={setDetailPedido}
+          onOpenComanda={setComandaPedido}
           onStatusChange={handleStatusChange}
-          onComandaSave={handleComandaSave}
           onPrint={isElectron ? handlePrint : undefined}
+        />
+      )}
+
+      {comandaPedido && (
+        <ComandaPedidoModal
+          pedido={comandaPedido}
+          numero={numeroPedido.get(comandaPedido.id) ?? 0}
+          onClose={() => setComandaPedido(null)}
+          onSave={handleComandaSave}
         />
       )}
 
@@ -446,15 +456,15 @@ export function PedidosPage() {
 // Modal: histórico da mesa com filtro de dia
 // ---------------------------------------------------------------------------
 function MesaDetalheModal({
-  group, pedidos, numeroPedido, onClose, onDetail, onStatusChange, onComandaSave, onPrint,
+  group, pedidos, numeroPedido, onClose, onDetail, onOpenComanda, onStatusChange, onPrint,
 }: {
   group: MesaGroup
   pedidos: PedidoCompleto[]
   numeroPedido: Map<string, number>
   onClose: () => void
   onDetail: (p: PedidoCompleto) => void
+  onOpenComanda: (p: PedidoCompleto) => void
   onStatusChange: (id: string, status: StatusPedido) => void
-  onComandaSave: (id: string, comanda: string) => void
   onPrint?: (id: string) => void
 }) {
   const [data, setData] = useState(todayLocal())
@@ -497,8 +507,8 @@ function MesaDetalheModal({
                   pedido={pedido}
                   numero={numeroPedido.get(pedido.id) ?? 0}
                   onDetail={() => { onClose(); onDetail(pedido) }}
+                  onOpenComanda={onOpenComanda}
                   onStatusChange={onStatusChange}
-                  onComandaSave={onComandaSave}
                   onPrint={onPrint}
                 />
               </div>
@@ -616,13 +626,13 @@ function RelatorioModal({
 // PedidoRow
 // ---------------------------------------------------------------------------
 function PedidoRow({
-  pedido, numero, onDetail, onStatusChange, onComandaSave, onPrint,
+  pedido, numero, onDetail, onOpenComanda, onStatusChange, onPrint,
 }: {
   pedido: PedidoCompleto
   numero: number
   onDetail: () => void
+  onOpenComanda: (p: PedidoCompleto) => void
   onStatusChange: (id: string, status: StatusPedido) => void
-  onComandaSave: (id: string, comanda: string) => void
   onPrint?: (id: string) => void
 }) {
   return (
@@ -637,14 +647,14 @@ function PedidoRow({
           <span className="ml-2">{new Date(pedido.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
         </p>
       </div>
-      <div className="w-full sm:w-72 shrink-0">
-        <ComandaPedidoField
-          pedidoId={pedido.id}
-          comandaAtual={pedido.comanda_externa}
-          onSave={onComandaSave}
-        />
-      </div>
       <div className="flex items-center gap-1.5 shrink-0">
+        <button
+          onClick={() => onOpenComanda(pedido)}
+          className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-colors border border-gray-200"
+          title="Vincular comanda"
+        >
+          {pedido.comanda_externa ? `Comanda ${pedido.comanda_externa}` : 'Comanda'}
+        </button>
         <button onClick={onDetail} className="p-1.5 rounded-lg text-gray-400 hover:text-brand-600 hover:bg-brand-50 transition-colors border border-gray-200" title="Ver detalhes">
           <Eye size={13} />
         </button>
@@ -661,52 +671,65 @@ function PedidoRow({
   )
 }
 
-function ComandaPedidoField({
-  pedidoId, comandaAtual, onSave, compact = true,
+function ComandaPedidoModal({
+  pedido, numero, onClose, onSave,
 }: {
-  pedidoId: string
-  comandaAtual: string | null
+  pedido: PedidoCompleto
+  numero: number
+  onClose: () => void
   onSave: (id: string, comanda: string) => void
-  compact?: boolean
 }) {
-  const [comanda, setComanda] = useState(comandaAtual ?? '')
+  const [comanda, setComanda] = useState(pedido.comanda_externa ?? '')
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    setComanda(comandaAtual ?? '')
-  }, [comandaAtual])
+    setComanda(pedido.comanda_externa ?? '')
+  }, [pedido])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (saving) return
     setSaving(true)
     try {
-      await onSave(pedidoId, comanda)
+      await onSave(pedido.id, comanda)
+      onClose()
     } finally {
       setSaving(false)
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className={compact ? 'flex items-center gap-2' : 'space-y-2'}>
-      <Input
-        value={comanda}
-        onChange={e => setComanda(e.target.value)}
-        placeholder="Passe a comanda no leitor"
-        label={compact ? undefined : 'Comanda externa'}
-        hint={compact ? undefined : 'Ao escanear, o leitor envia Enter e o pedido salva automaticamente.'}
-        leftIcon={<ScanLine size={16} />}
-        className={compact ? 'py-2 text-xs' : ''}
-      />
-      <Button
-        type="submit"
-        size="sm"
-        loading={saving}
-        variant="outline"
-        className={compact ? 'shrink-0' : 'w-full justify-center'}
-      >
-        Salvar
-      </Button>
-    </form>
+    <Modal
+      isOpen
+      onClose={onClose}
+      title={`Comanda do Pedido #${numero}`}
+      size="sm"
+      footer={
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={onClose} fullWidth>
+            Cancelar
+          </Button>
+          <Button type="submit" form="comanda-pedido-form" loading={saving} fullWidth>
+            Salvar
+          </Button>
+        </div>
+      }
+    >
+      <form id="comanda-pedido-form" onSubmit={handleSubmit} className="space-y-4">
+        <div className="rounded-xl border border-brand-100 bg-brand-50 p-3">
+          <p className="text-sm font-semibold text-gray-900">Mesa {pedido.mesa?.numero ?? 'N/A'}</p>
+          <p className="text-xs text-gray-500 mt-1">Passe a comanda no leitor. Quando ele enviar `Enter`, o modal salva automaticamente.</p>
+        </div>
+        <Input
+          autoFocus
+          value={comanda}
+          onChange={e => setComanda(e.target.value)}
+          placeholder="Passe a comanda no leitor"
+          label="Comanda externa"
+          hint={pedido.comanda_externa ? `Atual: ${pedido.comanda_externa}` : 'Nenhuma comanda vinculada ainda.'}
+          leftIcon={<ScanLine size={16} />}
+        />
+      </form>
+    </Modal>
   )
 }

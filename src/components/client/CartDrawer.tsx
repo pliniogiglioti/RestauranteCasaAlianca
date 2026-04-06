@@ -46,7 +46,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         className={`
           fixed bottom-0 left-0 right-0 w-full max-h-[88vh] bg-white z-50 shadow-2xl
           flex flex-col transition-transform duration-300 ease-out
-          rounded-t-3xl
+          rounded-t-[32px] overflow-hidden
           ${isOpen ? 'translate-y-0' : 'translate-y-full'}
         `}
       >
@@ -79,7 +79,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto">
           {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center px-6">
+            <div className="flex flex-col items-center justify-center h-full text-center px-6 py-10">
               <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
                 <ShoppingCart size={24} className="text-gray-300" />
               </div>

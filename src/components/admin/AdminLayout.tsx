@@ -156,8 +156,8 @@ function SidebarContent({
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 isActive
-                  ? 'bg-green-200 text-green-950 shadow-sm'
-                  : 'text-green-900 hover:text-green-950 hover:bg-white/70'
+                  ? 'bg-brand-600 text-white shadow-sm'
+                  : 'bg-brand-500 text-white hover:bg-brand-600'
               }`
             }
           >

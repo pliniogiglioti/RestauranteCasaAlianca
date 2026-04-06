@@ -50,6 +50,10 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           ${isOpen ? 'translate-y-0' : 'translate-y-full'}
         `}
       >
+        <div className="flex justify-center pt-2 pb-1 bg-white shrink-0">
+          <div className="w-12 h-1.5 rounded-full bg-gray-300" />
+        </div>
+
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100 bg-white shrink-0">
           <div className="flex items-center gap-2">

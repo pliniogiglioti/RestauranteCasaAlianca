@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard,
@@ -17,6 +17,7 @@ import {
 import { signOut } from '@/hooks/useAuth'
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
 import { AppIcon } from '@/components/ui/AppIcon'
+import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 
 const navItems = [
@@ -31,6 +32,7 @@ const navItems = [
 
 export function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [pendingOrdersCount, setPendingOrdersCount] = useState(0)
   const navigate = useNavigate()
 
   async function handleSignOut() {
@@ -42,11 +44,72 @@ export function AdminLayout() {
     }
   }
 
+  useEffect(() => {
+    let mounted = true
+
+    async function refreshPendingOrdersCount() {
+      const { count, error } = await supabase
+        .from('pedidos')
+        .select('id', { count: 'exact', head: true })
+        .neq('status', 'finalizado')
+
+      if (!error && mounted) {
+        setPendingOrdersCount(count ?? 0)
+      }
+    }
+
+    void refreshPendingOrdersCount()
+
+    const channel = supabase
+      .channel('admin-sidebar-pedidos')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'pedidos' },
+        async () => {
+          void refreshPendingOrdersCount()
+          toast.success('Novo pedido recebido!')
+
+          if (typeof window !== 'undefined' && 'Notification' in window) {
+            if (Notification.permission === 'granted') {
+              new Notification('Novo pedido recebido', {
+                body: 'Acesse Pedidos para atender o novo pedido.',
+              })
+            } else if (Notification.permission === 'default') {
+              void Notification.requestPermission().then((permission) => {
+                if (permission === 'granted') {
+                  new Notification('Novo pedido recebido', {
+                    body: 'Acesse Pedidos para atender o novo pedido.',
+                  })
+                }
+              })
+            }
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'pedidos' },
+        () => {
+          void refreshPendingOrdersCount()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      mounted = false
+      void supabase.removeChannel(channel)
+    }
+  }, [])
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar Desktop */}
       <aside className="hidden lg:flex flex-col w-64 bg-[#f7f7f7] border-r border-[#d6d6d6] min-h-screen fixed left-0 top-0 z-30">
-        <SidebarContent onSignOut={handleSignOut} onClose={() => setSidebarOpen(false)} />
+        <SidebarContent
+          onSignOut={handleSignOut}
+          onClose={() => setSidebarOpen(false)}
+          pendingOrdersCount={pendingOrdersCount}
+        />
       </aside>
 
       {/* Sidebar Mobile */}
@@ -60,6 +123,7 @@ export function AdminLayout() {
             <SidebarContent
               onSignOut={handleSignOut}
               onClose={() => setSidebarOpen(false)}
+              pendingOrdersCount={pendingOrdersCount}
               showClose
             />
           </aside>
@@ -119,10 +183,12 @@ function MobileHeaderLogo() {
 function SidebarContent({
   onSignOut,
   onClose,
+  pendingOrdersCount,
   showClose = false,
 }: {
   onSignOut: () => void
   onClose: () => void
+  pendingOrdersCount: number
   showClose?: boolean
 }) {
   const { nomeRestaurante } = useConfiguracoes()
@@ -165,6 +231,15 @@ function SidebarContent({
               <>
                 <item.icon size={18} />
                 <span className="flex-1">{item.label}</span>
+                {item.to === '/admin/pedidos' && pendingOrdersCount > 0 && (
+                  <span
+                    className={`min-w-5 h-5 px-1 rounded-full text-[11px] font-bold flex items-center justify-center ${
+                      isActive ? 'bg-white/20 text-white' : 'bg-[#113917] text-white'
+                    }`}
+                  >
+                    {pendingOrdersCount > 99 ? '99+' : pendingOrdersCount}
+                  </span>
+                )}
                 {isActive && <ChevronRight size={14} />}
               </>
             )}

@@ -18,7 +18,7 @@ export const useConfiguracoes = create<ConfigStore>()(
   persist(
     (set) => ({
       id: null,
-      nomeRestaurante: 'Casa Aliança',
+  nomeRestaurante: 'Casa Alinça',
       slogan: 'Sabores que aquecem o coração',
       iconeApp: '🍽️',
       iconeUrl: '',
@@ -31,7 +31,7 @@ export const useConfiguracoes = create<ConfigStore>()(
           if (!data) return
           set({
             id: data.id,
-            nomeRestaurante: data.nome_restaurante || 'Casa Aliança',
+      nomeRestaurante: data.nome_restaurante || 'Casa Alinça',
             slogan: data.slogan || 'Sabores que aquecem o coração',
             iconeApp: data.icone_app || '🍽️',
             iconeUrl: data.logo_url || '',

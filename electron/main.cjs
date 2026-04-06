@@ -115,7 +115,7 @@ async function loadTrayIcon() {
 // ---------------------------------------------------------------------------
 function createTray(icon) {
   tray = new Tray(icon)
-  tray.setToolTip('Casa Aliança – Restaurante')
+  tray.setToolTip('Casa Alinça – Restaurante')
 
   const buildMenu = () =>
     Menu.buildFromTemplate([
@@ -216,7 +216,7 @@ function createMainWindow() {
     height: 800,
     minWidth: 900,
     minHeight: 600,
-    title: 'Casa Aliança – Restaurante',
+    title: 'Casa Alinça – Restaurante',
     icon: appIcon || undefined,
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
@@ -304,7 +304,7 @@ function generateReceiptHTML(pedido, numeroPedido) {
 </head>
 <body>
   <div class="header">
-    <h1>CASA ALIANÇA</h1>
+        <h1>CASA ALINÇA</h1>
     <p>Restaurante</p>
   </div>
   <div class="divider"></div>

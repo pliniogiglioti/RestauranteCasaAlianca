@@ -69,17 +69,13 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           ${isOpen ? 'translate-y-0' : 'translate-y-full'}
         `}
       >
+        {/* Header */}
         <div
-          className="flex justify-center pt-3 pb-2 bg-white shrink-0 touch-pan-y"
+          className="flex items-center justify-between px-4 py-4 border-b border-gray-100 bg-white shrink-0"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          <div className="w-12 h-1.5 rounded-full bg-gray-300" />
-        </div>
-
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100 bg-white shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             <ShoppingCart size={18} className="text-brand-500 shrink-0" />
             <h2 className="font-bold text-gray-900">Seu Pedido</h2>
@@ -96,7 +92,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors shrink-0"
+            className="w-10 h-10 rounded-xl bg-brand-50 border border-brand-200 text-brand-700 hover:bg-brand-100 hover:text-brand-800 transition-colors shrink-0 flex items-center justify-center"
           >
             <X size={18} />
           </button>

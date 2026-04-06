@@ -234,7 +234,7 @@ function UpsellBebidas() {
   if (bebidasParaMostrar.length === 0) return null
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50">
+              <div className="rounded-2xl overflow-hidden border border-amber-200 bg-gradient-to-r from-red-50 to-orange-50">
       {/* Header */}
       <div className="flex items-center gap-2 px-3 pt-3 pb-2">
         <div className="w-5 h-5 rounded-full bg-brand-500 flex items-center justify-center">

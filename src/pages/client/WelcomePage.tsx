@@ -37,7 +37,7 @@ export function WelcomePage() {
 
   if (error || !mesa) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-brand-50 to-orange-50 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-6">
         <div className="text-center max-w-xs">
           <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
             <QrCode size={28} className="text-red-400" />
@@ -92,7 +92,7 @@ export function WelcomePage() {
         {/* CTA Button */}
         <button
           onClick={() => navigate(`/mesa/${slug}/cardapio`)}
-          className="w-full bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 active:scale-[0.98] text-white font-bold py-4 px-8 rounded-2xl shadow-xl shadow-brand-500/30 transition-all duration-200 flex items-center justify-center gap-3 text-lg"
+              className="w-full bg-gradient-to-r from-red-500 to-brand-600 hover:from-red-600 hover:to-brand-700 active:scale-[0.98] text-white font-bold py-4 px-8 rounded-2xl shadow-xl shadow-brand-500/30 transition-all duration-200 flex items-center justify-center gap-3 text-lg"
         >
           Ver Cardápio
           <ArrowRight size={20} />

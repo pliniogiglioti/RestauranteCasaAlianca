@@ -45,7 +45,7 @@ function DishOfDayCard({
 
   return (
     <div
-      className="relative bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl overflow-hidden border border-amber-200 shadow-sm cursor-pointer"
+      className="relative bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl overflow-hidden border border-amber-200 shadow-sm cursor-pointer"
       onClick={() => onDetails?.(prato)}
     >
       {/* Badge */}
@@ -67,7 +67,7 @@ function DishOfDayCard({
               loading="lazy"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-amber-200 to-orange-200 flex items-center justify-center">
+                <div className="w-full h-full bg-gradient-to-br from-red-200 to-orange-200 flex items-center justify-center">
               <span className="text-5xl">⭐</span>
             </div>
           )}

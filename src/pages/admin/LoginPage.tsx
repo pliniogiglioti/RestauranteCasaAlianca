@@ -41,7 +41,7 @@ export function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <AppIcon size="lg" className="mx-auto mb-4 shadow-xl shadow-green-300/60" />
+          <AppIcon size="lg" className="mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-green-950 font-display">{nomeRestaurante}</h1>
           <p className="text-green-800/80 text-sm mt-1">Painel Administrativo</p>
         </div>

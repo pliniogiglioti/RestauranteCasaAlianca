@@ -24,8 +24,12 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     totalItens,
   } = useCart()
   const [editingObs, setEditingObs] = useState<string | null>(null)
+  const [dragOffset, setDragOffset] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
   const touchStartY = useRef<number | null>(null)
   const touchCurrentY = useRef<number | null>(null)
+  const canSwipeClose = useRef(false)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
 
   function handleFinalizar() {
@@ -36,19 +40,42 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   function handleTouchStart(e: React.TouchEvent<HTMLDivElement>) {
     touchStartY.current = e.touches[0]?.clientY ?? null
     touchCurrentY.current = touchStartY.current
+    canSwipeClose.current = (scrollContainerRef.current?.scrollTop ?? 0) <= 0
+    setIsDragging(canSwipeClose.current)
   }
 
   function handleTouchMove(e: React.TouchEvent<HTMLDivElement>) {
     touchCurrentY.current = e.touches[0]?.clientY ?? null
+    if (!canSwipeClose.current || touchStartY.current === null || touchCurrentY.current === null) return
+
+    const deltaY = touchCurrentY.current - touchStartY.current
+    setDragOffset(deltaY > 0 ? deltaY : 0)
   }
 
   function handleTouchEnd() {
-    if (touchStartY.current === null || touchCurrentY.current === null) return
-    const deltaY = touchCurrentY.current - touchStartY.current
-    if (deltaY > 70) onClose()
+    if (touchStartY.current !== null && touchCurrentY.current !== null && canSwipeClose.current) {
+      const deltaY = touchCurrentY.current - touchStartY.current
+      if (deltaY > 90) {
+        setDragOffset(0)
+        setIsDragging(false)
+        onClose()
+      } else {
+        setDragOffset(0)
+      }
+    }
+
     touchStartY.current = null
     touchCurrentY.current = null
+    canSwipeClose.current = false
+    setIsDragging(false)
   }
+
+  useEffect(() => {
+    if (!isOpen) {
+      setDragOffset(0)
+      setIsDragging(false)
+    }
+  }, [isOpen])
 
   return (
     <>
@@ -68,13 +95,15 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           rounded-t-[32px] overflow-hidden
           ${isOpen ? 'translate-y-0' : 'translate-y-full'}
         `}
+        style={{
+          transform: isOpen ? `translateY(${dragOffset}px)` : undefined,
+          transitionDuration: isDragging ? '0ms' : undefined,
+        }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
-        <div
-          className="flex justify-center pt-3 pb-2 bg-white shrink-0 touch-pan-y"
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
+        <div className="flex justify-center pt-3 pb-2 bg-white shrink-0 touch-pan-y">
           <div className="w-12 h-1.5 rounded-full bg-gray-300" />
         </div>
 
@@ -99,7 +128,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         </div>
 
         {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-6 py-10">
               <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">

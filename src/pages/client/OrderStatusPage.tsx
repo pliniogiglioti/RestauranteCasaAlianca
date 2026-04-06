@@ -181,7 +181,7 @@ export function OrderStatusPage() {
   const indexAtual = status ? ORDEM_STATUS.indexOf(status) : -1
 
   return (
-    <div className="min-h-screen bg-gray-50 animate-fade-in">
+    <div className="min-h-screen bg-gray-50 animate-fade-in overflow-x-hidden">
       {/* Header */}
       <header className="bg-white border-b border-gray-100 sticky top-0 z-10 shadow-sm">
         <div className="flex items-center gap-3 px-4 py-4">
@@ -205,7 +205,7 @@ export function OrderStatusPage() {
         </div>
       </header>
 
-      <div className="max-w-lg mx-auto p-4 space-y-4 animate-slide-up">
+      <div className="max-w-lg mx-auto p-4 space-y-4 animate-slide-in-right">
         {loading ? (
           <div className="flex justify-center py-16">
             <div className="w-10 h-10 border-4 border-brand-200 border-t-brand-500 rounded-full animate-spin" />
@@ -214,7 +214,7 @@ export function OrderStatusPage() {
           <>
             {/* Status principal */}
             {config && (
-              <div className={`rounded-3xl border-2 ${config.border} ${config.bg} p-6 text-center animate-slide-up`}>
+              <div className={`rounded-3xl border-2 ${config.border} ${config.bg} p-6 text-center animate-slide-in-right`}>
                 <div
                   className={`
                     w-20 h-20 rounded-full ${config.bg} border-2 ${config.border}
@@ -235,7 +235,7 @@ export function OrderStatusPage() {
             )}
 
             {/* Timeline de progresso */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 animate-slide-up">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 animate-slide-in-right">
               <h3 className="font-semibold text-gray-900 text-sm mb-4">Progresso do pedido</h3>
 
               <div className="relative">
@@ -294,7 +294,7 @@ export function OrderStatusPage() {
             </div>
 
             {/* Info do pedido */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 animate-slide-up">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 animate-slide-in-right">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-500">Pedido</span>
                 <span className="font-mono font-bold text-gray-900 text-xs">
@@ -317,7 +317,7 @@ export function OrderStatusPage() {
             {status !== 'finalizado' && (
               <button
                 onClick={() => navigate(`/mesa/${slug}/cardapio`)}
-                className="w-full py-4 rounded-2xl border-2 border-brand-200 text-brand-600 font-bold hover:bg-brand-50 transition-all animate-slide-up"
+                className="w-full py-4 rounded-2xl border-2 border-brand-200 text-brand-600 font-bold hover:bg-brand-50 transition-all animate-slide-in-right"
               >
                 Adicionar mais itens
               </button>
@@ -329,7 +329,7 @@ export function OrderStatusPage() {
                   limparPedido()
                   navigate(`/mesa/${slug}/cardapio`)
                 }}
-                className="w-full py-4 rounded-2xl bg-brand-500 text-white font-bold hover:bg-brand-600 transition-all shadow-lg shadow-brand-200 animate-slide-up"
+                className="w-full py-4 rounded-2xl bg-brand-500 text-white font-bold hover:bg-brand-600 transition-all shadow-lg shadow-brand-200 animate-slide-in-right"
               >
                 Fazer novo pedido
               </button>

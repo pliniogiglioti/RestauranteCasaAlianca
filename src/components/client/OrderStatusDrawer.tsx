@@ -7,7 +7,6 @@ import {
   Utensils,
   PartyPopper,
   RefreshCw,
-  UtensilsCrossed,
   MapPin,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'

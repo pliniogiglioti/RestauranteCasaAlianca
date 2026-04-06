@@ -85,7 +85,7 @@ const ORDEM_STATUS: StatusPedido[] = [
 
 export function OrderStatusPage() {
   const navigate = useNavigate()
-  const { pedido, limparPedido, atualizarStatus } = usePedidoAtivo()
+  const { pedido, atualizarStatus } = usePedidoAtivo()
   const { mesaSlug } = useCart()
   // Use stored status as initial value — always shows something even if SELECT policy isn't applied
   const [status, setStatus] = useState<StatusPedido | null>(pedido?.status ?? null)
@@ -138,11 +138,6 @@ export function OrderStatusPage() {
           setStatus(novo.status)
           atualizarStatus(novo.status)
           setLastUpdate(new Date())
-
-          // Limpa o pedido ativo ao finalizar
-          if (novo.status === 'finalizado') {
-            setTimeout(limparPedido, 5000)
-          }
         }
       )
       .subscribe()
@@ -150,7 +145,7 @@ export function OrderStatusPage() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [pedidoId, limparPedido, atualizarStatus])
+  }, [pedidoId, atualizarStatus])
 
   if (!pedidoId || !pedido) {
     return (

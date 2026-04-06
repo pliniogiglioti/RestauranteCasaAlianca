@@ -15,6 +15,7 @@ import { useConfiguracoes } from '@/hooks/useConfiguracoes'
 import { AppIcon } from '@/components/ui/AppIcon'
 import { SectionLoading } from '@/components/ui/LoadingSpinner'
 import type { PratoComCategoria } from '@/types'
+import { useEffect } from 'react'
 
 interface CategoriaGrupo {
   id: string
@@ -29,13 +30,19 @@ export function MenuPage() {
   const navigate = useNavigate()
   const { pratos, pratosDoDia, categorias, banners, loading, error } = useCardapio()
   const { mesaNumero, totalItens } = useCart()
-  const { pedido } = usePedidoAtivo()
+  const { pedido, limparPedido } = usePedidoAtivo()
   const { nomeRestaurante } = useConfiguracoes()
 
   const [search, setSearch] = useState('')
   const [selectedCategoria, setSelectedCategoria] = useState<string | null>(null)
   const [cartOpen, setCartOpen] = useState(false)
   const [selectedPrato, setSelectedPrato] = useState<PratoComCategoria | null>(null)
+
+  useEffect(() => {
+    if (pedido?.status === 'finalizado') {
+      limparPedido()
+    }
+  }, [pedido?.status, limparPedido])
 
   const pratosFilter = useMemo(() => {
     return pratos.filter((p) => {

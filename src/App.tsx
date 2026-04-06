@@ -35,9 +35,9 @@ function ConfigProvider({ children }: { children: React.ReactNode }) {
 }
 
 // Escuta o Realtime do pedido ativo em qualquer página.
-// Quando o admin finaliza, limpa o pedido do cliente automaticamente.
+// Mantém o status do pedido sincronizado no cliente.
 function PedidoWatcher() {
-  const { pedido, limparPedido, atualizarStatus } = usePedidoAtivo()
+  const { pedido, atualizarStatus } = usePedidoAtivo()
   const pedidoId = pedido?.pedidoId
 
   useEffect(() => {
@@ -51,15 +51,12 @@ function PedidoWatcher() {
         (payload) => {
           const novo = payload.new as { status: string }
           atualizarStatus(novo.status as import('@/types').StatusPedido)
-          if (novo.status === 'finalizado') {
-            setTimeout(limparPedido, 4000)
-          }
         }
       )
       .subscribe()
 
     return () => { void supabase.removeChannel(channel) }
-  }, [pedidoId, limparPedido, atualizarStatus])
+  }, [pedidoId, atualizarStatus])
 
   return null
 }

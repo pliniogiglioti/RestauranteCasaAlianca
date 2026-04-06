@@ -4,6 +4,7 @@ import { QrCode, ArrowRight, MapPin } from 'lucide-react'
 import { getMesaBySlug } from '@/services/mesas'
 import { useCart } from '@/hooks/useCart'
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
+import { usePedidoAtivo } from '@/hooks/usePedidoAtivo'
 import { AppIcon } from '@/components/ui/AppIcon'
 import type { Mesa } from '@/types'
 import { PageLoading } from '@/components/ui/LoadingSpinner'
@@ -12,6 +13,7 @@ export function WelcomePage() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
   const { setMesa } = useCart()
+  const { pedido, limparPedido } = usePedidoAtivo()
   const { nomeRestaurante, slogan } = useConfiguracoes()
   const [mesa, setMesaData] = useState<Mesa | null>(null)
   const [loading, setLoading] = useState(true)
@@ -26,12 +28,15 @@ export function WelcomePage() {
 
     getMesaBySlug(slug)
       .then((data) => {
+        if (pedido?.status === 'finalizado') {
+          limparPedido()
+        }
         setMesaData(data)
         setMesa(data.id, data.numero, data.slug)
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false))
-  }, [slug, setMesa])
+  }, [slug, setMesa, pedido?.status, limparPedido])
 
   if (loading) return <PageLoading />
 

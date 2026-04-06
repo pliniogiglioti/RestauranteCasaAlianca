@@ -287,6 +287,11 @@ CREATE POLICY "Admin leitura de itens de pedido"
   TO authenticated
   USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid()));
 
+CREATE POLICY "Anon pode ver itens de pedidos"
+  ON public.pedido_itens FOR SELECT
+  TO anon
+  USING (true);
+
 CREATE POLICY "Admin acesso ao próprio profile"
   ON public.profiles FOR ALL
   TO authenticated
@@ -311,6 +316,7 @@ GRANT SELECT ON public.categorias TO anon;
 GRANT SELECT ON public.pratos TO anon;
 GRANT SELECT ON public.banners TO anon;
 GRANT SELECT ON public.configuracoes TO anon;
+GRANT SELECT ON public.pedido_itens TO anon;
 
 -- Clientes podem criar pedidos (sem login)
 GRANT INSERT ON public.pedidos TO anon;

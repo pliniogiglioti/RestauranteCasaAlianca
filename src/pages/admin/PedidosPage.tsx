@@ -255,14 +255,35 @@ export function PedidosPage() {
             const todos = [group.pedidoAtual, ...group.pedidosAnteriores]
             const ultimos3 = todos.slice(0, 3)
             const temMais = todos.length > 3
+            const mesaAtiva = group.pedidoAtual.mesa?.ativo !== false
+            const mesaCardClass = !mesaAtiva
+              ? 'border-red-400 shadow-red-50'
+              : group.temAberto
+                ? 'border-orange-400 shadow-orange-50'
+                : 'border-green-400 shadow-green-50'
+            const mesaHeaderClass = !mesaAtiva
+              ? 'bg-red-50'
+              : group.temAberto
+                ? 'bg-orange-50'
+                : 'bg-green-50'
+            const mesaStatusClass = !mesaAtiva
+              ? 'text-red-600'
+              : group.temAberto
+                ? 'text-orange-600'
+                : 'text-green-600'
+            const mesaStatusLabel = !mesaAtiva
+              ? '● Desativada'
+              : group.temAberto
+                ? '● Ocupada'
+                : '✓ Livre'
             return (
-              <div key={group.mesaId ?? 'sem-mesa'} className={`bg-white rounded-2xl shadow-sm border-2 transition-all ${group.temAberto ? 'border-brand-400 shadow-brand-100' : 'border-green-400 shadow-green-50'}`}>
+              <div key={group.mesaId ?? 'sem-mesa'} className={`bg-white rounded-2xl shadow-sm border-2 transition-all ${mesaCardClass}`}>
                 {/* Cabeçalho */}
-                <div className={`flex items-center gap-3 px-4 py-3 rounded-t-xl ${group.temAberto ? 'bg-brand-50' : 'bg-green-50'}`}>
+                <div className={`flex items-center gap-3 px-4 py-3 rounded-t-xl ${mesaHeaderClass}`}>
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-gray-900 text-sm">Mesa {group.mesaNumero || '?'}</p>
-                    <p className={`text-xs font-medium ${group.temAberto ? 'text-brand-600' : 'text-green-600'}`}>
-                      {group.temAberto ? '● Em atendimento' : '✓ Livre'}
+                    <p className={`text-xs font-medium ${mesaStatusClass}`}>
+                      {mesaStatusLabel}
                     </p>
                   </div>
                   <span className="text-xs text-gray-400 font-medium">{todos.length} pedido{todos.length !== 1 ? 's' : ''}</span>
@@ -320,9 +341,27 @@ export function PedidosPage() {
           {pedidosFiltrados.slice().sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).map(pedido => (
             <div key={pedido.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
               <div className="flex flex-col gap-4 px-4 py-4 xl:flex-row xl:items-center">
-                <div className="w-12 h-12 rounded-xl bg-brand-50 border border-brand-100 flex flex-col items-center justify-center shrink-0">
-                  <span className="text-xs text-brand-500 font-medium leading-none">Mesa</span>
-                  <span className="text-brand-700 font-black text-lg leading-tight">{pedido.mesa?.numero ?? '?'}</span>
+                <div className={`w-12 h-12 rounded-xl border flex flex-col items-center justify-center shrink-0 ${
+                  pedido.mesa?.ativo === false
+                    ? 'bg-red-50 border-red-100'
+                    : STATUS_ABERTO.includes(pedido.status)
+                      ? 'bg-orange-50 border-orange-100'
+                      : 'bg-green-50 border-green-100'
+                }`}>
+                  <span className={`text-xs font-medium leading-none ${
+                    pedido.mesa?.ativo === false
+                      ? 'text-red-500'
+                      : STATUS_ABERTO.includes(pedido.status)
+                        ? 'text-orange-500'
+                        : 'text-green-500'
+                  }`}>Mesa</span>
+                  <span className={`font-black text-lg leading-tight ${
+                    pedido.mesa?.ativo === false
+                      ? 'text-red-700'
+                      : STATUS_ABERTO.includes(pedido.status)
+                        ? 'text-orange-700'
+                        : 'text-green-700'
+                  }`}>{pedido.mesa?.numero ?? '?'}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">

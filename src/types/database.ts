@@ -66,6 +66,7 @@ export interface PedidoRow {
   id: string
   mesa_id: string | null
   status: StatusPedido
+  comanda_externa: string | null
   observacao_geral: string | null
   valor_total: number
   created_at: string
@@ -146,6 +147,7 @@ export interface BannerInsert {
 export interface PedidoInsert {
   mesa_id?: string | null
   status?: StatusPedido
+  comanda_externa?: string | null
   observacao_geral?: string | null
   valor_total: number
 }

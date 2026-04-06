@@ -95,7 +95,7 @@ export function DashboardPage() {
           icon={<UtensilsCrossed size={20} />}
           label="Pratos Ativos"
           value={String(stats?.pratos ?? 0)}
-          color="orange"
+          color="red"
           href="/admin/pratos"
         />
         <StatCard
@@ -189,7 +189,7 @@ function StatCard({
 }) {
   const colorMap: Record<string, string> = {
     blue: 'bg-blue-50 text-blue-600',
-    orange: 'bg-orange-50 text-orange-600',
+    red: 'bg-red-50 text-red-600',
     purple: 'bg-purple-50 text-purple-600',
     green: 'bg-green-50 text-green-600',
     emerald: 'bg-emerald-50 text-emerald-600',

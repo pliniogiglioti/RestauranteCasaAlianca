@@ -45,7 +45,7 @@ export function AdminLayout() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar Desktop */}
-      <aside className="hidden lg:flex flex-col w-64 bg-gradient-to-b from-green-100 via-emerald-50 to-lime-100 border-r border-green-200 min-h-screen fixed left-0 top-0 z-30">
+      <aside className="hidden lg:flex flex-col w-64 bg-green-100 border-r border-green-200 min-h-screen fixed left-0 top-0 z-30">
         <SidebarContent onSignOut={handleSignOut} onClose={() => setSidebarOpen(false)} />
       </aside>
 
@@ -56,7 +56,7 @@ export function AdminLayout() {
             className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
           />
-          <aside className="relative flex flex-col w-72 bg-gradient-to-b from-green-100 via-emerald-50 to-lime-100 border-r border-green-200 min-h-screen z-50 animate-slide-down">
+          <aside className="relative flex flex-col w-72 bg-green-100 border-r border-green-200 min-h-screen z-50 animate-slide-down">
             <SidebarContent
               onSignOut={handleSignOut}
               onClose={() => setSidebarOpen(false)}
@@ -156,7 +156,7 @@ function SidebarContent({
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 isActive
-                  ? 'bg-brand-500 text-white shadow-sm'
+                  ? 'bg-green-200 text-green-950 shadow-sm'
                   : 'text-green-900 hover:text-green-950 hover:bg-white/70'
               }`
             }

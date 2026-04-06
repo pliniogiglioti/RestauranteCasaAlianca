@@ -153,7 +153,7 @@ export function ConfiguracoesPage() {
       </div>
 
       {/* Preview */}
-      <div className="bg-gradient-to-br from-green-100 via-emerald-50 to-lime-100 border border-green-200 rounded-2xl p-6 flex items-center gap-4 shadow-lg shadow-green-100">
+      <div className="bg-green-100 border border-green-200 rounded-2xl p-6 flex items-center gap-4 shadow-lg shadow-green-100">
         <div className="shrink-0 flex items-center justify-center w-16 h-16">
           {exibeImagem ? (
             <img src={iconeUrlVal} alt="ícone" className="w-full h-full object-contain" />

@@ -1,4 +1,4 @@
-import { X, Minus, Plus, Trash2, ShoppingCart, MessageSquare, Zap } from 'lucide-react'
+import { Minus, Plus, Trash2, ShoppingCart, MessageSquare, Zap } from 'lucide-react'
 import { formatCurrency } from '@/types'
 import { useCart } from '@/hooks/useCart'
 import { useState, useEffect, useRef } from 'react'
@@ -24,11 +24,30 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     totalItens,
   } = useCart()
   const [editingObs, setEditingObs] = useState<string | null>(null)
+  const touchStartY = useRef<number | null>(null)
+  const touchCurrentY = useRef<number | null>(null)
   const navigate = useNavigate()
 
   function handleFinalizar() {
     onClose()
     navigate('/pedido/resumo')
+  }
+
+  function handleTouchStart(e: React.TouchEvent<HTMLDivElement>) {
+    touchStartY.current = e.touches[0]?.clientY ?? null
+    touchCurrentY.current = touchStartY.current
+  }
+
+  function handleTouchMove(e: React.TouchEvent<HTMLDivElement>) {
+    touchCurrentY.current = e.touches[0]?.clientY ?? null
+  }
+
+  function handleTouchEnd() {
+    if (touchStartY.current === null || touchCurrentY.current === null) return
+    const deltaY = touchCurrentY.current - touchStartY.current
+    if (deltaY > 70) onClose()
+    touchStartY.current = null
+    touchCurrentY.current = null
   }
 
   return (
@@ -50,7 +69,12 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           ${isOpen ? 'translate-y-0' : 'translate-y-full'}
         `}
       >
-        <div className="flex justify-center pt-2 pb-1 bg-white shrink-0">
+        <div
+          className="flex justify-center pt-3 pb-2 bg-white shrink-0 touch-pan-y"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           <div className="w-12 h-1.5 rounded-full bg-gray-300" />
         </div>
 
@@ -71,12 +95,6 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 Mesa {mesaNumero}
               </span>
             )}
-            <button
-              onClick={onClose}
-              className="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-            >
-              <X size={18} />
-            </button>
           </div>
         </div>
 

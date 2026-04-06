@@ -37,7 +37,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#ebebeb] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#f7f7f7] flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -47,7 +47,7 @@ export function LoginPage() {
         </div>
 
         {/* Form */}
-        <div className="bg-white rounded-3xl p-6 shadow-2xl border border-[#d8d8d8]">
+        <div className="bg-[#f7f7f7] rounded-3xl p-6 shadow-2xl border border-[#d8d8d8]">
           <h2 className="text-lg font-bold text-[#474747] mb-5">Entrar</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">

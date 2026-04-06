@@ -45,7 +45,7 @@ export function AdminLayout() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar Desktop */}
-      <aside className="hidden lg:flex flex-col w-64 bg-[#ebebeb] border-r border-[#d6d6d6] min-h-screen fixed left-0 top-0 z-30">
+      <aside className="hidden lg:flex flex-col w-64 bg-[#f7f7f7] border-r border-[#d6d6d6] min-h-screen fixed left-0 top-0 z-30">
         <SidebarContent onSignOut={handleSignOut} onClose={() => setSidebarOpen(false)} />
       </aside>
 
@@ -56,7 +56,7 @@ export function AdminLayout() {
             className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
           />
-          <aside className="relative flex flex-col w-72 bg-[#ebebeb] border-r border-[#d6d6d6] min-h-screen z-50 animate-slide-down">
+          <aside className="relative flex flex-col w-72 bg-[#f7f7f7] border-r border-[#d6d6d6] min-h-screen z-50 animate-slide-down">
             <SidebarContent
               onSignOut={handleSignOut}
               onClose={() => setSidebarOpen(false)}
@@ -69,10 +69,10 @@ export function AdminLayout() {
       {/* Main content */}
       <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
         {/* Mobile header */}
-        <header className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3 sticky top-0 z-20 shadow-sm">
+        <header className="lg:hidden bg-[#f7f7f7] border-b border-gray-200 px-4 py-3 flex items-center gap-3 sticky top-0 z-20 shadow-sm">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-2 rounded-lg text-[#474747] hover:bg-white/70"
+            className="p-2 rounded-lg text-[#474747] hover:bg-[#ebebeb]"
           >
             <Menu size={20} />
           </button>
@@ -157,7 +157,7 @@ function SidebarContent({
               `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 isActive
                   ? 'bg-[#3a3a3a] text-white shadow-sm'
-                  : 'text-[#474747] hover:text-[#2f2f2f] hover:bg-white/70'
+                  : 'text-[#474747] hover:text-[#2f2f2f] hover:bg-[#ebebeb]'
               }`
             }
           >
@@ -179,7 +179,7 @@ function SidebarContent({
       <div className="px-3 py-4 border-t border-[#d6d6d6]">
         <button
           onClick={onSignOut}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-[#474747] hover:text-[#2f2f2f] hover:bg-white/70 transition-all"
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-[#474747] hover:text-[#2f2f2f] hover:bg-[#ebebeb] transition-all"
         >
           <LogOut size={18} />
           Sair

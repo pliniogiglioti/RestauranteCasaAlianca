@@ -37,13 +37,13 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-100 via-emerald-50 to-lime-100 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <AppIcon size="lg" className="mx-auto mb-4 shadow-xl shadow-brand-500/30" />
-          <h1 className="text-2xl font-bold text-white font-display">{nomeRestaurante}</h1>
-          <p className="text-gray-400 text-sm mt-1">Painel Administrativo</p>
+          <AppIcon size="lg" className="mx-auto mb-4 shadow-xl shadow-green-300/60" />
+          <h1 className="text-2xl font-bold text-green-950 font-display">{nomeRestaurante}</h1>
+          <p className="text-green-800/80 text-sm mt-1">Painel Administrativo</p>
         </div>
 
         {/* Form */}
@@ -118,7 +118,7 @@ export function LoginPage() {
           </form>
         </div>
 
-        <p className="text-center text-gray-500 text-xs mt-6">
+        <p className="text-center text-green-900/70 text-xs mt-6">
           Acesso restrito aos administradores do restaurante
         </p>
       </div>

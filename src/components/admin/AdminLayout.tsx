@@ -45,7 +45,7 @@ export function AdminLayout() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar Desktop */}
-      <aside className="hidden lg:flex flex-col w-64 bg-gray-900 min-h-screen fixed left-0 top-0 z-30">
+      <aside className="hidden lg:flex flex-col w-64 bg-gradient-to-b from-green-100 via-emerald-50 to-lime-100 border-r border-green-200 min-h-screen fixed left-0 top-0 z-30">
         <SidebarContent onSignOut={handleSignOut} onClose={() => setSidebarOpen(false)} />
       </aside>
 
@@ -56,7 +56,7 @@ export function AdminLayout() {
             className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setSidebarOpen(false)}
           />
-          <aside className="relative flex flex-col w-72 bg-gray-900 min-h-screen z-50 animate-slide-down">
+          <aside className="relative flex flex-col w-72 bg-gradient-to-b from-green-100 via-emerald-50 to-lime-100 border-r border-green-200 min-h-screen z-50 animate-slide-down">
             <SidebarContent
               onSignOut={handleSignOut}
               onClose={() => setSidebarOpen(false)}
@@ -92,12 +92,12 @@ function PrinterStatus() {
   const isElectron = typeof window !== 'undefined' && !!window.electronAPI
 
   return (
-    <div className="px-3 pb-2 border-t border-gray-800 pt-3">
+    <div className="px-3 pb-2 border-t border-green-200 pt-3">
       <div className="flex items-center gap-3 px-3 py-2">
-        <Printer size={18} className={isElectron ? 'text-green-400' : 'text-gray-600'} />
+        <Printer size={18} className={isElectron ? 'text-green-700' : 'text-green-500'} />
         <div className="flex-1 min-w-0">
-          <p className="text-xs text-gray-500 leading-none mb-0.5">App Desktop</p>
-          <p className={`text-xs font-medium ${isElectron ? 'text-green-400' : 'text-gray-600'}`}>
+          <p className="text-xs text-green-800/70 leading-none mb-0.5">App Desktop</p>
+          <p className={`text-xs font-medium ${isElectron ? 'text-green-700' : 'text-green-600'}`}>
             {isElectron ? 'Online' : 'Offline'}
           </p>
         </div>
@@ -130,16 +130,16 @@ function SidebarContent({
   return (
     <>
       {/* Logo */}
-      <div className="flex items-center justify-between px-5 py-5 border-b border-gray-800">
+      <div className="flex items-center justify-between px-5 py-5 border-b border-green-200">
         <div className="flex items-center gap-3">
           <AppIcon size="md" />
           <div>
-            <p className="text-white font-semibold text-sm leading-tight">{nomeRestaurante}</p>
-            <p className="text-gray-400 text-xs">Painel Admin</p>
+            <p className="text-green-950 font-semibold text-sm leading-tight">{nomeRestaurante}</p>
+            <p className="text-green-800/75 text-xs">Painel Admin</p>
           </div>
         </div>
         {showClose && (
-          <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-white">
+          <button onClick={onClose} className="p-1.5 text-green-700 hover:text-green-950">
             <X size={18} />
           </button>
         )}
@@ -157,7 +157,7 @@ function SidebarContent({
               `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 isActive
                   ? 'bg-brand-500 text-white shadow-sm'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                  : 'text-green-900 hover:text-green-950 hover:bg-white/70'
               }`
             }
           >
@@ -176,10 +176,10 @@ function SidebarContent({
       <PrinterStatus />
 
       {/* Sign out */}
-      <div className="px-3 py-4 border-t border-gray-800">
+      <div className="px-3 py-4 border-t border-green-200">
         <button
           onClick={onSignOut}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-gray-800 transition-all"
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-green-900 hover:text-green-950 hover:bg-white/70 transition-all"
         >
           <LogOut size={18} />
           Sair

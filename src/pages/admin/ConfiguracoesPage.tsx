@@ -153,7 +153,7 @@ export function ConfiguracoesPage() {
       </div>
 
       {/* Preview */}
-      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 flex items-center gap-4 shadow-lg">
+      <div className="bg-gradient-to-br from-green-100 via-emerald-50 to-lime-100 border border-green-200 rounded-2xl p-6 flex items-center gap-4 shadow-lg shadow-green-100">
         <div className="shrink-0 flex items-center justify-center w-16 h-16">
           {exibeImagem ? (
             <img src={iconeUrlVal} alt="ícone" className="w-full h-full object-contain" />
@@ -162,8 +162,8 @@ export function ConfiguracoesPage() {
           )}
         </div>
         <div>
-          <p className="text-white font-bold text-xl leading-tight">{nome || 'Nome do Restaurante'}</p>
-          <p className="text-gray-400 text-sm mt-0.5">{sloganVal || 'Seu slogan aqui'}</p>
+          <p className="text-green-950 font-bold text-xl leading-tight">{nome || 'Nome do Restaurante'}</p>
+          <p className="text-green-800/80 text-sm mt-0.5">{sloganVal || 'Seu slogan aqui'}</p>
         </div>
       </div>
 

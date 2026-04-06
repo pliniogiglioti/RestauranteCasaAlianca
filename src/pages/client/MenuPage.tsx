@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { ShoppingCart, MapPin, Clock } from 'lucide-react'
 import { BannerSlider } from '@/components/client/BannerSlider'
 import { CategoryFilter } from '@/components/client/CategoryFilter'
@@ -8,6 +8,7 @@ import { DishOfDay } from '@/components/client/DishOfDay'
 import { SearchBar } from '@/components/client/SearchBar'
 import { CartDrawer, FloatingCartButton } from '@/components/client/CartDrawer'
 import { DishModal } from '@/components/client/DishModal'
+import { OrderStatusDrawer } from '@/components/client/OrderStatusDrawer'
 import { useCardapio } from '@/hooks/useCardapio'
 import { useCart } from '@/hooks/useCart'
 import { usePedidoAtivo } from '@/hooks/usePedidoAtivo'
@@ -27,7 +28,6 @@ interface CategoriaGrupo {
 
 export function MenuPage() {
   const { slug: _slug } = useParams<{ slug: string }>()
-  const navigate = useNavigate()
   const { pratos, pratosDoDia, categorias, banners, loading, error } = useCardapio()
   const { mesaNumero, totalItens } = useCart()
   const { pedido, limparPedido } = usePedidoAtivo()
@@ -36,6 +36,7 @@ export function MenuPage() {
   const [search, setSearch] = useState('')
   const [selectedCategoria, setSelectedCategoria] = useState<string | null>(null)
   const [cartOpen, setCartOpen] = useState(false)
+  const [pedidoOpen, setPedidoOpen] = useState(false)
   const [selectedPrato, setSelectedPrato] = useState<PratoComCategoria | null>(null)
 
   useEffect(() => {
@@ -111,7 +112,7 @@ export function MenuPage() {
           <div className="flex items-center gap-2">
             {pedido && (
               <button
-                onClick={() => navigate('/pedido/status')}
+                onClick={() => setPedidoOpen(true)}
                 className="flex items-center gap-1.5 bg-[#e8f0ea] border border-[#7ea287] text-[#113917] text-xs font-semibold px-3 py-2 rounded-xl hover:bg-[#dbe9df] active:scale-95 transition-all animate-pulse-soft"
               >
                 <Clock size={13} />
@@ -197,6 +198,7 @@ export function MenuPage() {
 
       {!cartOpen && <FloatingCartButton onClick={() => setCartOpen(true)} />}
       <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+      <OrderStatusDrawer isOpen={pedidoOpen} onClose={() => setPedidoOpen(false)} />
       <DishModal prato={selectedPrato} onClose={() => setSelectedPrato(null)} />
     </div>
   )

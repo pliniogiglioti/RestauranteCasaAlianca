@@ -44,9 +44,10 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
       {/* Drawer */}
       <div
         className={`
-          fixed right-0 top-0 h-full w-full max-w-sm bg-white z-50 shadow-2xl
+          fixed bottom-0 left-0 right-0 w-full max-h-[88vh] bg-white z-50 shadow-2xl
           flex flex-col transition-transform duration-300 ease-out
-          ${isOpen ? 'translate-x-0' : 'translate-x-full'}
+          rounded-t-3xl
+          ${isOpen ? 'translate-y-0' : 'translate-y-full'}
         `}
       >
         {/* Header */}

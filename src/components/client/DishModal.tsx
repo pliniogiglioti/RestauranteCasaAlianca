@@ -53,7 +53,7 @@ export function DishModal({ prato, onClose }: DishModalProps) {
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-red-100 to-brand-200 flex items-center justify-center text-6xl">
+            <div className="w-full h-full bg-gradient-to-br from-brand-100 to-brand-200 flex items-center justify-center text-6xl">
               🍽️
             </div>
           )}

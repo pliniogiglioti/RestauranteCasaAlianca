@@ -118,7 +118,7 @@ export function MenuPage() {
             >
               <ShoppingCart size={18} />
               {totalItens() > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white text-xs font-black rounded-full flex items-center justify-center shadow-md">
+                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-brand-700 text-white text-xs font-black rounded-full flex items-center justify-center shadow-md">
                   {totalItens() > 9 ? '9+' : totalItens()}
                 </span>
               )}

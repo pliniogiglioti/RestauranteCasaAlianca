@@ -28,7 +28,7 @@ export function DishCard({ prato, onDetails }: DishCardProps) {
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-red-100 to-brand-200 flex items-center justify-center">
+          <div className="w-full h-full bg-gradient-to-br from-brand-100 to-brand-200 flex items-center justify-center">
             <span className="text-4xl">🍽️</span>
           </div>
         )}

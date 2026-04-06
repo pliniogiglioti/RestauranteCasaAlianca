@@ -189,7 +189,7 @@ export function MesasPage() {
                 </button>
                 <button
                   onClick={() => setDeleteTarget(mesa)}
-                  className="p-2 rounded-xl bg-gray-50 hover:bg-red-50 text-gray-500 hover:text-red-500 transition-colors border border-gray-200 hover:border-red-200"
+                  className="p-2 rounded-xl bg-gray-50 hover:bg-brand-50 text-gray-500 hover:text-brand-600 transition-colors border border-gray-200 hover:border-brand-200"
                 >
                   <Trash2 size={14} />
                 </button>

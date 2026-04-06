@@ -196,7 +196,7 @@ export function OrderStatusPage() {
             </div>
           </div>
           <div className="text-xs text-gray-400 flex items-center gap-1">
-            <RefreshCw size={11} className="text-green-500" />
+            <RefreshCw size={11} className="text-brand-500" />
             Tempo real
           </div>
         </div>

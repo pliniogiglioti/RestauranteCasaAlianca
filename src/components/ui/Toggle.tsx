@@ -19,7 +19,7 @@ export function Toggle({ checked, onChange, label, disabled = false }: TogglePro
         <div
           className={`
             w-11 h-6 rounded-full transition-colors duration-200
-            ${checked ? 'bg-brand-500' : 'bg-gray-300'}
+            ${checked ? 'bg-brand-500' : 'bg-brand-200'}
             ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
           `}
         />

@@ -119,7 +119,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
                     <button
                       onClick={() => removeItem(item.prato.id)}
-                      className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-1.5 text-gray-400 hover:text-brand-600 hover:bg-brand-50 rounded-lg transition-colors"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -234,14 +234,14 @@ function UpsellBebidas() {
   if (bebidasParaMostrar.length === 0) return null
 
   return (
-              <div className="rounded-2xl overflow-hidden border border-amber-200 bg-gradient-to-r from-red-50 to-orange-50">
+              <div className="rounded-2xl overflow-hidden border border-brand-200 bg-gradient-to-r from-brand-50 to-brand-100">
       {/* Header */}
       <div className="flex items-center gap-2 px-3 pt-3 pb-2">
         <div className="w-5 h-5 rounded-full bg-brand-500 flex items-center justify-center">
           <Zap size={11} className="text-white" />
         </div>
         <p className="text-xs font-bold text-gray-800">Adicionar bebida?</p>
-        <span className="text-xs text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full font-medium ml-auto">
+        <span className="text-xs text-brand-700 bg-brand-100 px-2 py-0.5 rounded-full font-medium ml-auto">
           Mais pedidas
         </span>
       </div>
@@ -278,7 +278,7 @@ function DrinkCard({
   }
 
   return (
-    <div className="flex-none w-28 bg-white rounded-xl overflow-hidden shadow-sm border border-amber-100">
+    <div className="flex-none w-28 bg-white rounded-xl overflow-hidden shadow-sm border border-brand-100">
       {/* Rank badge para os 3 primeiros */}
       <div className="relative">
         <div className="aspect-square overflow-hidden bg-gray-100">

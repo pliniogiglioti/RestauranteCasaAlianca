@@ -15,7 +15,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
             {label}
-            {props.required && <span className="text-red-500 ml-1">*</span>}
+            {props.required && <span className="text-brand-500 ml-1">*</span>}
           </label>
         )}
         <div className="relative">
@@ -32,7 +32,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent
               transition-all duration-200
               disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed
-              ${error ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'}
+              ${error ? 'border-brand-400 focus:ring-brand-400' : 'border-gray-300'}
               ${leftIcon ? 'pl-10' : ''}
               ${rightIcon ? 'pr-10' : ''}
               ${className}
@@ -45,7 +45,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             </div>
           )}
         </div>
-        {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+        {error && <p className="mt-1 text-sm text-brand-600">{error}</p>}
         {hint && !error && <p className="mt-1 text-sm text-gray-500">{hint}</p>}
       </div>
     )
@@ -67,7 +67,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         {label && (
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
             {label}
-            {props.required && <span className="text-red-500 ml-1">*</span>}
+            {props.required && <span className="text-brand-500 ml-1">*</span>}
           </label>
         )}
         <textarea
@@ -78,12 +78,12 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent
             transition-all duration-200
             disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed
-            ${error ? 'border-red-400 focus:ring-red-400' : 'border-gray-300'}
+            ${error ? 'border-brand-400 focus:ring-brand-400' : 'border-gray-300'}
             ${className}
           `}
           {...props}
         />
-        {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+        {error && <p className="mt-1 text-sm text-brand-600">{error}</p>}
         {hint && !error && <p className="mt-1 text-sm text-gray-500">{hint}</p>}
       </div>
     )

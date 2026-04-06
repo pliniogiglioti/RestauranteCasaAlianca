@@ -217,7 +217,7 @@ export function BannersPage() {
                   </button>
                   <button
                     onClick={() => setDeleteTarget(banner)}
-                    className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    className="p-1.5 rounded-lg text-gray-400 hover:text-brand-600 hover:bg-brand-50 transition-colors"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -249,7 +249,7 @@ export function BannersPage() {
           {/* Image */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Imagem do Banner <span className="text-red-500">*</span>
+              Imagem do Banner <span className="text-brand-500">*</span>
             </label>
             <div
               className="relative border-2 border-dashed border-gray-200 rounded-xl overflow-hidden cursor-pointer hover:border-brand-300 transition-colors"

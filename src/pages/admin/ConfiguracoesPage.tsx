@@ -238,7 +238,7 @@ export function ConfiguracoesPage() {
                     <button
                       type="button"
                       onClick={removerImagem}
-                      className="text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
+                      className="text-xs font-medium text-brand-700 bg-brand-50 hover:bg-brand-100 border border-brand-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
                     >
                       <X size={12} />
                       Remover

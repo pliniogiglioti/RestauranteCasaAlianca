@@ -105,7 +105,7 @@ export function OrderSummaryPage() {
                       {item.quantidade}x {formatCurrency(item.prato.preco)}
                     </p>
                     {item.observacao && (
-                      <p className="text-gray-500 text-xs mt-1 bg-amber-50 px-2 py-1 rounded-lg border border-amber-100">
+                      <p className="text-gray-500 text-xs mt-1 bg-brand-50 px-2 py-1 rounded-lg border border-brand-100">
                         💬 {item.observacao}
                       </p>
                     )}

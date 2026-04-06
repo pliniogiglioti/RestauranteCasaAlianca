@@ -170,7 +170,7 @@ export function CategoriasPage() {
                   </button>
                   <button
                     onClick={() => setDeleteTarget(cat)}
-                    className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    className="p-2 rounded-lg text-gray-400 hover:text-brand-600 hover:bg-brand-50 transition-colors"
                   >
                     <Trash2 size={14} />
                   </button>

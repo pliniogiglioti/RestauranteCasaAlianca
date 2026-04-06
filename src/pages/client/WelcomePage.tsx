@@ -39,8 +39,8 @@ export function WelcomePage() {
     return (
       <div className="min-h-screen bg-[#f5f5f5] flex items-center justify-center p-6">
         <div className="text-center max-w-xs">
-          <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
-            <QrCode size={28} className="text-red-400" />
+          <div className="w-16 h-16 rounded-full bg-brand-100 flex items-center justify-center mx-auto mb-4">
+            <QrCode size={28} className="text-brand-400" />
           </div>
           <h2 className="text-xl font-bold text-gray-900 mb-2">Mesa não encontrada</h2>
           <p className="text-gray-500 text-sm">

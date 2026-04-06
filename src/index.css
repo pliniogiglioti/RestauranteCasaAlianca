@@ -6,7 +6,7 @@
   :root {
     color: #1f2937;
     background:
-      radial-gradient(circle at top, rgba(239, 68, 68, 0.08), transparent 32%),
+      radial-gradient(circle at top, rgba(17, 57, 23, 0.08), transparent 32%),
       linear-gradient(180deg, #f8f8f8 0%, #f3f4f6 100%);
   }
 
@@ -22,7 +22,7 @@
     @apply antialiased;
     color: #1f2937;
     background:
-      radial-gradient(circle at top, rgba(239, 68, 68, 0.08), transparent 32%),
+      radial-gradient(circle at top, rgba(17, 57, 23, 0.08), transparent 32%),
       linear-gradient(180deg, #f8f8f8 0%, #f3f4f6 100%);
     font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
   }

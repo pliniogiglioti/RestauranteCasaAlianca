@@ -19,7 +19,7 @@ export function CategoryFilter({ categorias, selected, onSelect }: CategoryFilte
             ${
               selected === null
                 ? 'bg-brand-500 text-white border-brand-500 shadow-sm shadow-brand-200'
-                : 'bg-white text-gray-600 border-gray-200 hover:border-brand-300 hover:text-brand-600'
+                : 'bg-white text-gray-700 border-gray-300 hover:border-brand-300 hover:text-brand-600'
             }
           `}
         >
@@ -36,7 +36,7 @@ export function CategoryFilter({ categorias, selected, onSelect }: CategoryFilte
               ${
                 selected === cat.id
                   ? 'bg-brand-500 text-white border-brand-500 shadow-sm shadow-brand-200'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-brand-300 hover:text-brand-600'
+                  : 'bg-white text-gray-700 border-gray-300 hover:border-brand-300 hover:text-brand-600'
               }
             `}
           >

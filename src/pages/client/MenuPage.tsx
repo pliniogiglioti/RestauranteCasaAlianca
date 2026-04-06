@@ -86,9 +86,9 @@ export function MenuPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-28">
+    <div className="min-h-screen bg-[#f5f5f5] pb-28">
       {/* Header */}
-      <header className="bg-white sticky top-0 z-20 shadow-sm border-b border-gray-100">
+      <header className="bg-white sticky top-0 z-20 shadow-sm border-b border-gray-200">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
             <AppIcon size="sm" />
@@ -105,7 +105,7 @@ export function MenuPage() {
             {pedido && (
               <button
                 onClick={() => navigate('/pedido/status')}
-                className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-3 py-2 rounded-xl hover:bg-amber-100 active:scale-95 transition-all animate-pulse-soft"
+                className="flex items-center gap-1.5 bg-brand-50 border border-brand-200 text-brand-700 text-xs font-semibold px-3 py-2 rounded-xl hover:bg-brand-100 active:scale-95 transition-all animate-pulse-soft"
               >
                 <Clock size={13} />
                 Meu Pedido
@@ -168,8 +168,8 @@ export function MenuPage() {
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-xl">{grupo.icone}</span>
                   <h2 className="text-base font-bold text-gray-800">{grupo.nome}</h2>
-                  <div className="flex-1 h-px bg-gray-200" />
-                  <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                  <div className="flex-1 h-px bg-gray-300" />
+                  <span className="text-xs text-gray-500 bg-white border border-gray-200 px-2 py-0.5 rounded-full">
                     {grupo.pratos.length}
                   </span>
                 </div>

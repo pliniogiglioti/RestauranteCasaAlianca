@@ -3,6 +3,13 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    color: #1f2937;
+    background:
+      radial-gradient(circle at top, rgba(239, 68, 68, 0.08), transparent 32%),
+      linear-gradient(180deg, #f8f8f8 0%, #f3f4f6 100%);
+  }
+
   * {
     -webkit-tap-highlight-color: transparent;
   }
@@ -12,8 +19,12 @@
   }
 
   body {
-    @apply antialiased text-gray-900 bg-gray-50;
-    font-family: 'Inter', system-ui, sans-serif;
+    @apply antialiased;
+    color: #1f2937;
+    background:
+      radial-gradient(circle at top, rgba(239, 68, 68, 0.08), transparent 32%),
+      linear-gradient(180deg, #f8f8f8 0%, #f3f4f6 100%);
+    font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
   }
 }
 

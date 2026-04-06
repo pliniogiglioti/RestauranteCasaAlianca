@@ -50,7 +50,7 @@ export function BannerSlider({ banners }: BannerSliderProps) {
               loading={i === 0 ? 'eager' : 'lazy'}
             />
             {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-brand-700/80 via-brand-600/35 to-transparent" />
 
             {/* Text content */}
             <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6">

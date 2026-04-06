@@ -37,7 +37,7 @@ export function WelcomePage() {
 
   if (error || !mesa) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-[#f5f5f5] flex items-center justify-center p-6">
         <div className="text-center max-w-xs">
           <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
             <QrCode size={28} className="text-red-400" />
@@ -52,11 +52,11 @@ export function WelcomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen bg-[#f5f5f5] flex flex-col items-center justify-center relative overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-32 -right-32 w-80 h-80 rounded-full bg-brand-500/10 blur-3xl" />
-        <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-gold-500/10 blur-3xl" />
+        <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full bg-orange-100/50 blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-brand-400/5 blur-3xl" />
       </div>
 
@@ -66,25 +66,25 @@ export function WelcomePage() {
         <AppIcon size="lg" className="mb-8" />
 
         {/* Restaurant name */}
-        <h1 className="text-3xl font-bold text-white font-display mb-1">{nomeRestaurante}</h1>
-        <p className="text-gray-400 text-sm mb-8">{slogan}</p>
+        <h1 className="text-3xl font-bold text-gray-900 font-display mb-1">{nomeRestaurante}</h1>
+        <p className="text-gray-500 text-sm mb-8">{slogan}</p>
 
         {/* Mesa badge */}
-        <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-6 py-4 mb-8 w-full">
+        <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl px-6 py-4 mb-8 w-full">
           <div className="flex items-center justify-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-brand-500/20 border border-brand-500/30 flex items-center justify-center">
-              <MapPin size={18} className="text-brand-400" />
+            <div className="w-10 h-10 rounded-xl bg-brand-50 border border-brand-100 flex items-center justify-center">
+              <MapPin size={18} className="text-brand-500" />
             </div>
             <div className="text-left">
-              <p className="text-gray-400 text-xs font-medium">Você está na</p>
-              <p className="text-white font-bold text-xl">Mesa {mesa.numero}</p>
+              <p className="text-gray-500 text-xs font-medium">Você está na</p>
+              <p className="text-gray-900 font-bold text-xl">Mesa {mesa.numero}</p>
             </div>
           </div>
         </div>
 
         {/* Welcome text */}
         <div className="mb-8 text-center">
-          <p className="text-white/80 text-base leading-relaxed">
+          <p className="text-gray-600 text-base leading-relaxed">
             Bem-vindo ao nosso cardápio digital! Explore nossos pratos e faça seu pedido com facilidade.
           </p>
         </div>
@@ -92,13 +92,13 @@ export function WelcomePage() {
         {/* CTA Button */}
         <button
           onClick={() => navigate(`/mesa/${slug}/cardapio`)}
-              className="w-full bg-gradient-to-r from-red-500 to-brand-600 hover:from-red-600 hover:to-brand-700 active:scale-[0.98] text-white font-bold py-4 px-8 rounded-2xl shadow-xl shadow-brand-500/30 transition-all duration-200 flex items-center justify-center gap-3 text-lg"
+          className="w-full bg-brand-500 hover:bg-brand-600 active:scale-[0.98] text-white font-bold py-4 px-8 rounded-2xl shadow-xl shadow-brand-500/30 transition-all duration-200 flex items-center justify-center gap-3 text-lg"
         >
           Ver Cardápio
           <ArrowRight size={20} />
         </button>
 
-        <p className="text-gray-500 text-xs mt-6">
+        <p className="text-gray-400 text-xs mt-6">
           Toque no botão acima para começar a navegar
         </p>
       </div>
@@ -109,7 +109,7 @@ export function WelcomePage() {
           {[...Array(3)].map((_, i) => (
             <div
               key={i}
-              className={`rounded-full bg-white/20 animate-pulse-soft`}
+              className="rounded-full bg-brand-300/70 animate-pulse-soft"
               style={{
                 width: i === 1 ? '20px' : '8px',
                 height: '8px',

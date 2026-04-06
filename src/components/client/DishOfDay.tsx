@@ -16,11 +16,11 @@ export function DishOfDay({ pratos, onDetails }: DishOfDayProps) {
   return (
     <section className="px-4">
       <div className="flex items-center gap-2 mb-3">
-        <div className="flex items-center gap-1.5 bg-gradient-to-r from-gold-500 to-gold-600 text-white px-3 py-1 rounded-full">
+        <div className="flex items-center gap-1.5 bg-gradient-to-r from-brand-500 to-brand-600 text-white px-3 py-1 rounded-full shadow-sm shadow-brand-200">
           <Star size={12} className="fill-current" />
           <span className="text-xs font-bold">Prato do Dia</span>
         </div>
-        <div className="flex-1 h-px bg-gradient-to-r from-gold-200 to-transparent" />
+        <div className="flex-1 h-px bg-gradient-to-r from-brand-200 to-transparent" />
       </div>
 
       <div className="space-y-3">
@@ -45,12 +45,12 @@ function DishOfDayCard({
 
   return (
     <div
-      className="relative bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl overflow-hidden border border-amber-200 shadow-sm cursor-pointer"
+      className="relative bg-gradient-to-br from-white to-brand-50 rounded-2xl overflow-hidden border border-brand-100 shadow-sm cursor-pointer"
       onClick={() => onDetails?.(prato)}
     >
       {/* Badge */}
       <div className="absolute top-3 right-3 z-10">
-        <div className="bg-gradient-to-r from-gold-500 to-gold-600 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
+        <div className="bg-gradient-to-r from-brand-500 to-brand-600 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
           <Star size={10} className="fill-current" />
           Destaque
         </div>
@@ -67,7 +67,7 @@ function DishOfDayCard({
               loading="lazy"
             />
           ) : (
-                <div className="w-full h-full bg-gradient-to-br from-red-200 to-orange-200 flex items-center justify-center">
+            <div className="w-full h-full bg-gradient-to-br from-brand-100 to-orange-100 flex items-center justify-center">
               <span className="text-5xl">⭐</span>
             </div>
           )}
@@ -77,7 +77,7 @@ function DishOfDayCard({
         <div className="flex-1 p-4 flex flex-col justify-between min-w-0">
           <div>
             {prato.categoria && (
-              <span className="text-xs text-amber-700 font-medium">
+              <span className="text-xs text-brand-700 font-medium">
                 {prato.categoria.icone} {prato.categoria.nome}
               </span>
             )}
@@ -96,7 +96,7 @@ function DishOfDayCard({
 
             {quantidade > 0 ? (
               <div
-                className="flex items-center gap-2 bg-white rounded-full p-1 shadow-sm border border-amber-200"
+                className="flex items-center gap-2 bg-white rounded-full p-1 shadow-sm border border-brand-100"
                 onClick={(e) => e.stopPropagation()}
               >
                 <button

@@ -28,8 +28,8 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Playfair Display', 'serif'],
+        sans: ['Segoe UI', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['Segoe UI', 'Inter', 'system-ui', 'sans-serif'],
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',

@@ -76,7 +76,7 @@ export function DishCard({ prato, onDetails }: DishCardProps) {
               </span>
               <button
                 onClick={() => addItem(prato)}
-                className="w-7 h-7 rounded-full bg-brand-500 shadow-sm flex items-center justify-center text-white hover:bg-brand-600 active:scale-95 transition-all"
+                className="w-7 h-7 rounded-full bg-[#113917] shadow-sm flex items-center justify-center text-white hover:bg-[#0d2e13] active:scale-95 transition-all"
               >
                 <Plus size={12} />
               </button>
@@ -84,7 +84,7 @@ export function DishCard({ prato, onDetails }: DishCardProps) {
           ) : (
             <button
               onClick={() => addItem(prato)}
-              className="flex items-center gap-1.5 bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white text-xs font-medium px-3 py-2 rounded-full shadow-sm active:scale-95 transition-all"
+              className="flex items-center gap-1.5 bg-[#113917] hover:bg-[#0d2e13] active:bg-[#081d0c] text-white text-xs font-medium px-3 py-2 rounded-full shadow-sm active:scale-95 transition-all"
             >
               <ShoppingCart size={12} />
               Adicionar

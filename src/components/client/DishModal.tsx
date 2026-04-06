@@ -93,7 +93,7 @@ export function DishModal({ prato, onClose }: DishModalProps) {
                 </span>
                 <button
                   onClick={() => addItem(prato)}
-                  className="w-10 h-10 rounded-xl bg-brand-500 shadow-sm flex items-center justify-center text-white hover:bg-brand-600 active:scale-95 transition-all"
+                  className="w-10 h-10 rounded-xl bg-[#113917] shadow-sm flex items-center justify-center text-white hover:bg-[#0d2e13] active:scale-95 transition-all"
                 >
                   <Plus size={16} />
                 </button>
@@ -108,7 +108,7 @@ export function DishModal({ prato, onClose }: DishModalProps) {
           ) : (
             <button
               onClick={() => addItem(prato)}
-              className="w-full bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              className="w-full bg-[#113917] hover:bg-[#0d2e13] active:bg-[#081d0c] text-white font-bold py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
               <ShoppingCart size={18} />
               Adicionar ao Pedido

@@ -138,7 +138,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                       </span>
                       <button
                         onClick={() => updateQuantidade(item.prato.id, item.quantidade + 1)}
-                        className="w-6 h-6 rounded-full bg-brand-500 flex items-center justify-center text-white hover:bg-brand-600 active:scale-95 transition-all"
+                        className="w-6 h-6 rounded-full bg-[#113917] flex items-center justify-center text-white hover:bg-[#0d2e13] active:scale-95 transition-all"
                       >
                         <Plus size={11} />
                       </button>
@@ -203,7 +203,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             </div>
             <button
               onClick={handleFinalizar}
-              className="w-full bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all text-base"
+              className="w-full bg-[#113917] hover:bg-[#0d2e13] active:bg-[#081d0c] text-white font-bold py-4 rounded-2xl shadow-lg shadow-brand-200 active:scale-[0.98] transition-all text-base"
             >
               Finalizar Pedido
             </button>
@@ -315,8 +315,8 @@ function DrinkCard({
           className={`
             w-full mt-2 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95
             ${added
-              ? 'bg-green-500 text-white'
-              : 'bg-brand-500 hover:bg-brand-600 text-white'
+              ? 'bg-[#4f7a5c] text-white'
+              : 'bg-[#113917] hover:bg-[#0d2e13] text-white'
             }
           `}
         >
@@ -342,7 +342,7 @@ export function FloatingCartButton({ onClick }: FloatingCartButtonProps) {
     <div className="fixed bottom-6 left-4 right-4 z-30 animate-slide-up">
       <button
         onClick={onClick}
-        className="w-full bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white font-bold py-4 px-5 rounded-2xl shadow-xl shadow-brand-300/50 active:scale-[0.98] transition-all flex items-center justify-between"
+        className="w-full bg-[#113917] hover:bg-[#0d2e13] active:bg-[#081d0c] text-white font-bold py-4 px-5 rounded-2xl shadow-xl shadow-brand-300/50 active:scale-[0.98] transition-all flex items-center justify-between"
       >
         <div className="flex items-center gap-2">
           <div className="bg-white/20 rounded-full w-7 h-7 flex items-center justify-center">

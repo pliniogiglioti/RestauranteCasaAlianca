@@ -110,7 +110,7 @@ function DishOfDayCard({
                 </span>
                 <button
                   onClick={() => addItem(prato)}
-                  className="w-7 h-7 rounded-full bg-brand-500 flex items-center justify-center text-white hover:bg-brand-600 active:scale-95 transition-all"
+                  className="w-7 h-7 rounded-full bg-[#113917] flex items-center justify-center text-white hover:bg-[#0d2e13] active:scale-95 transition-all"
                 >
                   <Plus size={12} />
                 </button>
@@ -121,7 +121,7 @@ function DishOfDayCard({
                   e.stopPropagation()
                   addItem(prato)
                 }}
-                className="bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm active:scale-95 transition-all flex items-center gap-1"
+                className="bg-[#113917] hover:bg-[#0d2e13] active:bg-[#081d0c] text-white text-xs font-bold px-4 py-2 rounded-full shadow-sm active:scale-95 transition-all flex items-center gap-1"
               >
                 <Plus size={13} />
                 Pedir

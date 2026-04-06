@@ -105,7 +105,7 @@ export function MenuPage() {
             {pedido && (
               <button
                 onClick={() => navigate('/pedido/status')}
-                className="flex items-center gap-1.5 bg-brand-50 border border-brand-200 text-brand-700 text-xs font-semibold px-3 py-2 rounded-xl hover:bg-brand-100 active:scale-95 transition-all animate-pulse-soft"
+                className="flex items-center gap-1.5 bg-[#e8f0ea] border border-[#7ea287] text-[#113917] text-xs font-semibold px-3 py-2 rounded-xl hover:bg-[#dbe9df] active:scale-95 transition-all animate-pulse-soft"
               >
                 <Clock size={13} />
                 Meu Pedido
@@ -114,11 +114,11 @@ export function MenuPage() {
 
             <button
               onClick={() => setCartOpen(true)}
-              className="relative p-2.5 bg-brand-500 rounded-xl text-white shadow-sm hover:bg-brand-600 active:scale-95 transition-all"
+              className="relative p-2.5 bg-[#113917] rounded-xl text-white shadow-sm hover:bg-[#0d2e13] active:scale-95 transition-all"
             >
               <ShoppingCart size={18} />
               {totalItens() > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-brand-700 text-white text-xs font-black rounded-full flex items-center justify-center shadow-md">
+                <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#081d0c] text-white text-xs font-black rounded-full flex items-center justify-center shadow-md">
                   {totalItens() > 9 ? '9+' : totalItens()}
                 </span>
               )}

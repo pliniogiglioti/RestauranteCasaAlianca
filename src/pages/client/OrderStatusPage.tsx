@@ -85,7 +85,7 @@ const ORDEM_STATUS: StatusPedido[] = [
 
 export function OrderStatusPage() {
   const navigate = useNavigate()
-  const { pedido, atualizarStatus } = usePedidoAtivo()
+  const { pedido, atualizarStatus, limparPedido } = usePedidoAtivo()
   const { mesaSlug } = useCart()
   // Use stored status as initial value — always shows something even if SELECT policy isn't applied
   const [status, setStatus] = useState<StatusPedido | null>(pedido?.status ?? null)

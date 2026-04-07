@@ -43,11 +43,9 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
       description="Resumo do carrinho e itens do pedido."
       contentClassName="w-full max-h-[88vh] overflow-hidden rounded-t-[32px]"
       showHandle
-      handleLabel="Arraste para fechar"
-      handleOnly
     >
-      <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100 bg-white shrink-0">
-        <div className="flex items-center gap-2 min-w-0">
+      <div className="flex items-center px-4 py-4 border-b border-gray-100 bg-white shrink-0">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           <ShoppingCart size={18} className="text-brand-500 shrink-0" />
           <h2 className="font-bold text-gray-900">Seu Pedido</h2>
           {totalItens() > 0 && (
@@ -55,12 +53,12 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               {totalItens()}
             </span>
           )}
-          {mesaNumero > 0 && (
-            <span className="text-xs bg-brand-50 text-brand-700 font-semibold px-2.5 py-1 rounded-full border border-brand-200">
-              Mesa {mesaNumero}
-            </span>
-          )}
         </div>
+        {mesaNumero > 0 && (
+          <span className="ml-auto shrink-0 text-xs bg-brand-50 text-brand-700 font-semibold px-2.5 py-1 rounded-full border border-brand-200">
+            Mesa {mesaNumero}
+          </span>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto">

@@ -1,4 +1,4 @@
-import { X, Plus, Minus, ShoppingCart } from 'lucide-react'
+import { Plus, Minus, ShoppingCart } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { AppDrawer } from '@/components/ui/Drawer'
 import { useCart } from '@/hooks/useCart'
@@ -41,16 +41,8 @@ export function DishModal({ prato, onClose }: DishModalProps) {
       description={pratoAtual.descricao ?? 'Detalhes do prato selecionado.'}
       contentClassName="mx-auto w-full max-w-lg max-h-[92vh] overflow-hidden rounded-t-[32px] sm:bottom-4 sm:rounded-[32px]"
       showHandle
-      handleOnly
     >
       <div className="relative flex h-full flex-col">
-        <button
-          onClick={onClose}
-          className="absolute top-5 right-4 z-10 w-9 h-9 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/60 transition-colors"
-        >
-          <X size={16} />
-        </button>
-
         <div className="aspect-[16/9] w-full shrink-0 overflow-hidden">
           {pratoAtual.imagem_url ? (
             <img

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import {
   X,
   Clock,
@@ -9,10 +9,11 @@ import {
   RefreshCw,
   MapPin,
 } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { AppDrawer } from '@/components/ui/Drawer'
 import { usePedidoAtivo } from '@/hooks/usePedidoAtivo'
-import type { StatusPedido } from '@/types'
+import { supabase } from '@/lib/supabase'
 import { formatCurrency } from '@/types'
+import type { StatusPedido } from '@/types'
 
 interface OrderStatusDrawerProps {
   isOpen: boolean
@@ -22,7 +23,7 @@ interface OrderStatusDrawerProps {
 interface StatusConfig {
   label: string
   descricao: string
-  icon: React.ReactNode
+  icon: ReactNode
   color: string
   bg: string
   border: string
@@ -32,7 +33,7 @@ interface StatusConfig {
 const STATUS_CONFIG: Record<StatusPedido, StatusConfig> = {
   recebido: {
     label: 'Pedido Recebido',
-    descricao: 'Seu pedido chegou à cozinha!',
+    descricao: 'Seu pedido chegou a cozinha!',
     icon: <Clock size={24} />,
     color: 'text-blue-600',
     bg: 'bg-blue-50',
@@ -41,7 +42,7 @@ const STATUS_CONFIG: Record<StatusPedido, StatusConfig> = {
   },
   em_preparo: {
     label: 'Em Preparo',
-    descricao: 'Nossos chefs estão preparando seu pedido com carinho.',
+    descricao: 'Nossos chefs estao preparando seu pedido com carinho.',
     icon: <ChefHat size={24} />,
     color: 'text-amber-600',
     bg: 'bg-amber-50',
@@ -50,7 +51,7 @@ const STATUS_CONFIG: Record<StatusPedido, StatusConfig> = {
   },
   pronto: {
     label: 'Pronto!',
-    descricao: 'Seu pedido está pronto e sera entregue em breve.',
+    descricao: 'Seu pedido esta pronto e sera entregue em breve.',
     icon: <CheckCircle size={24} />,
     color: 'text-green-600',
     bg: 'bg-green-50',
@@ -89,14 +90,6 @@ export function OrderStatusDrawer({ isOpen, onClose }: OrderStatusDrawerProps) {
 
   const mesaNumero = pedido?.mesaNumero
   const pedidoId = pedido?.pedidoId
-
-  useEffect(() => {
-    if (!isOpen) return
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [isOpen])
 
   useEffect(() => {
     if (!isOpen) return
@@ -165,21 +158,17 @@ export function OrderStatusDrawer({ isOpen, onClose }: OrderStatusDrawerProps) {
   const indexAtual = status ? ORDEM_STATUS.indexOf(status) : -1
 
   return (
-    <>
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm animate-fade-in"
-          onClick={onClose}
-        />
-      )}
-
-      <div
-        className={`
-          fixed top-0 right-0 z-50 h-full w-full max-w-md bg-[#f5f5f5] shadow-2xl
-          transition-transform duration-300 ease-out flex flex-col
-          ${isOpen ? 'translate-x-0' : 'translate-x-full'}
-        `}
-      >
+    <AppDrawer
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose()
+      }}
+      direction="right"
+      title="Meu Pedido"
+      description="Acompanhe o status do pedido em tempo real."
+      contentClassName="h-full w-full max-w-md overflow-hidden bg-[#f5f5f5]"
+    >
+      <div className="flex h-full flex-col">
         <header className="bg-white border-b border-gray-100 px-4 py-4 shadow-sm shrink-0">
           <div className="flex items-center gap-3">
             <button
@@ -223,7 +212,12 @@ export function OrderStatusDrawer({ isOpen, onClose }: OrderStatusDrawerProps) {
                   <h2 className={`text-2xl font-bold ${config.color} mb-1`}>{config.label}</h2>
                   <p className="text-gray-600 text-sm">{config.descricao}</p>
                   <p className="text-xs text-gray-400 mt-3">
-                    Atualizado as {lastUpdate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                    Atualizado as{' '}
+                    {lastUpdate.toLocaleTimeString('pt-BR', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                    })}
                   </p>
                 </div>
               )}
@@ -275,7 +269,9 @@ export function OrderStatusDrawer({ isOpen, onClose }: OrderStatusDrawerProps) {
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-500">Pedido</span>
-                  <span className="font-mono font-bold text-gray-900 text-xs">#{numeroPedido ?? '...'}</span>
+                  <span className="font-mono font-bold text-gray-900 text-xs">
+                    #{numeroPedido ?? '...'}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between text-sm mt-2">
                   <span className="text-gray-500">Mesa</span>
@@ -313,6 +309,6 @@ export function OrderStatusDrawer({ isOpen, onClose }: OrderStatusDrawerProps) {
           )}
         </div>
       </div>
-    </>
+    </AppDrawer>
   )
 }

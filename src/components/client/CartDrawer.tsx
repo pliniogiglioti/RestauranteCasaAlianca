@@ -1,4 +1,4 @@
-import { X, Minus, Plus, Trash2, ShoppingCart, MessageSquare, Zap } from 'lucide-react'
+import { Minus, Plus, Trash2, ShoppingCart, MessageSquare, Zap } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppDrawer } from '@/components/ui/Drawer'
@@ -43,6 +43,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
       description="Resumo do carrinho e itens do pedido."
       contentClassName="w-full max-h-[88vh] overflow-hidden rounded-t-[32px]"
       showHandle
+      handleLabel="Arraste para fechar"
       handleOnly
     >
       <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100 bg-white shrink-0">
@@ -60,12 +61,6 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             </span>
           )}
         </div>
-        <button
-          onClick={onClose}
-          className="w-10 h-10 rounded-xl bg-brand-50 border border-brand-200 text-brand-700 hover:bg-brand-100 hover:text-brand-800 transition-colors shrink-0 flex items-center justify-center"
-        >
-          <X size={18} />
-        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto">

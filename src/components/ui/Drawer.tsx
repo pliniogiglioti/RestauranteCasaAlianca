@@ -13,6 +13,7 @@ interface AppDrawerProps {
   contentClassName?: string
   overlayClassName?: string
   showHandle?: boolean
+  handleLabel?: string
   handleOnly?: boolean
   dismissible?: boolean
   onAnimationEnd?: (open: boolean) => void
@@ -39,6 +40,7 @@ export function AppDrawer({
   contentClassName,
   overlayClassName,
   showHandle = false,
+  handleLabel,
   handleOnly = false,
   dismissible = true,
   onAnimationEnd,
@@ -73,8 +75,13 @@ export function AppDrawer({
           )}
 
           {showHandle && direction === 'bottom' && (
-            <div className="flex justify-center pt-3 pb-1">
-              <Drawer.Handle className="!h-1.5 !w-12 !rounded-full !bg-gray-300" />
+            <div className="flex flex-col items-center gap-1 border-b border-gray-100 bg-white/98 px-4 pt-3 pb-2">
+              <Drawer.Handle className="!h-1.5 !w-14 !rounded-full !bg-gray-400/80 shadow-sm" />
+              {handleLabel && (
+                <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-gray-400">
+                  {handleLabel}
+                </span>
+              )}
             </div>
           )}
 

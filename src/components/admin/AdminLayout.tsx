@@ -201,9 +201,9 @@ function TVButton({ onClose }: { onClose: () => void }) {
       onClick={handleClick}
       className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-[#474747] hover:text-[#113917] hover:bg-[#e8f0ea] transition-all"
     >
-      <Tv size={18} />
-      <span className="flex-1">TV – Chamada</span>
-      <ExternalLink size={13} className="text-[#474747]/50" />
+      <Tv size={18} className="shrink-0" />
+      <span className="flex-1 text-left">TV – Chamada</span>
+      <ExternalLink size={13} className="shrink-0 text-[#474747]/50" />
     </button>
   )
 }

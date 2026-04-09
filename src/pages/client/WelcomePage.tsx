@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { QrCode, ArrowRight, MapPin } from 'lucide-react'
+import { QrCode, ArrowRight, MapPin, User } from 'lucide-react'
 import { getMesaBySlug } from '@/services/mesas'
 import { useCart } from '@/hooks/useCart'
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
@@ -12,12 +12,13 @@ import { PageLoading } from '@/components/ui/LoadingSpinner'
 export function WelcomePage() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
-  const { setMesa } = useCart()
+  const { setMesa, setNomeCliente } = useCart()
   const { pedido, limparPedido } = usePedidoAtivo()
   const { nomeRestaurante, slogan } = useConfiguracoes()
   const [mesa, setMesaData] = useState<Mesa | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [nome, setNome] = useState('')
 
   useEffect(() => {
     const themeMeta = document.querySelector('meta[name="theme-color"]')
@@ -98,15 +99,38 @@ export function WelcomePage() {
         </div>
 
         {/* Welcome text */}
-        <div className="mb-8 text-center">
+        <div className="mb-6 text-center">
           <p className="text-gray-600 text-base leading-relaxed">
             Bem-vindo ao nosso cardápio digital! Explore nossos pratos e faça seu pedido com facilidade.
           </p>
         </div>
 
+        {/* Nome do cliente */}
+        <div className="w-full mb-6">
+          <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl px-4 py-3 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-brand-50 border border-brand-100 flex items-center justify-center shrink-0">
+              <User size={16} className="text-brand-500" />
+            </div>
+            <input
+              type="text"
+              placeholder="Seu nome (opcional)"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              className="flex-1 bg-transparent text-gray-900 placeholder-gray-400 text-base outline-none font-medium"
+              maxLength={50}
+            />
+          </div>
+          <p className="text-gray-400 text-xs mt-1.5 px-1">
+            Seu nome aparecerá na chamada quando o pedido estiver pronto
+          </p>
+        </div>
+
         {/* CTA Button */}
         <button
-          onClick={() => navigate(`/mesa/${slug}/cardapio`)}
+          onClick={() => {
+            setNomeCliente(nome.trim())
+            navigate(`/mesa/${slug}/cardapio`)
+          }}
           className="w-full bg-brand-500 hover:bg-brand-600 active:scale-[0.98] text-white font-bold py-4 px-8 rounded-2xl shadow-xl shadow-brand-500/30 transition-all duration-200 flex items-center justify-center gap-3 text-lg"
         >
           Ver Cardápio

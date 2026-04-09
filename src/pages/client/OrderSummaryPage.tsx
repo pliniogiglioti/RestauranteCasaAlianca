@@ -9,7 +9,7 @@ import toast from 'react-hot-toast'
 
 export function OrderSummaryPage() {
   const navigate = useNavigate()
-  const { items, observacaoGeral, mesaId, mesaNumero, mesaSlug, totalValor, clearCart } = useCart()
+  const { items, observacaoGeral, mesaId, mesaNumero, mesaSlug, nomeCliente, totalValor, clearCart } = useCart()
   const { salvarPedido } = usePedidoAtivo()
   const [loading, setLoading] = useState(false)
 
@@ -20,6 +20,7 @@ export function OrderSummaryPage() {
       setLoading(true)
       const pedido = await criarPedido({
         mesa_id: mesaId,
+        nome_cliente: nomeCliente || undefined,
         observacao_geral: observacaoGeral || undefined,
         itens: items,
       })

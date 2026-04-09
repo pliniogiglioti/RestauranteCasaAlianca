@@ -8,8 +8,10 @@ interface CartStore {
   mesaId: string
   mesaNumero: number
   mesaSlug: string
+  nomeCliente: string
 
   setMesa: (id: string, numero: number, slug: string) => void
+  setNomeCliente: (nome: string) => void
   addItem: (prato: Prato) => void
   removeItem: (pratoId: string) => void
   updateQuantidade: (pratoId: string, quantidade: number) => void
@@ -29,9 +31,12 @@ export const useCart = create<CartStore>()(
       mesaId: '',
       mesaNumero: 0,
       mesaSlug: '',
+      nomeCliente: '',
 
       setMesa: (id, numero, slug) =>
         set({ mesaId: id, mesaNumero: numero, mesaSlug: slug }),
+
+      setNomeCliente: (nome) => set({ nomeCliente: nome }),
 
       addItem: (prato) => {
         const items = get().items

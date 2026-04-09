@@ -3,6 +3,7 @@ import type { StatusPedido, CartItem, PedidoCompleto, Pedido } from '@/types'
 
 export interface CriarPedidoInput {
   mesa_id: string
+  nome_cliente?: string
   observacao_geral?: string
   itens: CartItem[]
 }
@@ -23,6 +24,7 @@ export async function criarPedido(input: CriarPedidoInput): Promise<{ id: string
     .insert({
       id: pedidoId,
       mesa_id: input.mesa_id,
+      nome_cliente: input.nome_cliente?.trim() || null,
       observacao_geral: input.observacao_geral ?? null,
       valor_total,
       status: 'recebido',

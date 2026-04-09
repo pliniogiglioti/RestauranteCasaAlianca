@@ -12,6 +12,7 @@ const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY
 const IS_DEV = process.env.NODE_ENV === 'development'
 
 let mainWindow = null
+let tvWindow = null
 let supabase = null
 let tray = null
 let appIcon = null  // nativeImage reutilizado na janela e no tray
@@ -123,6 +124,7 @@ function createTray(icon) {
         label: mainWindow && mainWindow.isVisible() ? 'Ocultar janela' : 'Mostrar janela',
         click: toggleWindow,
       },
+      { label: 'Abrir TV (Chamada de Pedidos)', click: createTvWindow },
       { type: 'separator' },
       { label: 'Selecionar impressora...', click: openPrinterSelector },
       {
@@ -150,6 +152,7 @@ function refreshTrayMenu() {
         label: mainWindow && mainWindow.isVisible() ? 'Ocultar janela' : 'Mostrar janela',
         click: toggleWindow,
       },
+      { label: 'Abrir TV (Chamada de Pedidos)', click: createTvWindow },
       { type: 'separator' },
       { label: 'Selecionar impressora...', click: openPrinterSelector },
       {
@@ -205,6 +208,40 @@ async function openPrinterSelector() {
       mainWindow.webContents.send('impressora-atualizada', selectedPrinter)
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// TV window
+// ---------------------------------------------------------------------------
+function createTvWindow() {
+  if (tvWindow && !tvWindow.isDestroyed()) {
+    tvWindow.focus()
+    return
+  }
+
+  tvWindow = new BrowserWindow({
+    width: 1280,
+    height: 720,
+    minWidth: 800,
+    minHeight: 450,
+    title: 'TV – Chamada de Pedidos',
+    icon: appIcon || undefined,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
+      nodeIntegration: false,
+      contextIsolation: true,
+    },
+  })
+
+  if (IS_DEV) {
+    tvWindow.loadURL('http://localhost:5173/#/tv')
+  } else {
+    tvWindow.loadFile(path.join(__dirname, '../dist/index.html'), { hash: '/tv' })
+  }
+
+  tvWindow.on('closed', () => {
+    tvWindow = null
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -522,6 +559,12 @@ ipcMain.handle('open-printer-selector', () => openPrinterSelector())
 // Imprimir HTML arbitrário (relatório)
 ipcMain.handle('print-relatorio', async (_event, html) => {
   await printHTML(html)
+  return { ok: true }
+})
+
+// Abrir janela TV
+ipcMain.handle('open-tv-window', () => {
+  createTvWindow()
   return { ok: true }
 })
 

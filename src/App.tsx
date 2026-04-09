@@ -8,6 +8,9 @@ import { MenuPage } from '@/pages/client/MenuPage'
 import { OrderSummaryPage } from '@/pages/client/OrderSummaryPage'
 import { OrderStatusPage } from '@/pages/client/OrderStatusPage'
 
+// TV page
+import { TVPage } from '@/pages/tv/TVPage'
+
 // Admin pages
 import { LoginPage } from '@/pages/admin/LoginPage'
 import { DashboardPage } from '@/pages/admin/DashboardPage'
@@ -88,6 +91,9 @@ export default function App() {
         />
 
         <Routes>
+          {/* TV route */}
+          <Route path="/tv" element={<TVPage />} />
+
           {/* Client routes */}
           <Route path="/mesa/:slug" element={<WelcomePage />} />
           <Route path="/mesa/:slug/cardapio" element={<MenuPage />} />

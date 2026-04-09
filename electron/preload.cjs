@@ -24,6 +24,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Imprimir HTML arbitrário (relatório do dia, etc.)
   printRelatorio: (html) => ipcRenderer.invoke('print-relatorio', html),
 
+  // Abrir janela TV de chamada de pedidos
+  openTvWindow: () => ipcRenderer.invoke('open-tv-window'),
+
   // Evento: novo pedido impresso automaticamente
   onNovoPedidoImpresso: (callback) => {
     ipcRenderer.on('novo-pedido-impresso', (_event, data) => callback(data))

@@ -12,6 +12,7 @@ interface ElectronAPI {
   setImpressora: (printerName: string) => Promise<{ ok: boolean }>
   openPrinterSelector: () => Promise<void>
   printRelatorio: (html: string) => Promise<{ ok: boolean }>
+  openTvWindow: () => Promise<{ ok: boolean }>
   onNovoPedidoImpresso: (
     callback: (data: { id: string; mesa: { numero: number } | null; valor_total: number; impressoEm: string }) => void
   ) => void

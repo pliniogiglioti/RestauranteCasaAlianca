@@ -66,7 +66,7 @@ export function TVPage() {
                 <p className="text-gray-400 text-lg">Nenhum pedido pronto</p>
               </div>
             ) : (
-              <div className="grid grid-cols-3 gap-3 content-start">
+              <div className="flex flex-col gap-3">
                 {prontos.map((p) => (
                   <CardPedido key={p.id} pedido={p} variant="pronto" />
                 ))}
@@ -91,7 +91,7 @@ export function TVPage() {
                 <p className="text-gray-400 text-lg">Nenhum pedido em preparo</p>
               </div>
             ) : (
-              <div className="grid grid-cols-3 gap-3 content-start">
+              <div className="flex flex-col gap-3">
                 {emPreparo.map((p) => (
                   <CardPedido key={p.id} pedido={p} variant="preparo" />
                 ))}
@@ -116,23 +116,29 @@ function CardPedido({
 
   return (
     <div
-      className={`rounded-2xl flex flex-col items-center justify-center py-5 px-3 text-center gap-1 transition-all ${
+      className={`rounded-2xl flex items-center gap-6 px-6 py-4 ${
         isPronto
           ? 'bg-green-500/20 border-2 border-green-500 shadow-lg shadow-green-500/20'
-          : 'bg-yellow-500/10 border-2 border-yellow-500/50'
+          : 'bg-yellow-500/10 border-2 border-yellow-500/40'
       }`}
     >
-      <p className={`text-xs font-semibold uppercase tracking-widest mb-1 ${isPronto ? 'text-green-400' : 'text-yellow-400/70'}`}>
-        Mesa
-      </p>
-      <p className={`font-black leading-none ${isPronto ? 'text-6xl text-white' : 'text-5xl text-gray-300'}`}>
-        {pedido.mesa?.numero ?? '—'}
-      </p>
-      {pedido.nome_cliente && (
-        <p className={`text-sm font-semibold mt-1 truncate w-full ${isPronto ? 'text-green-300' : 'text-gray-400'}`}>
-          {pedido.nome_cliente}
+      {/* Número da mesa */}
+      <div className="shrink-0 text-center">
+        <p className={`text-xs font-semibold uppercase tracking-widest ${isPronto ? 'text-green-400' : 'text-yellow-400/70'}`}>
+          Mesa
         </p>
-      )}
+        <p className={`font-black leading-none text-5xl ${isPronto ? 'text-white' : 'text-gray-300'}`}>
+          {pedido.mesa?.numero ?? '—'}
+        </p>
+      </div>
+
+      {/* Divisor */}
+      <div className={`w-px self-stretch ${isPronto ? 'bg-green-500/40' : 'bg-yellow-500/20'}`} />
+
+      {/* Nome do cliente */}
+      <p className={`font-black text-4xl truncate ${isPronto ? 'text-white' : 'text-gray-400'}`}>
+        {pedido.nome_cliente ?? '—'}
+      </p>
     </div>
   )
 }

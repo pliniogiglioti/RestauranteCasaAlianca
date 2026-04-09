@@ -85,7 +85,7 @@ export function TVPage() {
           <EmptyState />
         ) : (
           <div
-            className={`flex flex-col items-center text-center transition-all duration-400 ${
+            className={`flex flex-col items-center text-center transition-all duration-300 ${
               animando ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
             }`}
           >

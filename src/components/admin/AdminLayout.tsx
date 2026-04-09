@@ -13,6 +13,8 @@ import {
   ChevronRight,
   Settings,
   Printer,
+  Tv,
+  ExternalLink,
 } from 'lucide-react'
 import { signOut } from '@/hooks/useAuth'
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
@@ -157,12 +159,14 @@ function PrinterStatus() {
 
   return (
     <div className="px-3 pb-2 border-t border-[#d6d6d6] pt-3">
-      <div className="flex items-center gap-3 px-3 py-2">
-        <Printer size={18} className={isElectron ? 'text-[#3a3a3a]' : 'text-[#6a6a6a]'} />
+      <div className={`flex items-start gap-3 px-3 py-2 rounded-xl ${!isElectron ? 'bg-amber-50 border border-amber-200' : ''}`}>
+        <Printer size={18} className={`mt-0.5 shrink-0 ${isElectron ? 'text-[#3a3a3a]' : 'text-amber-500'}`} />
         <div className="flex-1 min-w-0">
-          <p className="text-xs text-[#474747]/70 leading-none mb-0.5">App Desktop</p>
-          <p className={`text-xs font-medium ${isElectron ? 'text-[#3a3a3a]' : 'text-[#6a6a6a]'}`}>
-            {isElectron ? 'Online' : 'Offline'}
+          <p className={`text-xs leading-none mb-0.5 ${isElectron ? 'text-[#474747]/70' : 'text-amber-700 font-semibold'}`}>
+            {isElectron ? 'App Desktop' : 'Impressora offline'}
+          </p>
+          <p className={`text-xs font-medium ${isElectron ? 'text-[#3a3a3a]' : 'text-amber-600'}`}>
+            {isElectron ? 'Online' : 'Execute o aplicativo Windows para imprimir'}
           </p>
         </div>
       </div>
@@ -177,6 +181,30 @@ function MobileHeaderLogo() {
       <AppIcon size="sm" />
       <span className="font-semibold text-[#474747] text-sm">{nomeRestaurante} Admin</span>
     </div>
+  )
+}
+
+function TVButton({ onClose }: { onClose: () => void }) {
+  const isElectron = typeof window !== 'undefined' && !!window.electronAPI
+
+  function handleClick() {
+    onClose()
+    if (isElectron) {
+      void window.electronAPI!.openTvWindow()
+    } else {
+      window.open('/tv', '_blank')
+    }
+  }
+
+  return (
+    <button
+      onClick={handleClick}
+      className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-[#474747] hover:text-[#113917] hover:bg-[#e8f0ea] transition-all"
+    >
+      <Tv size={18} />
+      <span className="flex-1">TV – Chamada</span>
+      <ExternalLink size={13} className="text-[#474747]/50" />
+    </button>
   )
 }
 
@@ -245,6 +273,11 @@ function SidebarContent({
             )}
           </NavLink>
         ))}
+
+        {/* Separador + botão TV */}
+        <div className="pt-2 mt-2 border-t border-[#d6d6d6]">
+          <TVButton onClose={onClose} />
+        </div>
       </nav>
 
       {/* Printer status (Electron only) */}

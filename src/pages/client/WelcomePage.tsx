@@ -113,7 +113,7 @@ export function WelcomePage() {
             </div>
             <input
               type="text"
-              placeholder="Seu nome (opcional)"
+              placeholder="Digite seu nome"
               value={nome}
               onChange={(e) => setNome(e.target.value)}
               className="flex-1 bg-transparent text-gray-900 placeholder-gray-400 text-base outline-none font-medium"
@@ -121,17 +121,18 @@ export function WelcomePage() {
             />
           </div>
           <p className="text-gray-400 text-xs mt-1.5 px-1">
-            Seu nome aparecerá na chamada quando o pedido estiver pronto
+            Seu nome será chamado na TV quando o pedido estiver pronto
           </p>
         </div>
 
         {/* CTA Button */}
         <button
+          disabled={!nome.trim()}
           onClick={() => {
             setNomeCliente(nome.trim())
             navigate(`/mesa/${slug}/cardapio`)
           }}
-          className="w-full bg-brand-500 hover:bg-brand-600 active:scale-[0.98] text-white font-bold py-4 px-8 rounded-2xl shadow-xl shadow-brand-500/30 transition-all duration-200 flex items-center justify-center gap-3 text-lg"
+          className="w-full bg-brand-500 hover:bg-brand-600 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-4 px-8 rounded-2xl shadow-xl shadow-brand-500/30 transition-all duration-200 flex items-center justify-center gap-3 text-lg"
         >
           Ver Cardápio
           <ArrowRight size={20} />

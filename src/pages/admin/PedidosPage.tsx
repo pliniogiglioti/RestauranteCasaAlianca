@@ -300,6 +300,7 @@ export function PedidosPage() {
                       onOpenComanda={() => setComandaPedido(pedido)}
                       onStatusChange={handleStatusChange}
                       onPrint={isElectron ? handlePrint : undefined}
+                      mesaInativa={!mesaAtiva}
                     />
                   ))}
                 </div>
@@ -314,7 +315,11 @@ export function PedidosPage() {
                       </div>
                       <div className="flex items-center justify-between gap-2">
                         <StatusBadge status={pedido.status} />
-                        <button onClick={() => handleStatusChange(pedido.id, 'finalizado')} className="text-xs font-medium text-amber-700 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-lg transition-colors">Finalizar</button>
+                        <button
+                          onClick={() => handleStatusChange(pedido.id, 'finalizado')}
+                          disabled={!mesaAtiva}
+                          className="text-xs font-medium text-amber-700 bg-amber-100 hover:bg-amber-200 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                        >Finalizar</button>
                       </div>
                     </div>
                   </div>
@@ -377,15 +382,29 @@ export function PedidosPage() {
                 <div className="text-right shrink-0">
                   <p className="font-bold text-gray-900">{formatCurrency(pedido.valor_total)}</p>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className={`flex items-center gap-2 shrink-0 ${pedido.mesa?.ativo === false ? 'opacity-50' : ''}`}>
                   <button onClick={() => setDetailPedido(pedido)} className="p-2 rounded-xl text-gray-400 hover:text-brand-600 hover:bg-brand-50 transition-colors border border-gray-200"><Eye size={15} /></button>
-                  <button onClick={() => setComandaPedido(pedido)} className="px-3 py-2 rounded-xl text-xs font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-colors border border-gray-200">
+                  <button
+                    onClick={() => setComandaPedido(pedido)}
+                    disabled={pedido.mesa?.ativo === false}
+                    className="px-3 py-2 rounded-xl text-xs font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-colors border border-gray-200 disabled:pointer-events-none"
+                  >
                     {pedido.comanda_externa ? `Comanda ${pedido.comanda_externa}` : 'Vincular Comanda'}
                   </button>
                   {isElectron && (
-                    <button onClick={() => handlePrint(pedido.id)} className="p-2 rounded-xl text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors border border-gray-200" title="Reimprimir pedido"><Printer size={15} /></button>
+                    <button
+                      onClick={() => handlePrint(pedido.id)}
+                      disabled={pedido.mesa?.ativo === false}
+                      className="p-2 rounded-xl text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors border border-gray-200 disabled:pointer-events-none"
+                      title="Reimprimir pedido"
+                    ><Printer size={15} /></button>
                   )}
-                  <select value={pedido.status} onChange={e => handleStatusChange(pedido.id, e.target.value as StatusPedido)} className="text-sm font-medium border border-gray-200 rounded-xl px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-400 cursor-pointer hover:border-brand-300 transition-colors">
+                  <select
+                    value={pedido.status}
+                    disabled={pedido.mesa?.ativo === false}
+                    onChange={e => handleStatusChange(pedido.id, e.target.value as StatusPedido)}
+                    className="text-sm font-medium border border-gray-200 rounded-xl px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-400 cursor-pointer hover:border-brand-300 transition-colors disabled:cursor-not-allowed disabled:bg-gray-50"
+                  >
                     {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                   </select>
                 </div>
@@ -442,13 +461,19 @@ export function PedidosPage() {
             )}
             <div>
               <h3 className="font-semibold text-gray-900 text-sm mb-2">Alterar Status</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {STATUS_OPTIONS.map(s => (
-                  <button key={s.value} onClick={() => handleStatusChange(detailPedido.id, s.value)} className={`px-3 py-2 rounded-xl text-xs font-medium transition-all border flex items-center gap-1.5 ${detailPedido.status === s.value ? 'bg-brand-500 text-white border-brand-500 shadow-sm' : 'bg-white text-gray-600 border-gray-200 hover:border-brand-300 hover:text-brand-600'}`}>
-                    {STATUS_ICON[s.value]}{s.label}
-                  </button>
-                ))}
-              </div>
+              {detailPedido.mesa?.ativo === false ? (
+                <p className="text-xs text-red-500 bg-red-50 border border-red-200 rounded-xl px-3 py-2">
+                  Mesa desativada — alterações bloqueadas.
+                </p>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {STATUS_OPTIONS.map(s => (
+                    <button key={s.value} onClick={() => handleStatusChange(detailPedido.id, s.value)} className={`px-3 py-2 rounded-xl text-xs font-medium transition-all border flex items-center gap-1.5 ${detailPedido.status === s.value ? 'bg-brand-500 text-white border-brand-500 shadow-sm' : 'bg-white text-gray-600 border-gray-200 hover:border-brand-300 hover:text-brand-600'}`}>
+                      {STATUS_ICON[s.value]}{s.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -665,7 +690,7 @@ function RelatorioModal({
 // PedidoRow
 // ---------------------------------------------------------------------------
 function PedidoRow({
-  pedido, numero, onDetail, onOpenComanda, onStatusChange, onPrint,
+  pedido, numero, onDetail, onOpenComanda, onStatusChange, onPrint, mesaInativa,
 }: {
   pedido: PedidoCompleto
   numero: number
@@ -673,9 +698,10 @@ function PedidoRow({
   onOpenComanda: (p: PedidoCompleto) => void
   onStatusChange: (id: string, status: StatusPedido) => void
   onPrint?: (id: string) => void
+  mesaInativa?: boolean
 }) {
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+    <div className={`flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 ${mesaInativa ? 'opacity-50' : ''}`}>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-semibold text-gray-900 text-sm">Pedido #{numero}</span>
@@ -689,7 +715,8 @@ function PedidoRow({
       <div className="flex items-center gap-1.5 shrink-0">
         <button
           onClick={() => onOpenComanda(pedido)}
-          className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-colors border border-gray-200"
+          disabled={mesaInativa}
+          className="px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:text-brand-600 hover:bg-brand-50 transition-colors border border-gray-200 disabled:pointer-events-none"
           title="Vincular comanda"
         >
           {pedido.comanda_externa ? `Comanda ${pedido.comanda_externa}` : 'Comanda'}
@@ -698,11 +725,21 @@ function PedidoRow({
           <Eye size={13} />
         </button>
         {onPrint && (
-          <button onClick={() => onPrint(pedido.id)} className="p-1.5 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors border border-gray-200" title="Reimprimir">
+          <button
+            onClick={() => onPrint(pedido.id)}
+            disabled={mesaInativa}
+            className="p-1.5 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors border border-gray-200 disabled:pointer-events-none"
+            title="Reimprimir"
+          >
             <Printer size={13} />
           </button>
         )}
-        <select value={pedido.status} onChange={e => onStatusChange(pedido.id, e.target.value as StatusPedido)} className="text-xs font-medium border border-gray-200 rounded-lg px-2 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-400 cursor-pointer hover:border-brand-300 transition-colors">
+        <select
+          value={pedido.status}
+          disabled={mesaInativa}
+          onChange={e => onStatusChange(pedido.id, e.target.value as StatusPedido)}
+          className="text-xs font-medium border border-gray-200 rounded-lg px-2 py-1.5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-400 cursor-pointer hover:border-brand-300 transition-colors disabled:cursor-not-allowed disabled:bg-gray-50"
+        >
           {STATUS_PEDIDO.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
         </select>
       </div>

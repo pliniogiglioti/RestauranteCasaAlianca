@@ -4,6 +4,7 @@ import { AppDrawer } from '@/components/ui/Drawer'
 import { useCart } from '@/hooks/useCart'
 import { formatCurrency } from '@/types'
 import type { Prato } from '@/types'
+import { getPrecoVigente, isPromocaoAtiva } from '@/lib/pricing'
 
 interface DishModalProps {
   prato: (Prato & { categoria?: { nome: string; icone?: string | null } | null }) | null
@@ -26,6 +27,8 @@ export function DishModal({ prato, onClose }: DishModalProps) {
 
   const cartItem = items.find((i) => i.prato.id === pratoAtual.id)
   const quantidade = cartItem?.quantidade ?? 0
+  const precoVigente = getPrecoVigente(pratoAtual)
+  const promocaoAtiva = isPromocaoAtiva(pratoAtual)
 
   return (
     <AppDrawer
@@ -69,9 +72,16 @@ export function DishModal({ prato, onClose }: DishModalProps) {
           {pratoAtual.descricao && (
             <p className="text-gray-500 text-sm mt-2 leading-relaxed">{pratoAtual.descricao}</p>
           )}
-          <p className="text-brand-600 font-bold text-2xl mt-4">
-            {formatCurrency(pratoAtual.preco)}
-          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            {promocaoAtiva && (
+              <span className="text-base font-semibold text-gray-400 line-through">
+                {formatCurrency(pratoAtual.preco)}
+              </span>
+            )}
+            <p className={`font-bold text-2xl ${promocaoAtiva ? 'text-green-600' : 'text-brand-600'}`}>
+              {formatCurrency(precoVigente)}
+            </p>
+          </div>
         </div>
 
         <div className="p-5 border-t border-gray-100 bg-white">
@@ -97,7 +107,7 @@ export function DishModal({ prato, onClose }: DishModalProps) {
               <div className="text-right">
                 <p className="text-xs text-gray-500">Total</p>
                 <p className="text-brand-600 font-bold text-lg">
-                  {formatCurrency(pratoAtual.preco * quantidade)}
+                  {formatCurrency(precoVigente * quantidade)}
                 </p>
               </div>
             </div>

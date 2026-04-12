@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { CartItem, Prato } from '@/types'
+import { getPrecoVigente } from '@/lib/pricing'
 
 interface CartStore {
   items: CartItem[]
@@ -86,7 +87,7 @@ export const useCart = create<CartStore>()(
         get().items.reduce((acc, i) => acc + i.quantidade, 0),
 
       totalValor: () =>
-        get().items.reduce((acc, i) => acc + i.prato.preco * i.quantidade, 0),
+        get().items.reduce((acc, i) => acc + getPrecoVigente(i.prato) * i.quantidade, 0),
     }),
     {
       name: 'cart-storage',

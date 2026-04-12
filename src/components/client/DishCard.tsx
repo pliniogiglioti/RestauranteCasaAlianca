@@ -2,6 +2,7 @@ import { Plus, Minus, ShoppingCart } from 'lucide-react'
 import { formatCurrency } from '@/types'
 import type { Prato } from '@/types'
 import { useCart } from '@/hooks/useCart'
+import { getPrecoVigente, isPromocaoAtiva } from '@/lib/pricing'
 
 interface DishCardProps {
   prato: Prato & { categoria?: { nome: string; icone?: string | null } | null }
@@ -12,6 +13,8 @@ export function DishCard({ prato, onDetails }: DishCardProps) {
   const { items, addItem, updateQuantidade } = useCart()
   const cartItem = items.find((i) => i.prato.id === prato.id)
   const quantidade = cartItem?.quantidade ?? 0
+  const precoVigente = getPrecoVigente(prato)
+  const promocaoAtiva = isPromocaoAtiva(prato)
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200">
@@ -41,6 +44,14 @@ export function DishCard({ prato, onDetails }: DishCardProps) {
             </span>
           </div>
         )}
+
+        {promocaoAtiva && (
+          <div className="absolute right-2 top-2">
+            <span className="rounded-full bg-green-600 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
+              Promocao
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Content */}
@@ -58,9 +69,16 @@ export function DishCard({ prato, onDetails }: DishCardProps) {
         )}
 
         <div className="mt-3">
-          <span className="text-brand-600 font-bold text-base">
-            {formatCurrency(prato.preco)}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            {promocaoAtiva && (
+              <span className="text-xs font-semibold text-gray-400 line-through">
+                {formatCurrency(prato.preco)}
+              </span>
+            )}
+            <span className={`font-bold text-base ${promocaoAtiva ? 'text-green-600' : 'text-brand-600'}`}>
+              {formatCurrency(precoVigente)}
+            </span>
+          </div>
 
           {/* Cart controls */}
           {quantidade > 0 ? (

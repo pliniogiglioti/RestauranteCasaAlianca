@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import type { StatusPedido, CartItem, PedidoCompleto, Pedido } from '@/types'
+import { getPrecoVigente } from '@/lib/pricing'
 
 export interface CriarPedidoInput {
   mesa_id: string
@@ -10,7 +11,7 @@ export interface CriarPedidoInput {
 
 export async function criarPedido(input: CriarPedidoInput): Promise<{ id: string }> {
   const valor_total = input.itens.reduce(
-    (acc, item) => acc + item.prato.preco * item.quantidade,
+    (acc, item) => acc + getPrecoVigente(item.prato) * item.quantidade,
     0
   )
 
@@ -37,7 +38,7 @@ export async function criarPedido(input: CriarPedidoInput): Promise<{ id: string
     prato_id: item.prato.id,
     nome_prato: item.prato.nome,
     quantidade: item.quantidade,
-    preco_unitario: item.prato.preco,
+    preco_unitario: getPrecoVigente(item.prato),
     observacao_item: item.observacao || null,
   }))
 

@@ -6,6 +6,7 @@ import { useCart } from '@/hooks/useCart'
 import { getBebidasParaUpsell } from '@/services/pratos'
 import { formatCurrency } from '@/types'
 import type { PratoComCategoria } from '@/types'
+import { getPrecoVigente, isPromocaoAtiva } from '@/lib/pricing'
 
 interface CartDrawerProps {
   isOpen: boolean
@@ -93,12 +94,19 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     <h4 className="font-semibold text-gray-900 text-sm line-clamp-1">
                       {item.prato.nome}
                     </h4>
-                    <p className="text-brand-600 font-bold text-sm mt-0.5">
-                      {formatCurrency(item.prato.preco * item.quantidade)}
+                    <p className={`font-bold text-sm mt-0.5 ${isPromocaoAtiva(item.prato) ? 'text-green-600' : 'text-brand-600'}`}>
+                      {formatCurrency(getPrecoVigente(item.prato) * item.quantidade)}
                     </p>
-                    <p className="text-gray-400 text-xs">
-                      {formatCurrency(item.prato.preco)} cada
-                    </p>
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      {isPromocaoAtiva(item.prato) && (
+                        <span className="text-gray-400 line-through">
+                          {formatCurrency(item.prato.preco)} cada
+                        </span>
+                      )}
+                      <span className={isPromocaoAtiva(item.prato) ? 'font-semibold text-green-600' : 'text-gray-400'}>
+                        {formatCurrency(getPrecoVigente(item.prato))} cada
+                      </span>
+                    </div>
                   </div>
 
                   <button
@@ -246,6 +254,8 @@ function DrinkCard({
   onAdd: (prato: PratoComCategoria) => void
 }) {
   const [added, setAdded] = useState(false)
+  const precoVigente = getPrecoVigente(bebida)
+  const promocaoAtiva = isPromocaoAtiva(bebida)
 
   function handleAdd() {
     onAdd(bebida)
@@ -282,7 +292,16 @@ function DrinkCard({
         <p className="text-gray-800 text-xs font-semibold line-clamp-2 leading-tight min-h-[2rem]">
           {bebida.nome}
         </p>
-        <p className="text-brand-600 font-bold text-xs mt-1">{formatCurrency(bebida.preco)}</p>
+        <div className="mt-1 flex flex-col">
+          {promocaoAtiva && (
+            <span className="text-[10px] font-semibold text-gray-400 line-through">
+              {formatCurrency(bebida.preco)}
+            </span>
+          )}
+          <p className={`font-bold text-xs ${promocaoAtiva ? 'text-green-600' : 'text-brand-600'}`}>
+            {formatCurrency(precoVigente)}
+          </p>
+        </div>
         <button
           onClick={handleAdd}
           className={`

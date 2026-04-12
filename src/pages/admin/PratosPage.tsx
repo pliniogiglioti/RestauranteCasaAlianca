@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/Badge'
 import { SectionLoading } from '@/components/ui/LoadingSpinner'
 import { DIAS_SEMANA, formatCurrency } from '@/types'
 import type { Prato, Categoria, DiaSemana } from '@/types'
+import { formatDataPromocional, hasPromocaoConfigurada } from '@/lib/pricing'
 import toast from 'react-hot-toast'
 
 type PratoComCat = Prato & { categoria: Categoria | null }
@@ -36,6 +37,9 @@ export function PratosPage() {
   const [ativo, setAtivo] = useState(true)
   const [pratoDoDia, setPratoDoDia] = useState(false)
   const [diaPratoDoDia, setDiaPratoDoDia] = useState<DiaSemana | ''>('')
+  const [promocaoAtiva, setPromocaoAtiva] = useState(false)
+  const [precoPromocional, setPrecoPromocional] = useState('')
+  const [dataPromocional, setDataPromocional] = useState('')
   const [imagemUrl, setImagemUrl] = useState('')
   const [novaImagem, setNovaImagem] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState('')
@@ -64,6 +68,9 @@ export function PratosPage() {
       setAtivo(prato.ativo)
       setPratoDoDia(prato.prato_do_dia)
       setDiaPratoDoDia(prato.dia_prato_do_dia ?? '')
+      setPromocaoAtiva(hasPromocaoConfigurada(prato))
+      setPrecoPromocional(prato.preco_promocional != null ? String(prato.preco_promocional) : '')
+      setDataPromocional(prato.data_promocional ?? '')
       setImagemUrl(prato.imagem_url ?? '')
       setPreviewUrl(prato.imagem_url ?? '')
     } else {
@@ -75,6 +82,9 @@ export function PratosPage() {
       setAtivo(true)
       setPratoDoDia(false)
       setDiaPratoDoDia('')
+      setPromocaoAtiva(false)
+      setPrecoPromocional('')
+      setDataPromocional('')
       setImagemUrl('')
       setPreviewUrl('')
     }
@@ -95,6 +105,29 @@ export function PratosPage() {
       return
     }
 
+    if (pratoDoDia && !diaPratoDoDia) {
+      toast.error('Selecione o dia do prato do dia')
+      return
+    }
+
+    if (promocaoAtiva && (!precoPromocional || !dataPromocional)) {
+      toast.error('Preencha o valor e a data da promoção')
+      return
+    }
+
+    const precoBase = parseFloat(preco)
+    const precoPromo = parseFloat(precoPromocional)
+
+    if (promocaoAtiva && (Number.isNaN(precoPromo) || precoPromo <= 0)) {
+      toast.error('Informe um preço promocional válido')
+      return
+    }
+
+    if (promocaoAtiva && !Number.isNaN(precoBase) && precoPromo >= precoBase) {
+      toast.error('O preço promocional deve ser menor que o preço original')
+      return
+    }
+
     try {
       setSaving(true)
       let finalImagemUrl = imagemUrl
@@ -103,7 +136,9 @@ export function PratosPage() {
         nome,
         descricao: descricao || null,
         imagem_url: finalImagemUrl || null,
-        preco: parseFloat(preco),
+        preco: precoBase,
+        preco_promocional: promocaoAtiva ? precoPromo : null,
+        data_promocional: promocaoAtiva ? dataPromocional : null,
         categoria_id: categoriaId || null,
         ativo,
         prato_do_dia: pratoDoDia,
@@ -203,6 +238,7 @@ export function PratosPage() {
                 <th className="text-left px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide">Prato</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide hidden sm:table-cell">Categoria</th>
                 <th className="text-right px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide">Preço</th>
+                <th className="text-center px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide hidden lg:table-cell">Promoção</th>
                 <th className="text-center px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide hidden md:table-cell">Dia</th>
                 <th className="text-center px-4 py-3 font-semibold text-gray-600 text-xs uppercase tracking-wide">Status</th>
                 <th className="px-4 py-3" />
@@ -239,7 +275,28 @@ export function PratosPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <span className="font-bold text-gray-900">{formatCurrency(prato.preco)}</span>
+                    <div className="flex flex-col items-end">
+                      <span className="font-bold text-gray-900">{formatCurrency(prato.preco)}</span>
+                      {hasPromocaoConfigurada(prato) && (
+                        <span className="text-xs font-medium text-green-600">
+                          {formatCurrency(prato.preco_promocional ?? 0)}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-center hidden lg:table-cell">
+                    {hasPromocaoConfigurada(prato) ? (
+                      <div className="flex flex-col items-center gap-1">
+                        <Badge variant="success" size="sm">
+                          {formatDataPromocional(prato.data_promocional)}
+                        </Badge>
+                        <span className="text-[11px] font-semibold text-green-600">
+                          {formatCurrency(prato.preco_promocional ?? 0)}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-gray-300">—</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-center hidden md:table-cell">
                     {prato.dia_prato_do_dia ? (
@@ -356,6 +413,7 @@ export function PratosPage() {
           <div className="space-y-3 pt-1">
             <Toggle checked={ativo} onChange={setAtivo} label="Prato ativo (visível no cardápio)" />
             <Toggle checked={pratoDoDia} onChange={setPratoDoDia} label="Marcar como Prato do Dia" />
+            <Toggle checked={promocaoAtiva} onChange={setPromocaoAtiva} label="Ativar promoção por data" />
           </div>
 
           {pratoDoDia && (
@@ -366,6 +424,28 @@ export function PratosPage() {
               options={DIAS_SEMANA.map((d) => ({ value: d.value, label: d.label }))}
               placeholder="Selecionar dia..."
             />
+          )}
+
+          {promocaoAtiva && (
+            <div className="grid grid-cols-1 gap-4 rounded-2xl border border-green-100 bg-green-50/70 p-4 sm:grid-cols-2">
+              <Input
+                label="Preço promocional (R$)"
+                type="number"
+                step="0.01"
+                min="0"
+                value={precoPromocional}
+                onChange={(e) => setPrecoPromocional(e.target.value)}
+                placeholder="0.00"
+                required
+              />
+              <Input
+                label="Data da promoção"
+                type="date"
+                value={dataPromocional}
+                onChange={(e) => setDataPromocional(e.target.value)}
+                required
+              />
+            </div>
           )}
         </div>
       </Modal>

@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { BellRing, ChefHat, Clock3, Sparkles } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
 import { AppIcon } from '@/components/ui/AppIcon'
@@ -33,75 +34,148 @@ export function TVPage() {
       })
       .subscribe()
 
-    return () => { void supabase.removeChannel(channel) }
+    return () => {
+      void supabase.removeChannel(channel)
+    }
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col select-none overflow-hidden">
-      {/* Header */}
-      <header className="flex items-center justify-between px-8 py-4 bg-gray-900 border-b border-gray-800">
-        <div className="flex items-center gap-3">
-          <AppIcon size="sm" />
-          <span className="text-lg font-bold tracking-wide">{nomeRestaurante}</span>
-        </div>
-        <Clock />
-      </header>
-
-      {/* Dois painéis */}
-      <div className="flex-1 grid grid-cols-2 divide-x divide-gray-800 overflow-hidden">
-
-        {/* PAINEL ESQUERDO — Retire aqui */}
-        <div className="flex flex-col">
-          {/* Título painel */}
-          <div className="bg-green-600 px-6 py-4 text-center">
-            <p className="text-white font-black text-2xl tracking-wider uppercase">
-              Retire aqui
-            </p>
-          </div>
-
-          {/* Cards de pedidos prontos */}
-          <div className="flex-1 p-4 overflow-y-auto">
-            {prontos.length === 0 ? (
-              <div className="h-full flex items-center justify-center opacity-30">
-                <p className="text-gray-400 text-lg">Nenhum pedido pronto</p>
+    <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(22,163,74,0.18),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(250,204,21,0.16),_transparent_24%),linear-gradient(135deg,_#06110b_0%,_#0b1b13_45%,_#101726_100%)] text-white">
+      <div className="flex min-h-screen flex-col px-6 py-6 lg:px-8">
+        <header className="rounded-[32px] border border-white/10 bg-white/6 px-6 py-5 shadow-2xl shadow-black/30 backdrop-blur-xl">
+          <div className="flex items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="rounded-2xl border border-white/10 bg-white/10 p-3">
+                <AppIcon size="sm" />
               </div>
-            ) : (
-              <div className="flex flex-col gap-3">
-                {prontos.map((p) => (
-                  <CardPedido key={p.id} pedido={p} variant="pronto" />
-                ))}
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-emerald-200/80">
+                  Painel de chamada
+                </p>
+                <h1 className="mt-1 text-3xl font-black tracking-tight text-white">
+                  {nomeRestaurante}
+                </h1>
               </div>
-            )}
-          </div>
-        </div>
+            </div>
 
-        {/* PAINEL DIREITO — Em preparo */}
-        <div className="flex flex-col">
-          {/* Título painel */}
-          <div className="bg-yellow-500 px-6 py-4 text-center">
-            <p className="text-gray-900 font-black text-2xl tracking-wider uppercase">
-              Em preparo
-            </p>
+            <div className="flex items-center gap-3">
+              <ResumoChip
+                icon={<BellRing size={18} />}
+                label="Prontos"
+                value={String(prontos.length)}
+                tone="ready"
+              />
+              <ResumoChip
+                icon={<ChefHat size={18} />}
+                label="Preparando"
+                value={String(emPreparo.length)}
+                tone="prep"
+              />
+              <ClockPanel />
+            </div>
           </div>
+        </header>
 
-          {/* Cards de pedidos em preparo */}
-          <div className="flex-1 p-4 overflow-y-auto">
-            {emPreparo.length === 0 ? (
-              <div className="h-full flex items-center justify-center opacity-30">
-                <p className="text-gray-400 text-lg">Nenhum pedido em preparo</p>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-3">
-                {emPreparo.map((p) => (
-                  <CardPedido key={p.id} pedido={p} variant="preparo" />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
+        <main className="mt-6 grid min-h-0 flex-1 grid-cols-2 gap-6">
+          <PainelPedidos
+            title="Retire aqui"
+            subtitle="Pedidos liberados para entrega"
+            icon={<Sparkles size={22} />}
+            pedidos={prontos}
+            variant="pronto"
+          />
+          <PainelPedidos
+            title="Em preparo"
+            subtitle="Pedidos recebidos pela cozinha"
+            icon={<Clock3 size={22} />}
+            pedidos={emPreparo}
+            variant="preparo"
+          />
+        </main>
       </div>
     </div>
+  )
+}
+
+function PainelPedidos({
+  title,
+  subtitle,
+  icon,
+  pedidos,
+  variant,
+}: {
+  title: string
+  subtitle: string
+  icon: ReactNode
+  pedidos: PedidoCompleto[]
+  variant: 'pronto' | 'preparo'
+}) {
+  const isPronto = variant === 'pronto'
+
+  return (
+    <section
+      className={`flex min-h-0 flex-col overflow-hidden rounded-[34px] border ${
+        isPronto
+          ? 'border-emerald-400/30 bg-emerald-500/10 shadow-[0_24px_90px_-35px_rgba(34,197,94,0.55)]'
+          : 'border-amber-300/25 bg-amber-400/8 shadow-[0_24px_90px_-35px_rgba(250,204,21,0.35)]'
+      }`}
+    >
+      <div
+        className={`flex items-center justify-between border-b px-6 py-5 ${
+          isPronto ? 'border-emerald-300/20 bg-emerald-400/10' : 'border-amber-200/15 bg-amber-300/10'
+        }`}
+      >
+        <div className="flex items-center gap-4">
+          <div
+            className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
+              isPronto ? 'bg-emerald-300/15 text-emerald-200' : 'bg-amber-200/15 text-amber-100'
+            }`}
+          >
+            {icon}
+          </div>
+          <div>
+            <h2 className="text-3xl font-black tracking-tight text-white">{title}</h2>
+            <p className={`text-sm ${isPronto ? 'text-emerald-100/75' : 'text-amber-50/70'}`}>
+              {subtitle}
+            </p>
+          </div>
+        </div>
+
+        <div
+          className={`rounded-full px-4 py-2 text-sm font-bold ${
+            isPronto ? 'bg-emerald-300/14 text-emerald-100' : 'bg-amber-200/14 text-amber-50'
+          }`}
+        >
+          {pedidos.length} pedido{pedidos.length === 1 ? '' : 's'}
+        </div>
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto p-5">
+        {pedidos.length === 0 ? (
+          <div className="flex h-full flex-col items-center justify-center rounded-[28px] border border-dashed border-white/10 bg-black/10 px-8 text-center">
+            <div
+              className={`mb-4 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.3em] ${
+                isPronto ? 'bg-emerald-300/10 text-emerald-200' : 'bg-amber-200/10 text-amber-100'
+              }`}
+            >
+              Painel livre
+            </div>
+            <p className="text-3xl font-black text-white">
+              {isPronto ? 'Nenhum pedido pronto' : 'Nenhum pedido em preparo'}
+            </p>
+            <p className="mt-2 max-w-md text-base text-white/55">
+              Assim que um pedido mudar de status ele aparecera automaticamente aqui.
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-4">
+            {pedidos.map((pedido) => (
+              <CardPedido key={pedido.id} pedido={pedido} variant={variant} />
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
   )
 }
 
@@ -113,45 +187,124 @@ function CardPedido({
   variant: 'pronto' | 'preparo'
 }) {
   const isPronto = variant === 'pronto'
+  const itens = pedido.itens.reduce((total, item) => total + item.quantidade, 0)
 
   return (
-    <div
-      className={`rounded-2xl flex items-center gap-6 px-6 py-4 ${
+    <article
+      className={`rounded-[28px] border p-5 ${
         isPronto
-          ? 'bg-green-500/20 border-2 border-green-500 shadow-lg shadow-green-500/20'
-          : 'bg-yellow-500/10 border-2 border-yellow-500/40'
+          ? 'border-emerald-300/30 bg-[linear-gradient(135deg,rgba(16,185,129,0.18),rgba(5,46,22,0.8))]'
+          : 'border-amber-200/20 bg-[linear-gradient(135deg,rgba(245,158,11,0.16),rgba(30,25,10,0.86))]'
       }`}
     >
-      {/* Número da mesa */}
-      <div className="shrink-0 text-center">
-        <p className={`text-xs font-semibold uppercase tracking-widest ${isPronto ? 'text-green-400' : 'text-yellow-400/70'}`}>
-          Mesa
-        </p>
-        <p className={`font-black leading-none text-5xl ${isPronto ? 'text-white' : 'text-gray-300'}`}>
-          {pedido.mesa?.numero ?? '—'}
-        </p>
+      <div className="flex items-center gap-5">
+        <div
+          className={`flex h-28 w-28 shrink-0 flex-col items-center justify-center rounded-[26px] border ${
+            isPronto
+              ? 'border-emerald-200/35 bg-emerald-200/12 text-white'
+              : 'border-amber-100/20 bg-amber-100/8 text-amber-50'
+          }`}
+        >
+          <span className={`text-xs font-bold uppercase tracking-[0.4em] ${isPronto ? 'text-emerald-100/70' : 'text-amber-100/65'}`}>
+            Mesa
+          </span>
+          <span className="mt-2 text-6xl font-black leading-none tabular-nums">
+            {pedido.mesa?.numero ?? '—'}
+          </span>
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span
+              className={`rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.3em] ${
+                isPronto ? 'bg-emerald-200/15 text-emerald-100' : 'bg-amber-100/12 text-amber-50'
+              }`}
+            >
+              {isPronto ? 'Pode retirar' : pedido.status === 'recebido' ? 'Recebido' : 'Cozinha'}
+            </span>
+            <span className="text-sm font-medium text-white/45">
+              Atualizado {formatHorario(pedido.updated_at)}
+            </span>
+          </div>
+
+          <p className="mt-4 truncate text-5xl font-black tracking-tight text-white">
+            {pedido.nome_cliente?.trim() || 'Cliente sem nome'}
+          </p>
+
+          <div className="mt-4 flex items-center gap-3 text-sm text-white/70">
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 font-semibold">
+              {itens} item{itens === 1 ? '' : 's'}
+            </span>
+            {pedido.comanda_externa && (
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 font-semibold">
+                Comanda {pedido.comanda_externa}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
+    </article>
+  )
+}
 
-      {/* Divisor */}
-      <div className={`w-px self-stretch ${isPronto ? 'bg-green-500/40' : 'bg-yellow-500/20'}`} />
+function ResumoChip({
+  icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: ReactNode
+  label: string
+  value: string
+  tone: 'ready' | 'prep'
+}) {
+  return (
+    <div
+      className={`flex items-center gap-3 rounded-2xl border px-4 py-3 ${
+        tone === 'ready'
+          ? 'border-emerald-300/20 bg-emerald-300/10 text-emerald-50'
+          : 'border-amber-200/15 bg-amber-200/10 text-amber-50'
+      }`}
+    >
+      <div className="opacity-80">{icon}</div>
+      <div>
+        <p className="text-[11px] font-bold uppercase tracking-[0.3em] opacity-65">{label}</p>
+        <p className="text-2xl font-black leading-none">{value}</p>
+      </div>
+    </div>
+  )
+}
 
-      {/* Nome do cliente */}
-      <p className={`font-black text-4xl truncate ${isPronto ? 'text-white' : 'text-gray-400'}`}>
-        {pedido.nome_cliente ?? '—'}
+function ClockPanel() {
+  const [agora, setAgora] = useState(() => new Date())
+
+  useEffect(() => {
+    const id = setInterval(() => setAgora(new Date()), 1000)
+    return () => clearInterval(id)
+  }, [])
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-black/20 px-5 py-3 text-right">
+      <p className="text-[11px] font-bold uppercase tracking-[0.35em] text-white/45">
+        Agora
+      </p>
+      <p className="mt-1 text-4xl font-black leading-none tabular-nums text-white">
+        {agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+      </p>
+      <p className="mt-1 text-sm text-white/55">
+        {agora.toLocaleDateString('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        })}
       </p>
     </div>
   )
 }
 
-function Clock() {
-  const [hora, setHora] = useState(() =>
-    new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-  )
-  useEffect(() => {
-    const id = setInterval(() => {
-      setHora(new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }))
-    }, 10000)
-    return () => clearInterval(id)
-  }, [])
-  return <span className="text-2xl font-bold text-gray-400 tabular-nums">{hora}</span>
+function formatHorario(value: string): string {
+  return new Date(value).toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }

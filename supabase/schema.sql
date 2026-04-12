@@ -63,6 +63,8 @@ CREATE TABLE IF NOT EXISTS public.pratos (
   descricao TEXT,
   imagem_url TEXT,
   preco NUMERIC(10,2) NOT NULL DEFAULT 0,
+  preco_promocional NUMERIC(10,2),
+  data_promocional DATE,
   categoria_id UUID REFERENCES public.categorias(id) ON DELETE SET NULL,
   ativo BOOLEAN DEFAULT true,
   prato_do_dia BOOLEAN DEFAULT false,
@@ -78,6 +80,7 @@ CREATE TABLE IF NOT EXISTS public.pratos (
 CREATE INDEX IF NOT EXISTS idx_pratos_categoria ON public.pratos(categoria_id);
 CREATE INDEX IF NOT EXISTS idx_pratos_ativo ON public.pratos(ativo);
 CREATE INDEX IF NOT EXISTS idx_pratos_prato_do_dia ON public.pratos(prato_do_dia, dia_prato_do_dia);
+CREATE INDEX IF NOT EXISTS idx_pratos_promocao_data ON public.pratos(data_promocional);
 
 -- ============================================================
 -- TABELA: banners

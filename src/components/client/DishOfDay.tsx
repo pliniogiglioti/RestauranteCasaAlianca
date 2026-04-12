@@ -2,6 +2,7 @@ import { Star, Plus, Minus } from 'lucide-react'
 import { formatCurrency } from '@/types'
 import type { Prato } from '@/types'
 import { useCart } from '@/hooks/useCart'
+import { getPrecoVigente, isPromocaoAtiva } from '@/lib/pricing'
 
 type PratoComCategoria = Prato & { categoria?: { nome: string; icone?: string | null } | null }
 
@@ -42,6 +43,8 @@ function DishOfDayCard({
   const { items, addItem, updateQuantidade } = useCart()
   const cartItem = items.find((i) => i.prato.id === prato.id)
   const quantidade = cartItem?.quantidade ?? 0
+  const precoVigente = getPrecoVigente(prato)
+  const promocaoAtiva = isPromocaoAtiva(prato)
 
   return (
     <div
@@ -90,9 +93,16 @@ function DishOfDayCard({
           </div>
 
           <div className="flex items-center justify-between mt-3 gap-2">
-            <span className="text-brand-600 font-bold text-lg">
-              {formatCurrency(prato.preco)}
-            </span>
+            <div className="flex flex-col">
+              {promocaoAtiva && (
+                <span className="text-xs font-semibold text-gray-400 line-through">
+                  {formatCurrency(prato.preco)}
+                </span>
+              )}
+              <span className={`font-bold text-lg ${promocaoAtiva ? 'text-green-600' : 'text-brand-600'}`}>
+                {formatCurrency(precoVigente)}
+              </span>
+            </div>
 
             {quantidade > 0 ? (
               <div

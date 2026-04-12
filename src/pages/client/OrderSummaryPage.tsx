@@ -5,6 +5,7 @@ import { formatCurrency } from '@/types'
 import { useCart } from '@/hooks/useCart'
 import { usePedidoAtivo } from '@/hooks/usePedidoAtivo'
 import { criarPedido } from '@/services/pedidos'
+import { getPrecoVigente, isPromocaoAtiva } from '@/lib/pricing'
 import toast from 'react-hot-toast'
 
 export function OrderSummaryPage() {
@@ -98,13 +99,20 @@ export function OrderSummaryPage() {
                       <p className="font-semibold text-gray-900 text-sm line-clamp-1">
                         {item.prato.nome}
                       </p>
-                      <span className="text-brand-600 font-bold text-sm shrink-0">
-                        {formatCurrency(item.prato.preco * item.quantidade)}
+                      <span className={`font-bold text-sm shrink-0 ${isPromocaoAtiva(item.prato) ? 'text-green-600' : 'text-brand-600'}`}>
+                        {formatCurrency(getPrecoVigente(item.prato) * item.quantidade)}
                       </span>
                     </div>
-                    <p className="text-gray-400 text-xs mt-0.5">
-                      {item.quantidade}x {formatCurrency(item.prato.preco)}
-                    </p>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs">
+                      {isPromocaoAtiva(item.prato) && (
+                        <span className="text-gray-400 line-through">
+                          {item.quantidade}x {formatCurrency(item.prato.preco)}
+                        </span>
+                      )}
+                      <span className={isPromocaoAtiva(item.prato) ? 'font-semibold text-green-600' : 'text-gray-400'}>
+                        {item.quantidade}x {formatCurrency(getPrecoVigente(item.prato))}
+                      </span>
+                    </div>
                     {item.observacao && (
                       <p className="text-gray-500 text-xs mt-1 bg-brand-50 px-2 py-1 rounded-lg border border-brand-100">
                         💬 {item.observacao}

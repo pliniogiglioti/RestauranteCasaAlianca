@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Plus, Edit2, Trash2, GripVertical } from 'lucide-react'
+import { Plus, Edit2, Trash2, GripVertical, ArrowUp, ArrowDown, ListOrdered } from 'lucide-react'
 import {
   getCategorias,
   createCategoria,
   updateCategoria,
   deleteCategoria,
+  reordenarCategorias,
   gerarSlugCategoria,
 } from '@/services/categorias'
 import { PageHeader } from '@/components/admin/PageHeader'
@@ -25,6 +26,7 @@ export function CategoriasPage() {
   const [deleteTarget, setDeleteTarget] = useState<Categoria | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [reorderingId, setReorderingId] = useState<string | null>(null)
 
   // Form
   const [nome, setNome] = useState('')
@@ -112,6 +114,28 @@ export function CategoriasPage() {
     }
   }
 
+  async function moverCategoria(index: number, direction: 'up' | 'down') {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1
+    if (targetIndex < 0 || targetIndex >= categorias.length) return
+
+    const reordered = [...categorias]
+    const [item] = reordered.splice(index, 1)
+    reordered.splice(targetIndex, 0, item)
+
+    setCategorias(reordered.map((categoria, ordemIndex) => ({ ...categoria, ordem: ordemIndex + 1 })))
+    setReorderingId(item.id)
+
+    try {
+      await reordenarCategorias(reordered.map((categoria) => categoria.id))
+      toast.success('Sequência atualizada!')
+    } catch {
+      toast.error('Erro ao atualizar sequência')
+      carregar()
+    } finally {
+      setReorderingId(null)
+    }
+  }
+
   if (loading) return <SectionLoading />
 
   return (
@@ -120,10 +144,16 @@ export function CategoriasPage() {
         title="Categorias"
         subtitle={`${categorias.length} categoria${categorias.length !== 1 ? 's' : ''}`}
         action={
-          <Button onClick={() => abrirModal()}>
-            <Plus size={16} />
-            Nova Categoria
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="hidden rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700 sm:flex sm:items-center sm:gap-2">
+              <ListOrdered size={14} />
+              Modo sequência ativo
+            </div>
+            <Button onClick={() => abrirModal()}>
+              <Plus size={16} />
+              Nova Categoria
+            </Button>
+          </div>
         }
       />
 
@@ -150,6 +180,25 @@ export function CategoriasPage() {
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-gray-900 text-sm">{cat.nome}</p>
                   <p className="text-xs text-gray-400 font-mono">{cat.slug}</p>
+                </div>
+
+                <div className="hidden items-center gap-1 rounded-xl border border-gray-200 bg-gray-50 p-1 md:flex">
+                  <button
+                    onClick={() => moverCategoria(index, 'up')}
+                    disabled={index === 0 || reorderingId !== null}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-white hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-40"
+                    title="Mover para cima"
+                  >
+                    <ArrowUp size={14} />
+                  </button>
+                  <button
+                    onClick={() => moverCategoria(index, 'down')}
+                    disabled={index === categorias.length - 1 || reorderingId !== null}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-white hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-40"
+                    title="Mover para baixo"
+                  >
+                    <ArrowDown size={14} />
+                  </button>
                 </div>
 
                 <Toggle

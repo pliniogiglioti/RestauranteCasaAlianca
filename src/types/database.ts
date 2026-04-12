@@ -43,7 +43,7 @@ export interface PratoRow {
   imagem_url: string | null
   preco: number
   preco_promocional: number | null
-  data_promocional: string | null
+  dia_promocional: DiaSemana | null
   categoria_id: string | null
   ativo: boolean
   prato_do_dia: boolean
@@ -133,7 +133,7 @@ export interface PratoInsert {
   imagem_url?: string | null
   preco: number
   preco_promocional?: number | null
-  data_promocional?: string | null
+  dia_promocional?: DiaSemana | null
   categoria_id?: string | null
   ativo?: boolean
   prato_do_dia?: boolean

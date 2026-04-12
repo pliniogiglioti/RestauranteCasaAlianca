@@ -74,11 +74,11 @@ export const STATUS_PEDIDO: { value: StatusPedido; label: string; color: string 
   { value: 'finalizado', label: 'Finalizado', color: 'gray' },
 ]
 
-export function getDiaSemanaAtual(): DiaSemana {
+export function getDiaSemanaAtual(date = new Date()): DiaSemana {
   const dias: DiaSemana[] = [
     'domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado',
   ]
-  return dias[new Date().getDay()]
+  return dias[date.getDay()]
 }
 
 export function formatCurrency(value: number): string {

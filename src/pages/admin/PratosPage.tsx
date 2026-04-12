@@ -12,7 +12,8 @@ import { Badge } from '@/components/ui/Badge'
 import { SectionLoading } from '@/components/ui/LoadingSpinner'
 import { DIAS_SEMANA, formatCurrency } from '@/types'
 import type { Prato, Categoria, DiaSemana } from '@/types'
-import { formatDataPromocional, hasPromocaoConfigurada } from '@/lib/pricing'
+import { formatDiaPromocional, hasPromocaoConfigurada } from '@/lib/pricing'
+import { currencyInputToNumber, formatCurrencyInput, numberToCurrencyInput } from '@/lib/currency'
 import toast from 'react-hot-toast'
 
 type PratoComCat = Prato & { categoria: Categoria | null }
@@ -22,6 +23,7 @@ export function PratosPage() {
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [categoriaFiltro, setCategoriaFiltro] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [editando, setEditando] = useState<PratoComCat | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<PratoComCat | null>(null)
@@ -39,7 +41,7 @@ export function PratosPage() {
   const [diaPratoDoDia, setDiaPratoDoDia] = useState<DiaSemana | ''>('')
   const [promocaoAtiva, setPromocaoAtiva] = useState(false)
   const [precoPromocional, setPrecoPromocional] = useState('')
-  const [dataPromocional, setDataPromocional] = useState('')
+  const [diaPromocional, setDiaPromocional] = useState<DiaSemana | ''>('')
   const [imagemUrl, setImagemUrl] = useState('')
   const [novaImagem, setNovaImagem] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState('')
@@ -63,28 +65,28 @@ export function PratosPage() {
       setEditando(prato)
       setNome(prato.nome)
       setDescricao(prato.descricao ?? '')
-      setPreco(String(prato.preco))
+      setPreco(numberToCurrencyInput(prato.preco))
       setCategoriaId(prato.categoria_id ?? '')
       setAtivo(prato.ativo)
       setPratoDoDia(prato.prato_do_dia)
       setDiaPratoDoDia(prato.dia_prato_do_dia ?? '')
       setPromocaoAtiva(hasPromocaoConfigurada(prato))
-      setPrecoPromocional(prato.preco_promocional != null ? String(prato.preco_promocional) : '')
-      setDataPromocional(prato.data_promocional ?? '')
+      setPrecoPromocional(numberToCurrencyInput(prato.preco_promocional))
+      setDiaPromocional(prato.dia_promocional ?? '')
       setImagemUrl(prato.imagem_url ?? '')
       setPreviewUrl(prato.imagem_url ?? '')
     } else {
       setEditando(null)
       setNome('')
       setDescricao('')
-      setPreco('')
+      setPreco(formatCurrencyInput('0'))
       setCategoriaId('')
       setAtivo(true)
       setPratoDoDia(false)
       setDiaPratoDoDia('')
       setPromocaoAtiva(false)
-      setPrecoPromocional('')
-      setDataPromocional('')
+      setPrecoPromocional(formatCurrencyInput('0'))
+      setDiaPromocional('')
       setImagemUrl('')
       setPreviewUrl('')
     }
@@ -100,7 +102,10 @@ export function PratosPage() {
   }
 
   async function handleSalvar() {
-    if (!nome.trim() || !preco) {
+    const precoBase = currencyInputToNumber(preco)
+    const precoPromo = currencyInputToNumber(precoPromocional)
+
+    if (!nome.trim() || precoBase <= 0) {
       toast.error('Nome e preço são obrigatórios')
       return
     }
@@ -110,20 +115,17 @@ export function PratosPage() {
       return
     }
 
-    if (promocaoAtiva && (!precoPromocional || !dataPromocional)) {
-      toast.error('Preencha o valor e a data da promoção')
+    if (promocaoAtiva && (!precoPromocional || !diaPromocional)) {
+      toast.error('Preencha o valor e o dia da promoção')
       return
     }
 
-    const precoBase = parseFloat(preco)
-    const precoPromo = parseFloat(precoPromocional)
-
-    if (promocaoAtiva && (Number.isNaN(precoPromo) || precoPromo <= 0)) {
+    if (promocaoAtiva && precoPromo <= 0) {
       toast.error('Informe um preço promocional válido')
       return
     }
 
-    if (promocaoAtiva && !Number.isNaN(precoBase) && precoPromo >= precoBase) {
+    if (promocaoAtiva && precoPromo >= precoBase) {
       toast.error('O preço promocional deve ser menor que o preço original')
       return
     }
@@ -138,7 +140,7 @@ export function PratosPage() {
         imagem_url: finalImagemUrl || null,
         preco: precoBase,
         preco_promocional: promocaoAtiva ? precoPromo : null,
-        data_promocional: promocaoAtiva ? dataPromocional : null,
+        dia_promocional: (promocaoAtiva && diaPromocional ? diaPromocional : null) as DiaSemana | null,
         categoria_id: categoriaId || null,
         ativo,
         prato_do_dia: pratoDoDia,
@@ -197,9 +199,10 @@ export function PratosPage() {
   }
 
   const pratosFiltrados = pratos.filter((p) =>
-    !search ||
-    p.nome.toLowerCase().includes(search.toLowerCase()) ||
-    p.categoria?.nome.toLowerCase().includes(search.toLowerCase())
+    (!search ||
+      p.nome.toLowerCase().includes(search.toLowerCase()) ||
+      p.categoria?.nome.toLowerCase().includes(search.toLowerCase())) &&
+    (!categoriaFiltro || p.categoria_id === categoriaFiltro)
   )
 
   if (loading) return <SectionLoading />
@@ -218,15 +221,26 @@ export function PratosPage() {
       />
 
       {/* Search */}
-      <div className="relative max-w-sm">
-        <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar prato..."
-          className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400 bg-white"
-        />
+      <div className="flex flex-col gap-3 md:flex-row md:items-end">
+        <div className="relative max-w-sm flex-1">
+          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar prato..."
+            className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-400 bg-white"
+          />
+        </div>
+        <div className="w-full md:max-w-xs">
+          <Select
+            label="Filtrar por categoria"
+            value={categoriaFiltro}
+            onChange={(e) => setCategoriaFiltro(e.target.value)}
+            options={categorias.map((c) => ({ value: c.id, label: `${c.icone ?? '📋'} ${c.nome}` }))}
+            placeholder="Todas as categorias"
+          />
+        </div>
       </div>
 
       {/* Table */}
@@ -288,7 +302,7 @@ export function PratosPage() {
                     {hasPromocaoConfigurada(prato) ? (
                       <div className="flex flex-col items-center gap-1">
                         <Badge variant="success" size="sm">
-                          {formatDataPromocional(prato.data_promocional)}
+                          {formatDiaPromocional(prato.dia_promocional)}
                         </Badge>
                         <span className="text-[11px] font-semibold text-green-600">
                           {formatCurrency(prato.preco_promocional ?? 0)}
@@ -393,12 +407,11 @@ export function PratosPage() {
           <div className="grid grid-cols-2 gap-4">
             <Input
               label="Preço (R$)"
-              type="number"
-              step="0.01"
-              min="0"
+              type="text"
+              inputMode="numeric"
               value={preco}
-              onChange={(e) => setPreco(e.target.value)}
-              placeholder="0.00"
+              onChange={(e) => setPreco(formatCurrencyInput(e.target.value))}
+              placeholder="R$ 0,00"
               required
             />
             <Select
@@ -413,7 +426,7 @@ export function PratosPage() {
           <div className="space-y-3 pt-1">
             <Toggle checked={ativo} onChange={setAtivo} label="Prato ativo (visível no cardápio)" />
             <Toggle checked={pratoDoDia} onChange={setPratoDoDia} label="Marcar como Prato do Dia" />
-            <Toggle checked={promocaoAtiva} onChange={setPromocaoAtiva} label="Ativar promoção por data" />
+            <Toggle checked={promocaoAtiva} onChange={setPromocaoAtiva} label="Ativar promoção por dia da semana" />
           </div>
 
           {pratoDoDia && (
@@ -430,20 +443,19 @@ export function PratosPage() {
             <div className="grid grid-cols-1 gap-4 rounded-2xl border border-green-100 bg-green-50/70 p-4 sm:grid-cols-2">
               <Input
                 label="Preço promocional (R$)"
-                type="number"
-                step="0.01"
-                min="0"
+                type="text"
+                inputMode="numeric"
                 value={precoPromocional}
-                onChange={(e) => setPrecoPromocional(e.target.value)}
-                placeholder="0.00"
+                onChange={(e) => setPrecoPromocional(formatCurrencyInput(e.target.value))}
+                placeholder="R$ 0,00"
                 required
               />
-              <Input
-                label="Data da promoção"
-                type="date"
-                value={dataPromocional}
-                onChange={(e) => setDataPromocional(e.target.value)}
-                required
+              <Select
+                label="Dia da promoção"
+                value={diaPromocional}
+                onChange={(e) => setDiaPromocional(e.target.value as DiaSemana)}
+                options={DIAS_SEMANA.map((d) => ({ value: d.value, label: d.label }))}
+                placeholder="Selecionar dia..."
               />
             </div>
           )}

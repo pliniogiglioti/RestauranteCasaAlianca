@@ -1,29 +1,21 @@
-import type { Prato } from '@/types'
+import { DIAS_SEMANA, getDiaSemanaAtual } from '@/types'
+import type { DiaSemana, Prato } from '@/types'
 
-type PratoComPromocao = Pick<Prato, 'preco' | 'preco_promocional' | 'data_promocional'>
-
-export function getDataAtualISO(date = new Date()): string {
-  const timezoneOffsetMs = date.getTimezoneOffset() * 60_000
-  return new Date(date.getTime() - timezoneOffsetMs).toISOString().slice(0, 10)
-}
+type PratoComPromocao = Pick<Prato, 'preco' | 'preco_promocional' | 'dia_promocional'>
 
 export function isPromocaoAtiva(prato: PratoComPromocao, date = new Date()): boolean {
-  return prato.preco_promocional != null && prato.data_promocional === getDataAtualISO(date)
+  return prato.preco_promocional != null && prato.dia_promocional === getDiaSemanaAtual(date)
 }
 
 export function hasPromocaoConfigurada(prato: PratoComPromocao): boolean {
-  return prato.preco_promocional != null && Boolean(prato.data_promocional)
+  return prato.preco_promocional != null && Boolean(prato.dia_promocional)
 }
 
 export function getPrecoVigente(prato: PratoComPromocao, date = new Date()): number {
   return isPromocaoAtiva(prato, date) ? Number(prato.preco_promocional) : Number(prato.preco)
 }
 
-export function formatDataPromocional(dataPromocional: string | null): string {
-  if (!dataPromocional) return ''
-
-  const [ano, mes, dia] = dataPromocional.split('-').map(Number)
-  if (!ano || !mes || !dia) return dataPromocional
-
-  return new Intl.DateTimeFormat('pt-BR').format(new Date(ano, mes - 1, dia))
+export function formatDiaPromocional(diaPromocional: DiaSemana | null): string {
+  if (!diaPromocional) return ''
+  return DIAS_SEMANA.find((dia) => dia.value === diaPromocional)?.label ?? diaPromocional
 }

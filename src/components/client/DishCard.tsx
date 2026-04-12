@@ -68,17 +68,17 @@ export function DishCard({ prato, onDetails }: DishCardProps) {
           </p>
         )}
 
-        <div className="mt-3">
+        <div className="mt-1">
           {promocaoAtiva && (
-            <div className="mb-0.5">
-              <span className="text-[10px] font-bold text-green-600 uppercase tracking-wide">
+            <div className="leading-none">
+              <span className="text-[10px] font-bold text-green-600 uppercase tracking-wide leading-none">
                 Promoção só de · {formatDiaPromocional(prato.dia_promocional)}
               </span>
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-sm text-green-600">
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="font-bold text-sm text-green-600 leading-none">
                   {formatCurrency(precoVigente)}
                 </span>
-                <span className="text-xs font-medium text-gray-400 line-through">
+                <span className="text-xs font-medium text-gray-400 line-through leading-none">
                   {formatCurrency(prato.preco)}
                 </span>
               </div>

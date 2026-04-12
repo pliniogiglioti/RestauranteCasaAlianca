@@ -2,7 +2,7 @@ import { Plus, Minus, ShoppingCart } from 'lucide-react'
 import { formatCurrency } from '@/types'
 import type { Prato } from '@/types'
 import { useCart } from '@/hooks/useCart'
-import { getPrecoVigente, isPromocaoAtiva } from '@/lib/pricing'
+import { getPrecoVigente, isPromocaoAtiva, formatDiaPromocional } from '@/lib/pricing'
 
 interface DishCardProps {
   prato: Prato & { categoria?: { nome: string; icone?: string | null } | null }
@@ -69,15 +69,27 @@ export function DishCard({ prato, onDetails }: DishCardProps) {
         )}
 
         <div className="mt-3">
+          {promocaoAtiva && (
+            <div className="mb-0.5">
+              <span className="text-[10px] font-bold text-green-600 uppercase tracking-wide">
+                Promoção só de · {formatDiaPromocional(prato.dia_promocional)}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-sm text-green-600">
+                  {formatCurrency(precoVigente)}
+                </span>
+                <span className="text-xs font-medium text-gray-400 line-through">
+                  {formatCurrency(prato.preco)}
+                </span>
+              </div>
+            </div>
+          )}
           <div className="flex flex-wrap items-center gap-2">
-            {promocaoAtiva && (
-              <span className="text-xs font-semibold text-gray-400 line-through">
-                {formatCurrency(prato.preco)}
+            {!promocaoAtiva && (
+              <span className={`font-bold text-base text-brand-600`}>
+                {formatCurrency(precoVigente)}
               </span>
             )}
-            <span className={`font-bold text-base ${promocaoAtiva ? 'text-green-600' : 'text-brand-600'}`}>
-              {formatCurrency(precoVigente)}
-            </span>
           </div>
 
           {/* Cart controls */}

@@ -7,10 +7,10 @@ interface ConfigStore {
   nomeRestaurante: string
   slogan: string
   iconeApp: string
-  iconeUrl: string   // URL da imagem PNG (prioridade sobre emoji)
+  iconeUrl: string
   telefone: string
   endereco: string
-  fetch: () => Promise<void>
+  fetch: (lojaId?: string | null) => Promise<void>
   setConfig: (c: Partial<Omit<ConfigStore, 'fetch' | 'setConfig'>>) => void
 }
 
@@ -18,20 +18,20 @@ export const useConfiguracoes = create<ConfigStore>()(
   persist(
     (set) => ({
       id: null,
-  nomeRestaurante: 'Casa Alinça',
+      nomeRestaurante: 'Casa Aliança',
       slogan: 'Sabores que aquecem o coração',
       iconeApp: '🍽️',
       iconeUrl: '',
       telefone: '',
       endereco: '',
 
-      fetch: async () => {
+      fetch: async (lojaId?: string | null) => {
         try {
-          const data = await getConfiguracao()
+          const data = await getConfiguracao(lojaId)
           if (!data) return
           set({
             id: data.id,
-      nomeRestaurante: data.nome_restaurante || 'Casa Alinça',
+            nomeRestaurante: data.nome_restaurante || 'Casa Aliança',
             slogan: data.slogan || 'Sabores que aquecem o coração',
             iconeApp: data.icone_app || '🍽️',
             iconeUrl: data.logo_url || '',

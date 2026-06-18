@@ -1,24 +1,25 @@
 import { supabase } from '@/lib/supabase'
 import type { Mesa, MesaInsert, MesaUpdate } from '@/types'
 
-export async function getMesas(): Promise<Mesa[]> {
-  const { data, error } = await supabase
-    .from('mesas')
-    .select('*')
-    .order('numero', { ascending: true })
+export async function getMesas(lojaId?: string | null): Promise<Mesa[]> {
+  let query = supabase.from('mesas').select('*').order('numero', { ascending: true })
+  if (lojaId) query = query.eq('loja_id', lojaId)
 
+  const { data, error } = await query
   if (error) throw error
   return (data ?? []) as Mesa[]
 }
 
-export async function getMesaBySlug(slug: string): Promise<Mesa> {
-  const { data, error } = await supabase
+export async function getMesaBySlug(slug: string, lojaId?: string | null): Promise<Mesa> {
+  let query = supabase
     .from('mesas')
     .select('*')
     .eq('slug', slug)
     .eq('ativo', true)
-    .single()
 
+  if (lojaId) query = query.eq('loja_id', lojaId)
+
+  const { data, error } = await query.single()
   if (error) throw error
   return data as Mesa
 }
@@ -68,6 +69,6 @@ export function gerarSlugMesa(numero: number): string {
   return `mesa-${numero}`
 }
 
-export function gerarQrCodeUrl(slug: string, baseUrl: string): string {
-  return `${baseUrl}/mesa/${slug}`
+export function gerarQrCodeUrl(slug: string, baseUrl: string, lojaSlug: string): string {
+  return `${baseUrl}/${lojaSlug}/mesa/${slug}`
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, CheckCircle, MapPin, UtensilsCrossed, MessageSquare } from 'lucide-react'
 import { formatCurrency } from '@/types'
 import { useCart } from '@/hooks/useCart'
@@ -10,9 +10,12 @@ import toast from 'react-hot-toast'
 
 export function OrderSummaryPage() {
   const navigate = useNavigate()
-  const { items, observacaoGeral, mesaId, mesaNumero, mesaSlug, nomeCliente, totalValor, clearCart } = useCart()
+  const { lojaSlug } = useParams<{ lojaSlug: string }>()
+  const { items, observacaoGeral, mesaId, mesaNumero, mesaSlug, nomeCliente, lojaId, lojaSlug: cartLojaSlug, totalValor, clearCart } = useCart()
   const { salvarPedido } = usePedidoAtivo()
   const [loading, setLoading] = useState(false)
+
+  const currentLojaSlug = lojaSlug || cartLojaSlug
 
   async function handleConfirmar() {
     if (items.length === 0) return
@@ -21,6 +24,7 @@ export function OrderSummaryPage() {
       setLoading(true)
       const pedido = await criarPedido({
         mesa_id: mesaId,
+        loja_id: lojaId || null,
         nome_cliente: nomeCliente || undefined,
         observacao_geral: observacaoGeral || undefined,
         itens: items,
@@ -30,12 +34,13 @@ export function OrderSummaryPage() {
         mesaId,
         mesaNumero: mesaNumero ?? 0,
         mesaSlug: mesaSlug ?? '',
+        lojaSlug: currentLojaSlug ?? '',
         criadoEm: new Date().toISOString(),
         status: 'recebido',
       })
       clearCart()
       toast.success('Pedido enviado com sucesso!')
-      navigate('/pedido/status', { replace: true })
+      navigate(`/${currentLojaSlug}/pedido/status`, { replace: true })
     } catch {
       toast.error('Erro ao enviar o pedido. Tente novamente.')
     } finally {

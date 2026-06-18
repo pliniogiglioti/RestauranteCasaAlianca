@@ -4,6 +4,7 @@ import { getPrecoVigente } from '@/lib/pricing'
 
 export interface CriarPedidoInput {
   mesa_id: string
+  loja_id?: string | null
   nome_cliente?: string
   observacao_geral?: string
   itens: CartItem[]
@@ -15,8 +16,6 @@ export async function criarPedido(input: CriarPedidoInput): Promise<{ id: string
     0
   )
 
-  // Gera o UUID no cliente para não precisar de SELECT após INSERT
-  // (anon não tem política de SELECT em pedidos — evita erro 42501)
   const pedidoId = crypto.randomUUID()
 
   const { error: pedidoError } = await supabase
@@ -25,6 +24,7 @@ export async function criarPedido(input: CriarPedidoInput): Promise<{ id: string
     .insert({
       id: pedidoId,
       mesa_id: input.mesa_id,
+      loja_id: input.loja_id ?? null,
       nome_cliente: input.nome_cliente?.trim() || null,
       observacao_geral: input.observacao_geral ?? null,
       valor_total,
@@ -49,23 +49,27 @@ export async function criarPedido(input: CriarPedidoInput): Promise<{ id: string
   return { id: pedidoId }
 }
 
-export async function getPedidos(): Promise<PedidoCompleto[]> {
-  const { data, error } = await supabase
+export async function getPedidos(lojaId?: string | null): Promise<PedidoCompleto[]> {
+  let query = supabase
     .from('pedidos')
     .select(`*, mesa:mesas(*), itens:pedido_itens(*)`)
     .order('created_at', { ascending: false })
+  if (lojaId) query = query.eq('loja_id', lojaId)
 
+  const { data, error } = await query
   if (error) throw error
   return (data ?? []) as unknown as PedidoCompleto[]
 }
 
-export async function getPedidosByStatus(status: StatusPedido): Promise<PedidoCompleto[]> {
-  const { data, error } = await supabase
+export async function getPedidosByStatus(status: StatusPedido, lojaId?: string | null): Promise<PedidoCompleto[]> {
+  let query = supabase
     .from('pedidos')
     .select(`*, mesa:mesas(*), itens:pedido_itens(*)`)
     .eq('status', status)
     .order('created_at', { ascending: false })
+  if (lojaId) query = query.eq('loja_id', lojaId)
 
+  const { data, error } = await query
   if (error) throw error
   return (data ?? []) as unknown as PedidoCompleto[]
 }

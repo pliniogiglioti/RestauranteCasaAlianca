@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/Input'
 import { Toggle } from '@/components/ui/Toggle'
 import { Badge } from '@/components/ui/Badge'
 import { SectionLoading } from '@/components/ui/LoadingSpinner'
+import { useLoja } from '@/hooks/useLoja'
 import type { Mesa } from '@/types'
 import toast from 'react-hot-toast'
 import QRCode from 'qrcode'
@@ -15,6 +16,7 @@ import QRCode from 'qrcode'
 const BASE_URL = window.location.origin
 
 export function MesasPage() {
+  const { lojaId, lojaSlug } = useLoja()
   const [mesas, setMesas] = useState<Mesa[]>([])
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
@@ -33,7 +35,7 @@ export function MesasPage() {
 
   async function carregar() {
     try {
-      const data = await getMesas()
+      const data = await getMesas(lojaId)
       setMesas(data)
     } catch {
       toast.error('Erro ao carregar mesas')
@@ -42,7 +44,10 @@ export function MesasPage() {
     }
   }
 
-  useEffect(() => { carregar() }, [])
+  useEffect(() => {
+    setLoading(true)
+    carregar()
+  }, [lojaId])
 
   function abrirModal(mesa?: Mesa) {
     if (mesa) {
@@ -72,7 +77,7 @@ export function MesasPage() {
         await updateMesa(editando.id, { numero: num, slug, ativo })
         toast.success('Mesa atualizada!')
       } else {
-        await createMesa({ numero: num, slug, ativo })
+        await createMesa({ numero: num, slug, ativo, loja_id: lojaId || null })
         toast.success('Mesa criada!')
       }
       setModalOpen(false)
@@ -103,7 +108,8 @@ export function MesasPage() {
   async function abrirQR(mesa: Mesa) {
     setQrMesa(mesa)
     setQrModalOpen(true)
-    const url = `${BASE_URL}/mesa/${mesa.slug}`
+    const slug = lojaSlug || 'empresa'
+    const url = `${BASE_URL}/${slug}/mesa/${mesa.slug}`
     setQrUrl(url)
     setTimeout(async () => {
       if (canvasRef.current) {
@@ -130,16 +136,22 @@ export function MesasPage() {
     <div className="space-y-6">
       <PageHeader
         title="Mesas"
-        subtitle={`${mesas.length} mesa${mesas.length !== 1 ? 's' : ''} cadastrada${mesas.length !== 1 ? 's' : ''}`}
+        subtitle={`${mesas.length} mesa${mesas.length !== 1 ? 's' : ''} cadastrada${mesas.length !== 1 ? 's' : ''}${lojaSlug ? ` · ${lojaSlug}` : ''}`}
         action={
-          <Button onClick={() => abrirModal()} size="md">
+          <Button onClick={() => abrirModal()} size="md" disabled={!lojaId}>
             <Plus size={16} />
             Nova Mesa
           </Button>
         }
       />
 
-      {mesas.length === 0 ? (
+      {!lojaId && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-amber-700 text-sm font-medium">
+          Selecione uma empresa na barra lateral para gerenciar as mesas.
+        </div>
+      )}
+
+      {lojaId && mesas.length === 0 ? (
         <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-gray-100">
           <QrCode size={40} className="text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500 font-medium">Nenhuma mesa cadastrada</p>
@@ -170,7 +182,7 @@ export function MesasPage() {
               </div>
 
               <p className="text-xs text-gray-400 truncate mb-3">
-                {BASE_URL}/mesa/{mesa.slug}
+                {BASE_URL}/{lojaSlug || '...'}/mesa/{mesa.slug}
               </p>
 
               <div className="flex gap-2">

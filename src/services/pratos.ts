@@ -2,29 +2,32 @@ import { supabase } from '@/lib/supabase'
 import type { PratoInsert, PratoUpdate, DiaSemana } from '@/types'
 import type { PratoComCategoria } from '@/types'
 
-export async function getPratos(): Promise<PratoComCategoria[]> {
-  const { data, error } = await supabase
+export async function getPratos(lojaId?: string | null): Promise<PratoComCategoria[]> {
+  let query = supabase
     .from('pratos')
     .select(`*, categoria:categorias(*)`)
     .order('nome', { ascending: true })
+  if (lojaId) query = query.eq('loja_id', lojaId)
 
+  const { data, error } = await query
   if (error) throw error
   return (data ?? []) as unknown as PratoComCategoria[]
 }
 
-export async function getPratosAtivos(): Promise<PratoComCategoria[]> {
-  const { data, error } = await supabase
+export async function getPratosAtivos(lojaId?: string | null): Promise<PratoComCategoria[]> {
+  let query = supabase
     .from('pratos')
     .select(`*, categoria:categorias(*)`)
     .eq('ativo', true)
     .order('nome', { ascending: true })
+  if (lojaId) query = query.eq('loja_id', lojaId)
 
+  const { data, error } = await query
   if (error) throw error
   return (data ?? []) as unknown as PratoComCategoria[]
 }
 
-export async function getBebidasParaUpsell(): Promise<PratoComCategoria[]> {
-  // Busca bebidas ordenando pelas mais pedidas (via contagem em pedido_itens)
+export async function getBebidasParaUpsell(lojaId?: string | null): Promise<PratoComCategoria[]> {
   const { data: bebidasPedidas, error: erroContagem } = await supabase
     .from('pedido_itens')
     .select('prato_id, quantidade')
@@ -32,7 +35,6 @@ export async function getBebidasParaUpsell(): Promise<PratoComCategoria[]> {
   let idsMaisVendidos: string[] = []
 
   if (!erroContagem && bebidasPedidas) {
-    // Agrupa por prato_id e soma quantidades
     const contagem: Record<string, number> = {}
     for (const item of bebidasPedidas as { prato_id: string | null; quantidade: number }[]) {
       if (item.prato_id) {
@@ -42,18 +44,19 @@ export async function getBebidasParaUpsell(): Promise<PratoComCategoria[]> {
     idsMaisVendidos = Object.keys(contagem).sort((a, b) => contagem[b] - contagem[a])
   }
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('pratos')
     .select(`*, categoria:categorias!inner(*)`)
     .eq('ativo', true)
     .eq('categorias.slug', 'bebidas')
+  if (lojaId) query = query.eq('loja_id', lojaId)
 
+  const { data, error } = await query
   if (error) throw error
   const bebidas = (data ?? []) as unknown as PratoComCategoria[]
 
   if (idsMaisVendidos.length === 0) return bebidas
 
-  // Ordena: mais pedidas primeiro, depois o restante
   return bebidas.sort((a, b) => {
     const posA = idsMaisVendidos.indexOf(a.id)
     const posB = idsMaisVendidos.indexOf(b.id)
@@ -64,14 +67,16 @@ export async function getBebidasParaUpsell(): Promise<PratoComCategoria[]> {
   })
 }
 
-export async function getPratoDodia(dia: DiaSemana): Promise<PratoComCategoria[]> {
-  const { data, error } = await supabase
+export async function getPratoDodia(dia: DiaSemana, lojaId?: string | null): Promise<PratoComCategoria[]> {
+  let query = supabase
     .from('pratos')
     .select(`*, categoria:categorias(*)`)
     .eq('ativo', true)
     .eq('prato_do_dia', true)
     .eq('dia_prato_do_dia', dia)
+  if (lojaId) query = query.eq('loja_id', lojaId)
 
+  const { data, error } = await query
   if (error) throw error
   return (data ?? []) as unknown as PratoComCategoria[]
 }

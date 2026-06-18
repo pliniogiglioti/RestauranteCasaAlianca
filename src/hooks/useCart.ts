@@ -10,8 +10,11 @@ interface CartStore {
   mesaNumero: number
   mesaSlug: string
   nomeCliente: string
+  lojaId: string
+  lojaSlug: string
 
   setMesa: (id: string, numero: number, slug: string) => void
+  setLoja: (id: string, slug: string) => void
   setNomeCliente: (nome: string) => void
   addItem: (prato: Prato) => void
   removeItem: (pratoId: string) => void
@@ -33,9 +36,13 @@ export const useCart = create<CartStore>()(
       mesaNumero: 0,
       mesaSlug: '',
       nomeCliente: '',
+      lojaId: '',
+      lojaSlug: '',
 
       setMesa: (id, numero, slug) =>
         set({ mesaId: id, mesaNumero: numero, mesaSlug: slug }),
+
+      setLoja: (id, slug) => set({ lojaId: id, lojaSlug: slug }),
 
       setNomeCliente: (nome) => set({ nomeCliente: nome }),
 

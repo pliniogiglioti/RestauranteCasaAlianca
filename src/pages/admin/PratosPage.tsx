@@ -10,6 +10,7 @@ import { Select } from '@/components/ui/Select'
 import { Toggle } from '@/components/ui/Toggle'
 import { Badge } from '@/components/ui/Badge'
 import { SectionLoading } from '@/components/ui/LoadingSpinner'
+import { useLoja } from '@/hooks/useLoja'
 import { DIAS_SEMANA, formatCurrency } from '@/types'
 import type { Prato, Categoria, DiaSemana } from '@/types'
 import { formatDiaPromocional, hasPromocaoConfigurada } from '@/lib/pricing'
@@ -19,6 +20,7 @@ import toast from 'react-hot-toast'
 type PratoComCat = Prato & { categoria: Categoria | null }
 
 export function PratosPage() {
+  const { lojaId } = useLoja()
   const [pratos, setPratos] = useState<PratoComCat[]>([])
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [loading, setLoading] = useState(true)
@@ -48,7 +50,7 @@ export function PratosPage() {
 
   async function carregar() {
     try {
-      const [pratosData, catsData] = await Promise.all([getPratos(), getCategoriasAtivas()])
+      const [pratosData, catsData] = await Promise.all([getPratos(lojaId), getCategoriasAtivas(lojaId)])
       setPratos(pratosData as PratoComCat[])
       setCategorias(catsData)
     } catch {
@@ -58,7 +60,7 @@ export function PratosPage() {
     }
   }
 
-  useEffect(() => { carregar() }, [])
+  useEffect(() => { setLoading(true); carregar() }, [lojaId])
 
   function abrirModal(prato?: PratoComCat) {
     if (prato) {
@@ -145,6 +147,7 @@ export function PratosPage() {
         ativo,
         prato_do_dia: pratoDoDia,
         dia_prato_do_dia: (pratoDoDia && diaPratoDoDia ? diaPratoDoDia : null) as DiaSemana | null,
+        loja_id: lojaId || null,
       }
 
       if (editando) {

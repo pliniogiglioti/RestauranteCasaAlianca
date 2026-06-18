@@ -15,10 +15,12 @@ import { Input } from '@/components/ui/Input'
 import { Toggle } from '@/components/ui/Toggle'
 import { Badge } from '@/components/ui/Badge'
 import { SectionLoading } from '@/components/ui/LoadingSpinner'
+import { useLoja } from '@/hooks/useLoja'
 import type { Categoria } from '@/types'
 import toast from 'react-hot-toast'
 
 export function CategoriasPage() {
+  const { lojaId } = useLoja()
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
@@ -35,7 +37,7 @@ export function CategoriasPage() {
 
   async function carregar() {
     try {
-      const data = await getCategorias()
+      const data = await getCategorias(lojaId)
       setCategorias(data)
     } catch {
       toast.error('Erro ao carregar categorias')
@@ -44,7 +46,7 @@ export function CategoriasPage() {
     }
   }
 
-  useEffect(() => { carregar() }, [])
+  useEffect(() => { setLoading(true); carregar() }, [lojaId])
 
   function abrirModal(cat?: Categoria) {
     if (cat) {
@@ -76,7 +78,7 @@ export function CategoriasPage() {
         await updateCategoria(editando.id, { nome, slug, icone: icone || null, ativo, ordem })
         toast.success('Categoria atualizada!')
       } else {
-        await createCategoria({ nome, slug, icone: icone || null, ativo, ordem })
+        await createCategoria({ nome, slug, icone: icone || null, ativo, ordem, loja_id: lojaId || null })
         toast.success('Categoria criada!')
       }
       setModalOpen(false)

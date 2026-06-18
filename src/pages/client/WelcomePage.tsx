@@ -2,17 +2,19 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { QrCode, ArrowRight, MapPin, User } from 'lucide-react'
 import { getMesaBySlug } from '@/services/mesas'
+import { getLojaBySlug } from '@/services/lojas'
 import { useCart } from '@/hooks/useCart'
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
 import { usePedidoAtivo } from '@/hooks/usePedidoAtivo'
 import { AppIcon } from '@/components/ui/AppIcon'
 import type { Mesa } from '@/types'
 import { PageLoading } from '@/components/ui/LoadingSpinner'
+import toast from 'react-hot-toast'
 
 export function WelcomePage() {
-  const { slug } = useParams<{ slug: string }>()
+  const { lojaSlug, slug } = useParams<{ lojaSlug: string; slug: string }>()
   const navigate = useNavigate()
-  const { setMesa, setNomeCliente } = useCart()
+  const { setMesa, setNomeCliente, setLoja } = useCart()
   const { pedido, limparPedido } = usePedidoAtivo()
   const { nomeRestaurante, slogan } = useConfiguracoes()
   const [mesa, setMesaData] = useState<Mesa | null>(null)
@@ -31,23 +33,27 @@ export function WelcomePage() {
   }, [])
 
   useEffect(() => {
-    if (!slug) {
+    if (!slug || !lojaSlug) {
       setError(true)
       setLoading(false)
       return
     }
 
-    getMesaBySlug(slug)
-      .then((data) => {
+    Promise.all([
+      getMesaBySlug(slug),
+      getLojaBySlug(lojaSlug),
+    ])
+      .then(([mesaData, lojaData]) => {
         if (pedido?.status === 'finalizado') {
           limparPedido()
         }
-        setMesaData(data)
-        setMesa(data.id, data.numero, data.slug)
+        setMesaData(mesaData)
+        setMesa(mesaData.id, mesaData.numero, mesaData.slug)
+        setLoja(lojaData.id, lojaData.slug)
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false))
-  }, [slug, setMesa, pedido?.status, limparPedido])
+  }, [slug, lojaSlug, setMesa, setLoja, pedido?.status, limparPedido])
 
   if (loading) return <PageLoading />
 
@@ -127,12 +133,15 @@ export function WelcomePage() {
 
         {/* CTA Button */}
         <button
-          disabled={!nome.trim()}
           onClick={() => {
+            if (!nome.trim()) {
+              toast.error('Digite seu nome para continuar!')
+              return
+            }
             setNomeCliente(nome.trim())
-            navigate(`/mesa/${slug}/cardapio`)
+            navigate(`/${lojaSlug}/mesa/${slug}/cardapio`)
           }}
-          className="w-full bg-brand-500 hover:bg-brand-600 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-4 px-8 rounded-2xl shadow-xl shadow-brand-500/30 transition-all duration-200 flex items-center justify-center gap-3 text-lg"
+          className="w-full bg-brand-500 hover:bg-brand-600 active:scale-[0.98] text-white font-bold py-4 px-8 rounded-2xl shadow-xl shadow-brand-500/30 transition-all duration-200 flex items-center justify-center gap-3 text-lg"
         >
           Ver Cardápio
           <ArrowRight size={20} />

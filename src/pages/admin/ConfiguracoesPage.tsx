@@ -3,6 +3,7 @@ import { Settings, Save, Store, Upload, Phone, MapPin, X, Monitor, Download } fr
 import { supabase } from '@/lib/supabase'
 import { upsertConfiguracao } from '@/services/configuracoes'
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
+import { useLoja } from '@/hooks/useLoja'
 import toast from 'react-hot-toast'
 
 const DOWNLOAD_URL = 'https://github.com/pliniogiglioti/RestauranteCasaAlianca/releases/latest/download/RestauranteCasaAliancaSetup.exe'
@@ -43,6 +44,7 @@ function DownloadAppCard() {
 export function ConfiguracoesPage() {
   const { id, nomeRestaurante, slogan, iconeApp, iconeUrl, telefone, endereco, fetch: fetchConfig, setConfig } =
     useConfiguracoes()
+  const { lojaId } = useLoja()
 
   const [nome, setNome] = useState(nomeRestaurante)
   const [sloganVal, setSloganVal] = useState(slogan)
@@ -114,6 +116,7 @@ export function ConfiguracoesPage() {
           logo_url: iconeUrlVal || null,
           telefone: tel.trim(),
           endereco: end.trim(),
+          loja_id: lojaId ?? null,
         },
         id ?? undefined
       )

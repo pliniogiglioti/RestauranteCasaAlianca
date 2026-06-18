@@ -1,3 +1,21 @@
+// ─── Loja (Empresa) ──────────────────────────────────────────
+export interface LojaRow {
+  id: string
+  nome: string
+  slug: string
+  ativo: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface LojaInsert {
+  nome: string
+  slug: string
+  ativo?: boolean
+}
+
+export type LojaUpdate = Partial<LojaInsert>
+
 export type DiaSemana =
   | 'segunda'
   | 'terca'
@@ -21,6 +39,7 @@ export interface MesaRow {
   slug: string
   qr_code_url: string | null
   ativo: boolean
+  loja_id: string | null
   created_at: string
   updated_at: string
 }
@@ -32,6 +51,7 @@ export interface CategoriaRow {
   icone: string | null
   ordem: number
   ativo: boolean
+  loja_id: string | null
   created_at: string
   updated_at: string
 }
@@ -48,6 +68,7 @@ export interface PratoRow {
   ativo: boolean
   prato_do_dia: boolean
   dia_prato_do_dia: DiaSemana | null
+  loja_id: string | null
   created_at: string
   updated_at: string
 }
@@ -60,6 +81,7 @@ export interface BannerRow {
   link_opcional: string | null
   ordem: number
   ativo: boolean
+  loja_id: string | null
   created_at: string
   updated_at: string
 }
@@ -67,6 +89,7 @@ export interface BannerRow {
 export interface PedidoRow {
   id: string
   mesa_id: string | null
+  loja_id: string | null
   status: StatusPedido
   comanda_externa: string | null
   nome_cliente: string | null
@@ -99,6 +122,7 @@ export interface ProfileRow {
 
 export interface ConfiguracaoRow {
   id: string
+  loja_id: string | null
   nome_restaurante: string
   slogan: string | null
   icone_app: string | null
@@ -117,6 +141,7 @@ export interface MesaInsert {
   slug: string
   qr_code_url?: string | null
   ativo?: boolean
+  loja_id?: string | null
 }
 
 export interface CategoriaInsert {
@@ -125,6 +150,7 @@ export interface CategoriaInsert {
   icone?: string | null
   ordem?: number
   ativo?: boolean
+  loja_id?: string | null
 }
 
 export interface PratoInsert {
@@ -138,6 +164,7 @@ export interface PratoInsert {
   ativo?: boolean
   prato_do_dia?: boolean
   dia_prato_do_dia?: DiaSemana | null
+  loja_id?: string | null
 }
 
 export interface BannerInsert {
@@ -147,10 +174,12 @@ export interface BannerInsert {
   link_opcional?: string | null
   ordem?: number
   ativo?: boolean
+  loja_id?: string | null
 }
 
 export interface PedidoInsert {
   mesa_id?: string | null
+  loja_id?: string | null
   status?: StatusPedido
   comanda_externa?: string | null
   nome_cliente?: string | null
@@ -178,6 +207,12 @@ export type PedidoUpdate = Partial<PedidoInsert>
 export interface Database {
   public: {
     Tables: {
+      lojas: {
+        Row: LojaRow
+        Insert: LojaInsert
+        Update: LojaUpdate
+        Relationships: []
+      }
       mesas: {
         Row: MesaRow
         Insert: MesaInsert

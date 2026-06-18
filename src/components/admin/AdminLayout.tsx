@@ -15,15 +15,21 @@ import {
   Printer,
   Tv,
   ExternalLink,
+  Building2,
+  ChevronDown,
 } from 'lucide-react'
 import { signOut } from '@/hooks/useAuth'
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
+import { useLoja } from '@/hooks/useLoja'
+import { getLojas } from '@/services/lojas'
 import { AppIcon } from '@/components/ui/AppIcon'
 import { supabase } from '@/lib/supabase'
+import type { Loja } from '@/types'
 import toast from 'react-hot-toast'
 
 const navItems = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/admin/empresas', label: 'Empresas', icon: Building2 },
   { to: '/admin/mesas', label: 'Mesas', icon: TableProperties },
   { to: '/admin/categorias', label: 'Categorias', icon: Tag },
   { to: '/admin/pratos', label: 'Pratos', icon: UtensilsCrossed },
@@ -154,6 +160,63 @@ export function AdminLayout() {
   )
 }
 
+function LojaSelector({ onClose }: { onClose: () => void }) {
+  const { lojaId, lojaSlug, lojaNome, setLoja } = useLoja()
+  const [lojas, setLojas] = useState<Loja[]>([])
+  const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    getLojas().then((data) => {
+      setLojas(data)
+      // Auto-seleciona a primeira loja se nenhuma estiver selecionada
+      if (!lojaId && data.length > 0) {
+        setLoja(data[0].id, data[0].slug, data[0].nome)
+      }
+    }).catch(() => {})
+  }, [lojaId, setLoja])
+
+  if (lojas.length === 0) return null
+
+  return (
+    <div className="px-3 pb-3 relative">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-brand-50 border border-brand-200 hover:bg-brand-100 transition-colors text-left"
+      >
+        <Building2 size={15} className="text-brand-500 shrink-0" />
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-brand-500/70">Empresa ativa</p>
+          <p className="text-sm font-semibold text-brand-700 truncate">{lojaNome || 'Selecione...'}</p>
+        </div>
+        <ChevronDown size={14} className={`text-brand-500 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="absolute left-3 right-3 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
+          {lojas.map((loja) => (
+            <button
+              key={loja.id}
+              onClick={() => {
+                setLoja(loja.id, loja.slug, loja.nome)
+                setOpen(false)
+                onClose()
+                toast.success(`Empresa "${loja.nome}" selecionada!`)
+              }}
+              className={`w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-gray-50 transition-colors text-sm ${
+                lojaId === loja.id ? 'bg-brand-50 text-brand-700 font-semibold' : 'text-gray-700'
+              }`}
+            >
+              <Building2 size={14} className={lojaId === loja.id ? 'text-brand-500' : 'text-gray-400'} />
+              <span className="flex-1 truncate">{loja.nome}</span>
+              {lojaId === loja.id && <ChevronRight size={12} className="text-brand-400" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function PrinterStatus() {
   const isElectron = typeof window !== 'undefined' && !!window.electronAPI
 
@@ -185,14 +248,16 @@ function MobileHeaderLogo() {
 }
 
 function TVButton({ onClose }: { onClose: () => void }) {
+  const { lojaSlug } = useLoja()
   const isElectron = typeof window !== 'undefined' && !!window.electronAPI
 
   function handleClick() {
     onClose()
+    const tvUrl = lojaSlug ? `/${lojaSlug}/tv` : '/tv'
     if (isElectron) {
       void window.electronAPI!.openTvWindow()
     } else {
-      window.open('/tv', '_blank')
+      window.open(tvUrl, '_blank')
     }
   }
 
@@ -239,8 +304,13 @@ function SidebarContent({
         )}
       </div>
 
+      {/* Seletor de empresa */}
+      <div className="pt-3">
+        <LojaSelector onClose={onClose} />
+      </div>
+
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
         {navItems.map((item) => (
           <NavLink
             key={item.to}

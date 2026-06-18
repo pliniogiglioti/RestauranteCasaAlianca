@@ -7,6 +7,7 @@ interface PedidoAtivo {
   mesaId: string
   mesaNumero: number
   mesaSlug: string
+  lojaSlug: string
   criadoEm: string
   status: StatusPedido
 }

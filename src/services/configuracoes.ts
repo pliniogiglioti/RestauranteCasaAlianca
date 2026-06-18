@@ -1,13 +1,14 @@
 import { supabase } from '@/lib/supabase'
 import type { Configuracao } from '@/types'
 
-export async function getConfiguracao(): Promise<Configuracao | null> {
-  const { data } = await supabase
-    .from('configuracoes')
-    .select('*')
-    .limit(1)
-    .maybeSingle()
+export async function getConfiguracao(lojaId?: string | null): Promise<Configuracao | null> {
+  let query = supabase.from('configuracoes').select('*')
 
+  if (lojaId) {
+    query = query.eq('loja_id', lojaId)
+  }
+
+  const { data } = await query.limit(1).maybeSingle()
   return data as Configuracao | null
 }
 

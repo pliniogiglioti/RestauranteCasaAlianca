@@ -5,7 +5,7 @@ import { getBannersAtivos } from '@/services/banners'
 import { getDiaSemanaAtual } from '@/types'
 import type { Categoria, Banner, PratoComCategoria } from '@/types'
 
-export function useCardapio() {
+export function useCardapio(lojaId?: string | null) {
   const [pratos, setPratos] = useState<PratoComCategoria[]>([])
   const [pratosDoDia, setPratosDoDia] = useState<PratoComCategoria[]>([])
   const [categorias, setCategorias] = useState<Categoria[]>([])
@@ -17,10 +17,10 @@ export function useCardapio() {
     try {
       setLoading(true)
       const [pratosData, categoriaData, bannersData, pratoDoDiaData] = await Promise.all([
-        getPratosAtivos(),
-        getCategoriasAtivas(),
-        getBannersAtivos(),
-        getPratoDodia(getDiaSemanaAtual()),
+        getPratosAtivos(lojaId),
+        getCategoriasAtivas(lojaId),
+        getBannersAtivos(lojaId),
+        getPratoDodia(getDiaSemanaAtual(), lojaId),
       ])
 
       setPratos(pratosData)
@@ -32,7 +32,7 @@ export function useCardapio() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [lojaId])
 
   useEffect(() => {
     carregarDados()

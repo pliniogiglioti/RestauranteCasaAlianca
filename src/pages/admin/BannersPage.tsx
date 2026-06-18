@@ -8,10 +8,12 @@ import { Input } from '@/components/ui/Input'
 import { Toggle } from '@/components/ui/Toggle'
 import { Badge } from '@/components/ui/Badge'
 import { SectionLoading } from '@/components/ui/LoadingSpinner'
+import { useLoja } from '@/hooks/useLoja'
 import type { Banner } from '@/types'
 import toast from 'react-hot-toast'
 
 export function BannersPage() {
+  const { lojaId } = useLoja()
   const [banners, setBanners] = useState<Banner[]>([])
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
@@ -32,7 +34,7 @@ export function BannersPage() {
 
   async function carregar() {
     try {
-      const data = await getBanners()
+      const data = await getBanners(lojaId)
       setBanners(data)
     } catch {
       toast.error('Erro ao carregar banners')
@@ -41,7 +43,7 @@ export function BannersPage() {
     }
   }
 
-  useEffect(() => { carregar() }, [])
+  useEffect(() => { setLoading(true); carregar() }, [lojaId])
 
   function abrirModal(banner?: Banner) {
     if (banner) {
@@ -93,6 +95,7 @@ export function BannersPage() {
         link_opcional: linkOpcional || null,
         ativo,
         ordem,
+        loja_id: lojaId || null,
       }
 
       if (editando) {

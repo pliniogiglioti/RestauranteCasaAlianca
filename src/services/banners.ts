@@ -1,23 +1,24 @@
 import { supabase } from '@/lib/supabase'
 import type { Banner, BannerInsert, BannerUpdate } from '@/types'
 
-export async function getBanners(): Promise<Banner[]> {
-  const { data, error } = await supabase
-    .from('banners')
-    .select('*')
-    .order('ordem', { ascending: true })
+export async function getBanners(lojaId?: string | null): Promise<Banner[]> {
+  let query = supabase.from('banners').select('*').order('ordem', { ascending: true })
+  if (lojaId) query = query.eq('loja_id', lojaId)
 
+  const { data, error } = await query
   if (error) throw error
   return (data ?? []) as Banner[]
 }
 
-export async function getBannersAtivos(): Promise<Banner[]> {
-  const { data, error } = await supabase
+export async function getBannersAtivos(lojaId?: string | null): Promise<Banner[]> {
+  let query = supabase
     .from('banners')
     .select('*')
     .eq('ativo', true)
     .order('ordem', { ascending: true })
+  if (lojaId) query = query.eq('loja_id', lojaId)
 
+  const { data, error } = await query
   if (error) throw error
   return (data ?? []) as Banner[]
 }

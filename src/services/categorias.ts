@@ -1,23 +1,24 @@
 import { supabase } from '@/lib/supabase'
 import type { Categoria, CategoriaInsert, CategoriaUpdate } from '@/types'
 
-export async function getCategorias(): Promise<Categoria[]> {
-  const { data, error } = await supabase
-    .from('categorias')
-    .select('*')
-    .order('ordem', { ascending: true })
+export async function getCategorias(lojaId?: string | null): Promise<Categoria[]> {
+  let query = supabase.from('categorias').select('*').order('ordem', { ascending: true })
+  if (lojaId) query = query.eq('loja_id', lojaId)
 
+  const { data, error } = await query
   if (error) throw error
   return (data ?? []) as Categoria[]
 }
 
-export async function getCategoriasAtivas(): Promise<Categoria[]> {
-  const { data, error } = await supabase
+export async function getCategoriasAtivas(lojaId?: string | null): Promise<Categoria[]> {
+  let query = supabase
     .from('categorias')
     .select('*')
     .eq('ativo', true)
     .order('ordem', { ascending: true })
+  if (lojaId) query = query.eq('loja_id', lojaId)
 
+  const { data, error } = await query
   if (error) throw error
   return (data ?? []) as Categoria[]
 }
@@ -67,7 +68,7 @@ export function gerarSlugCategoria(nome: string): string {
   return nome
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\p{Diacritic}/gu, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '')
 }

@@ -1,21 +1,36 @@
 import { useEffect, useState, type ReactNode } from 'react'
+import { useParams } from 'react-router-dom'
 import { Clock3, Sparkles } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
+import { getLojaBySlug } from '@/services/lojas'
 import { AppIcon } from '@/components/ui/AppIcon'
 import type { PedidoCompleto } from '@/types'
 
 export function TVPage() {
+  const { lojaSlug } = useParams<{ lojaSlug: string }>()
   const { nomeRestaurante } = useConfiguracoes()
   const [prontos, setProntos] = useState<PedidoCompleto[]>([])
   const [emPreparo, setEmPreparo] = useState<PedidoCompleto[]>([])
+  const [lojaId, setLojaId] = useState<string | null>(null)
 
-  async function carregarPedidos() {
-    const { data, error } = await supabase
+  useEffect(() => {
+    if (!lojaSlug) return
+    getLojaBySlug(lojaSlug)
+      .then((loja) => setLojaId(loja.id))
+      .catch(() => {})
+  }, [lojaSlug])
+
+  async function carregarPedidos(lId: string | null) {
+    let query = supabase
       .from('pedidos')
       .select('*, mesa:mesas(*), itens:pedido_itens(*)')
       .in('status', ['pronto', 'em_preparo', 'recebido'])
       .order('updated_at', { ascending: true })
+
+    if (lId) query = query.eq('loja_id', lId)
+
+    const { data, error } = await query
 
     if (!error && data) {
       const pedidos = data as unknown as PedidoCompleto[]
@@ -25,19 +40,19 @@ export function TVPage() {
   }
 
   useEffect(() => {
-    void carregarPedidos()
+    void carregarPedidos(lojaId)
 
     const channel = supabase
-      .channel('tv-pedidos')
+      .channel(`tv-pedidos-${lojaSlug ?? 'all'}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pedidos' }, () => {
-        void carregarPedidos()
+        void carregarPedidos(lojaId)
       })
       .subscribe()
 
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [])
+  }, [lojaId, lojaSlug])
 
   return (
     <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(22,163,74,0.18),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(250,204,21,0.16),_transparent_24%),linear-gradient(135deg,_#06110b_0%,_#0b1b13_45%,_#101726_100%)] text-white">

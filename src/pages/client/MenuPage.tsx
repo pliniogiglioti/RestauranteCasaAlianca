@@ -27,9 +27,9 @@ interface CategoriaGrupo {
 }
 
 export function MenuPage() {
-  const { slug: _slug } = useParams<{ slug: string }>()
-  const { pratos, pratosDoDia, categorias, banners, loading, error } = useCardapio()
-  const { mesaNumero, totalItens } = useCart()
+  const { lojaSlug: _lojaSlug } = useParams<{ lojaSlug: string; slug: string }>()
+  const { lojaId, mesaNumero, totalItens } = useCart()
+  const { pratos, pratosDoDia, categorias, banners, loading, error } = useCardapio(lojaId || null)
   const { pedido, limparPedido } = usePedidoAtivo()
   const { nomeRestaurante } = useConfiguracoes()
 

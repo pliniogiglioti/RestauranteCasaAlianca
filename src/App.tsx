@@ -20,6 +20,7 @@ import { PratosPage } from '@/pages/admin/PratosPage'
 import { BannersPage } from '@/pages/admin/BannersPage'
 import { PedidosPage } from '@/pages/admin/PedidosPage'
 import { ConfiguracoesPage } from '@/pages/admin/ConfiguracoesPage'
+import { EmpresasPage } from '@/pages/admin/EmpresasPage'
 
 // Admin layout & guard
 import { AdminLayout } from '@/components/admin/AdminLayout'
@@ -30,15 +31,12 @@ import { useConfiguracoes } from '@/hooks/useConfiguracoes'
 import { usePedidoAtivo } from '@/hooks/usePedidoAtivo'
 import { supabase } from '@/lib/supabase'
 
-// Carrega configurações do banco uma vez ao iniciar o app
 function ConfigProvider({ children }: { children: React.ReactNode }) {
   const fetch = useConfiguracoes((s) => s.fetch)
   useEffect(() => { void fetch() }, [fetch])
   return <>{children}</>
 }
 
-// Escuta o Realtime do pedido ativo em qualquer página.
-// Mantém o status do pedido sincronizado no cliente.
 function PedidoWatcher() {
   const { pedido, atualizarStatus } = usePedidoAtivo()
   const pedidoId = pedido?.pedidoId
@@ -91,14 +89,14 @@ export default function App() {
         />
 
         <Routes>
-          {/* TV route */}
-          <Route path="/tv" element={<TVPage />} />
+          {/* TV route por empresa */}
+          <Route path="/:lojaSlug/tv" element={<TVPage />} />
 
-          {/* Client routes */}
-          <Route path="/mesa/:slug" element={<WelcomePage />} />
-          <Route path="/mesa/:slug/cardapio" element={<MenuPage />} />
-          <Route path="/pedido/resumo" element={<OrderSummaryPage />} />
-          <Route path="/pedido/status" element={<OrderStatusPage />} />
+          {/* Client routes por empresa */}
+          <Route path="/:lojaSlug/mesa/:slug" element={<WelcomePage />} />
+          <Route path="/:lojaSlug/mesa/:slug/cardapio" element={<MenuPage />} />
+          <Route path="/:lojaSlug/pedido/resumo" element={<OrderSummaryPage />} />
+          <Route path="/:lojaSlug/pedido/status" element={<OrderStatusPage />} />
 
           {/* Admin routes */}
           <Route path="/admin/login" element={<LoginPage />} />
@@ -111,6 +109,7 @@ export default function App() {
             }
           >
             <Route index element={<DashboardPage />} />
+            <Route path="empresas" element={<EmpresasPage />} />
             <Route path="mesas" element={<MesasPage />} />
             <Route path="categorias" element={<CategoriasPage />} />
             <Route path="pratos" element={<PratosPage />} />

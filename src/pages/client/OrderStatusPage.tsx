@@ -86,8 +86,7 @@ const ORDEM_STATUS: StatusPedido[] = [
 export function OrderStatusPage() {
   const navigate = useNavigate()
   const { pedido, atualizarStatus, limparPedido } = usePedidoAtivo()
-  const { mesaSlug } = useCart()
-  // Use stored status as initial value — always shows something even if SELECT policy isn't applied
+  const { mesaSlug, lojaSlug: cartLojaSlug } = useCart()
   const [status, setStatus] = useState<StatusPedido | null>(pedido?.status ?? null)
   const [valorTotal, setValorTotal] = useState<number>(0)
   const [numeroPedido, setNumeroPedido] = useState<number | null>(null)
@@ -95,10 +94,10 @@ export function OrderStatusPage() {
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date())
 
   const slug = mesaSlug || pedido?.mesaSlug
+  const lojaSlug = pedido?.lojaSlug || cartLojaSlug
   const mesaNumero = pedido?.mesaNumero
   const pedidoId = pedido?.pedidoId
 
-  // Busca status inicial do banco (confirma o estado real)
   useEffect(() => {
     if (!pedidoId) {
       setLoading(false)
@@ -127,7 +126,6 @@ export function OrderStatusPage() {
       })
   }, [pedidoId, atualizarStatus])
 
-  // Realtime: escuta mudanças de status
   useEffect(() => {
     if (!pedidoId) return
 
@@ -165,9 +163,9 @@ export function OrderStatusPage() {
         <p className="text-gray-500 text-sm mb-6">
           Faça seu pedido pelo cardápio para acompanhar o status aqui.
         </p>
-        {slug && (
+        {slug && lojaSlug && (
           <button
-            onClick={() => navigate(`/mesa/${slug}/cardapio`)}
+            onClick={() => navigate(`/${lojaSlug}/mesa/${slug}/cardapio`)}
             className="bg-brand-500 text-white font-bold px-6 py-3 rounded-2xl"
           >
             Ver Cardápio
@@ -186,7 +184,7 @@ export function OrderStatusPage() {
       <header className="bg-white border-b border-gray-100 sticky top-0 z-10 shadow-sm">
         <div className="flex items-center gap-3 px-4 py-4">
           <button
-            onClick={() => navigate(`/mesa/${slug}/cardapio`)}
+            onClick={() => navigate(`/${lojaSlug}/mesa/${slug}/cardapio`)}
             className="p-2 rounded-xl text-gray-600 hover:bg-gray-100 transition-colors"
           >
             <ArrowLeft size={20} />
@@ -239,7 +237,6 @@ export function OrderStatusPage() {
               <h3 className="font-semibold text-gray-900 text-sm mb-4">Progresso do pedido</h3>
 
               <div className="relative">
-                {/* Linha vertical */}
                 <div className="absolute left-5 top-5 bottom-5 w-0.5 bg-gray-100" />
 
                 <div className="space-y-1">
@@ -250,7 +247,6 @@ export function OrderStatusPage() {
 
                     return (
                       <div key={s} className="flex items-center gap-4 relative">
-                        {/* Círculo */}
                         <div
                           className={`
                             w-10 h-10 rounded-full border-2 flex items-center justify-center shrink-0 z-10
@@ -271,7 +267,6 @@ export function OrderStatusPage() {
                           </div>
                         </div>
 
-                        {/* Label */}
                         <div className="flex-1 py-3">
                           <p
                             className={`text-sm font-semibold transition-colors ${
@@ -313,10 +308,9 @@ export function OrderStatusPage() {
               )}
             </div>
 
-            {/* Botão voltar ao cardápio */}
             {status !== 'finalizado' && (
               <button
-                onClick={() => navigate(`/mesa/${slug}/cardapio`)}
+                onClick={() => navigate(`/${lojaSlug}/mesa/${slug}/cardapio`)}
                 className="w-full py-4 rounded-2xl border-2 border-brand-200 text-brand-600 font-bold hover:bg-brand-50 transition-all animate-slide-in-right"
               >
                 Adicionar mais itens
@@ -327,7 +321,7 @@ export function OrderStatusPage() {
               <button
                 onClick={() => {
                   limparPedido()
-                  navigate(`/mesa/${slug}/cardapio`)
+                  navigate(`/${lojaSlug}/mesa/${slug}/cardapio`)
                 }}
                 className="w-full py-4 rounded-2xl bg-brand-500 text-white font-bold hover:bg-brand-600 transition-all shadow-lg shadow-brand-200 animate-slide-in-right"
               >

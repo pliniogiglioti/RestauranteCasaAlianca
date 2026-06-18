@@ -12,6 +12,7 @@ import { StatusBadge } from '@/components/ui/Badge'
 import { SectionLoading } from '@/components/ui/LoadingSpinner'
 import { formatCurrency, STATUS_PEDIDO } from '@/types'
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
+import { useLoja } from '@/hooks/useLoja'
 import type { PedidoCompleto, StatusPedido } from '@/types'
 import toast from 'react-hot-toast'
 
@@ -137,12 +138,13 @@ export function PedidosPage() {
   const [mesaDetalhe, setMesaDetalhe] = useState<MesaGroup | null>(null)
   const [showRelatorio, setShowRelatorio] = useState(false)
   const { nomeRestaurante } = useConfiguracoes()
+  const { lojaId } = useLoja()
 
   const carregar = useCallback(async (silent = false) => {
     try {
       if (!silent) setLoading(true)
       else setRefreshing(true)
-      const data = await getPedidos()
+      const data = await getPedidos(lojaId)
       setPedidos(data as PedidoCompleto[])
     } catch {
       toast.error('Erro ao carregar pedidos')
@@ -150,7 +152,7 @@ export function PedidosPage() {
       setLoading(false)
       setRefreshing(false)
     }
-  }, [])
+  }, [lojaId])
 
   useEffect(() => {
     carregar()

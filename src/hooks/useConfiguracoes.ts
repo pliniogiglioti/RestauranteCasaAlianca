@@ -8,8 +8,6 @@ interface ConfigStore {
   slogan: string
   iconeApp: string
   iconeUrl: string
-  telefone: string
-  endereco: string
   fetch: (lojaId?: string | null) => Promise<void>
   setConfig: (c: Partial<Omit<ConfigStore, 'fetch' | 'setConfig'>>) => void
 }
@@ -22,8 +20,6 @@ export const useConfiguracoes = create<ConfigStore>()(
       slogan: 'Sabores que aquecem o coração',
       iconeApp: '🍽️',
       iconeUrl: '',
-      telefone: '',
-      endereco: '',
 
       fetch: async (lojaId?: string | null) => {
         try {
@@ -35,8 +31,6 @@ export const useConfiguracoes = create<ConfigStore>()(
             slogan: data.slogan || 'Sabores que aquecem o coração',
             iconeApp: data.icone_app || '🍽️',
             iconeUrl: data.logo_url || '',
-            telefone: data.telefone || '',
-            endereco: data.endereco || '',
           })
         } catch {
           // mantém valores do cache persistido

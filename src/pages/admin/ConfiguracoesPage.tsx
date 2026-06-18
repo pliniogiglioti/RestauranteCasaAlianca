@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Settings, Save, Store, Upload, Phone, MapPin, X, Monitor, Download } from 'lucide-react'
+import { Settings, Save, Store, Upload, X, Monitor, Download } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { upsertConfiguracao } from '@/services/configuracoes'
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
@@ -42,7 +42,7 @@ function DownloadAppCard() {
 }
 
 export function ConfiguracoesPage() {
-  const { id, nomeRestaurante, slogan, iconeApp, iconeUrl, telefone, endereco, fetch: fetchConfig, setConfig } =
+  const { id, nomeRestaurante, slogan, iconeApp, iconeUrl, fetch: fetchConfig, setConfig } =
     useConfiguracoes()
   const { lojaId } = useLoja()
 
@@ -50,8 +50,6 @@ export function ConfiguracoesPage() {
   const [sloganVal, setSloganVal] = useState(slogan)
   const [icone, setIcone] = useState(iconeApp)
   const [iconeUrlVal, setIconeUrlVal] = useState(iconeUrl)
-  const [tel, setTel] = useState(telefone)
-  const [end, setEnd] = useState(endereco)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -61,9 +59,7 @@ export function ConfiguracoesPage() {
     setSloganVal(slogan)
     setIcone(iconeApp)
     setIconeUrlVal(iconeUrl)
-    setTel(telefone)
-    setEnd(endereco)
-  }, [nomeRestaurante, slogan, iconeApp, iconeUrl, telefone, endereco])
+  }, [nomeRestaurante, slogan, iconeApp, iconeUrl])
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -114,8 +110,6 @@ export function ConfiguracoesPage() {
           slogan: sloganVal.trim(),
           icone_app: icone.trim() || '🍽️',
           logo_url: iconeUrlVal || null,
-          telefone: tel.trim(),
-          endereco: end.trim(),
           loja_id: lojaId ?? null,
         },
         id ?? undefined
@@ -126,8 +120,6 @@ export function ConfiguracoesPage() {
         slogan: sloganVal.trim(),
         iconeApp: icone.trim() || '🍽️',
         iconeUrl: iconeUrlVal,
-        telefone: tel.trim(),
-        endereco: end.trim(),
       })
       await fetchConfig()
       toast.success('Configurações salvas!')
@@ -306,38 +298,6 @@ export function ConfiguracoesPage() {
           )}
         </div>
 
-        {/* Contato */}
-        <div className="p-5 space-y-4">
-          <h2 className="font-semibold text-gray-900 text-sm flex items-center gap-2">
-            <Phone size={15} className="text-brand-500" />
-            Contato (opcional)
-          </h2>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Telefone / WhatsApp</label>
-            <input
-              type="text"
-              value={tel}
-              onChange={(e) => setTel(e.target.value)}
-              placeholder="(11) 99999-9999"
-              className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent transition-all"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-1">
-              <MapPin size={13} />
-              Endereço
-            </label>
-            <input
-              type="text"
-              value={end}
-              onChange={(e) => setEnd(e.target.value)}
-              placeholder="Rua das Flores, 123 - São Paulo, SP"
-              className="block w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent transition-all"
-            />
-          </div>
-        </div>
       </div>
 
       {/* App Desktop Download */}

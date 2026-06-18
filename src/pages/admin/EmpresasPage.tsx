@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, Edit2, Trash2, Building2, Check, ExternalLink } from 'lucide-react'
+import { Plus, Edit2, Trash2, Building2, Check, ExternalLink, Phone, MapPin } from 'lucide-react'
 import { getLojas, createLoja, updateLoja, deleteLoja, gerarSlugLoja } from '@/services/lojas'
 import { PageHeader } from '@/components/admin/PageHeader'
 import { Button } from '@/components/ui/Button'
@@ -29,6 +29,8 @@ export function EmpresasPage() {
   const [nome, setNome] = useState('')
   const [slug, setSlug] = useState('')
   const [slugEditado, setSlugEditado] = useState(false)
+  const [telefone, setTelefone] = useState('')
+  const [endereco, setEndereco] = useState('')
   const [ativo, setAtivo] = useState(true)
 
   async function carregar() {
@@ -49,12 +51,16 @@ export function EmpresasPage() {
       setEditando(loja)
       setNome(loja.nome)
       setSlug(loja.slug)
+      setTelefone(loja.telefone ?? '')
+      setEndereco(loja.endereco ?? '')
       setAtivo(loja.ativo)
       setSlugEditado(true)
     } else {
       setEditando(null)
       setNome('')
       setSlug('')
+      setTelefone('')
+      setEndereco('')
       setAtivo(true)
       setSlugEditado(false)
     }
@@ -80,16 +86,22 @@ export function EmpresasPage() {
 
     try {
       setSaving(true)
+      const payload = {
+        nome: nome.trim(),
+        slug: slug.trim(),
+        ativo,
+        telefone: telefone.trim() || null,
+        endereco: endereco.trim() || null,
+      }
       if (editando) {
-        const atualizada = await updateLoja(editando.id, { nome: nome.trim(), slug: slug.trim(), ativo })
+        const atualizada = await updateLoja(editando.id, payload)
         toast.success('Empresa atualizada!')
         if (lojaAtualId === editando.id) {
           selecionarLoja(atualizada.id, atualizada.slug, atualizada.nome)
         }
       } else {
-        const nova = await createLoja({ nome: nome.trim(), slug: slug.trim(), ativo })
+        const nova = await createLoja(payload)
         toast.success('Empresa criada!')
-        // Seleciona automaticamente a nova empresa
         selecionarLoja(nova.id, nova.slug, nova.nome)
       }
       setModalOpen(false)
@@ -181,9 +193,20 @@ export function EmpresasPage() {
                   </div>
                 )}
 
-                <p className="text-xs text-gray-400 truncate mb-3">
+                <p className="text-xs text-gray-400 truncate mb-1">
                   {BASE_URL}/{loja.slug}/mesa/...
                 </p>
+                {loja.telefone && (
+                  <p className="text-xs text-gray-500 flex items-center gap-1 truncate mb-0.5">
+                    <Phone size={11} className="shrink-0" /> {loja.telefone}
+                  </p>
+                )}
+                {loja.endereco && (
+                  <p className="text-xs text-gray-500 flex items-center gap-1 truncate mb-2">
+                    <MapPin size={11} className="shrink-0" /> {loja.endereco}
+                  </p>
+                )}
+                {!loja.telefone && !loja.endereco && <div className="mb-2" />}
 
                 <div className="flex gap-2">
                   {!isAtual && (
@@ -262,6 +285,20 @@ export function EmpresasPage() {
               URL gerada: <span className="font-mono text-brand-600">{BASE_URL}/{slug || 'slug'}/mesa/...</span>
             </p>
           </div>
+          <Input
+            label="Telefone / WhatsApp"
+            type="text"
+            value={telefone}
+            onChange={(e) => setTelefone(e.target.value)}
+            placeholder="(11) 99999-9999"
+          />
+          <Input
+            label="Endereço"
+            type="text"
+            value={endereco}
+            onChange={(e) => setEndereco(e.target.value)}
+            placeholder="Rua das Flores, 123 - São Paulo, SP"
+          />
           <Toggle
             checked={ativo}
             onChange={setAtivo}

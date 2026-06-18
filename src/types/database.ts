@@ -4,6 +4,8 @@ export interface LojaRow {
   nome: string
   slug: string
   ativo: boolean
+  telefone: string | null
+  endereco: string | null
   created_at: string
   updated_at: string
 }
@@ -12,6 +14,8 @@ export interface LojaInsert {
   nome: string
   slug: string
   ativo?: boolean
+  telefone?: string | null
+  endereco?: string | null
 }
 
 export type LojaUpdate = Partial<LojaInsert>

@@ -29,12 +29,14 @@ import { ProtectedRoute } from '@/components/admin/ProtectedRoute'
 
 // Config hook
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
+import { useLoja } from '@/hooks/useLoja'
 import { usePedidoAtivo } from '@/hooks/usePedidoAtivo'
 import { supabase } from '@/lib/supabase'
 
 function ConfigProvider({ children }: { children: React.ReactNode }) {
   const fetch = useConfiguracoes((s) => s.fetch)
-  useEffect(() => { void fetch() }, [fetch])
+  const lojaId = useLoja((s) => s.lojaId)
+  useEffect(() => { void fetch(lojaId) }, [fetch, lojaId])
   return <>{children}</>
 }
 

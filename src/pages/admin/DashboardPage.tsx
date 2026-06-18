@@ -6,6 +6,7 @@ import { SectionLoading } from '@/components/ui/LoadingSpinner'
 import { StatusBadge } from '@/components/ui/Badge'
 import { formatCurrency } from '@/types'
 import { Link } from 'react-router-dom'
+import { useLoja } from '@/hooks/useLoja'
 
 interface Stats {
   mesas: number
@@ -28,22 +29,33 @@ export function DashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [pedidosRecentes, setPedidosRecentes] = useState<PedidoRecente[]>([])
   const [loading, setLoading] = useState(true)
+  const { lojaId } = useLoja()
 
   useEffect(() => {
     async function carregarDados() {
+      setLoading(true)
       try {
         const hoje = new Date()
         hoje.setHours(0, 0, 0, 0)
 
+        let mesasQ = supabase.from('mesas').select('id', { count: 'exact' }).eq('ativo', true)
+        let pratosQ = supabase.from('pratos').select('id', { count: 'exact' }).eq('ativo', true)
+        let categoriasQ = supabase.from('categorias').select('id', { count: 'exact' }).eq('ativo', true)
+        let pedidosQ = supabase
+          .from('pedidos')
+          .select('id, status, valor_total, created_at, mesa:mesas(numero)')
+          .gte('created_at', hoje.toISOString())
+          .order('created_at', { ascending: false })
+
+        if (lojaId) {
+          mesasQ = mesasQ.eq('loja_id', lojaId)
+          pratosQ = pratosQ.eq('loja_id', lojaId)
+          categoriasQ = categoriasQ.eq('loja_id', lojaId)
+          pedidosQ = pedidosQ.eq('loja_id', lojaId)
+        }
+
         const [mesasRes, pratosRes, categoriasRes, pedidosRes] = await Promise.all([
-          supabase.from('mesas').select('id', { count: 'exact' }).eq('ativo', true),
-          supabase.from('pratos').select('id', { count: 'exact' }).eq('ativo', true),
-          supabase.from('categorias').select('id', { count: 'exact' }).eq('ativo', true),
-          supabase
-            .from('pedidos')
-            .select('id, status, valor_total, created_at, mesa:mesas(numero)')
-            .gte('created_at', hoje.toISOString())
-            .order('created_at', { ascending: false }),
+          mesasQ, pratosQ, categoriasQ, pedidosQ,
         ])
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -72,7 +84,7 @@ export function DashboardPage() {
     }
 
     carregarDados()
-  }, [])
+  }, [lojaId])
 
   if (loading) return <SectionLoading />
 

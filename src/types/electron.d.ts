@@ -13,6 +13,8 @@ interface ElectronAPI {
   openPrinterSelector: () => Promise<void>
   printRelatorio: (html: string) => Promise<{ ok: boolean }>
   openTvWindow: () => Promise<{ ok: boolean }>
+  setLoja: (lojaId: string) => Promise<{ ok: boolean }>
+  getLoja: () => Promise<string>
   onNovoPedidoImpresso: (
     callback: (data: { id: string; mesa: { numero: number } | null; valor_total: number; impressoEm: string }) => void
   ) => void

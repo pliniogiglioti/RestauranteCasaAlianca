@@ -20,8 +20,14 @@ let appIcon = null  // nativeImage reutilizado na janela e no tray
 // Selected printer (persisted to userData/config.json)
 let selectedPrinter = ''
 
+// Loja selecionada (persisted to userData/config.json)
+let selectedLojaId = ''
+
 // In-memory order history (last 100 orders)
 const orderHistory = []
+
+// Active realtime channel (recreated when loja changes)
+let realtimeChannel = null
 
 // ---------------------------------------------------------------------------
 // Config persistence
@@ -35,13 +41,14 @@ function loadConfig() {
     const raw = fs.readFileSync(configPath(), 'utf8')
     const cfg = JSON.parse(raw)
     selectedPrinter = cfg.impressora || ''
+    selectedLojaId = cfg.lojaId || ''
   } catch {
     // first run — no config yet
   }
 }
 
 function saveConfig() {
-  fs.writeFileSync(configPath(), JSON.stringify({ impressora: selectedPrinter }), 'utf8')
+  fs.writeFileSync(configPath(), JSON.stringify({ impressora: selectedPrinter, lojaId: selectedLojaId }), 'utf8')
 }
 
 // ---------------------------------------------------------------------------
@@ -469,30 +476,41 @@ async function printOrder(pedidoBasico) {
 // ---------------------------------------------------------------------------
 async function setupRealtimeOrders() {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    console.warn(
-      '[realtime] VITE_SUPABASE_URL ou VITE_SUPABASE_ANON_KEY não configurados no .env — impressão automática desabilitada.'
-    )
+    console.warn('[realtime] Variáveis de ambiente não configuradas — impressão desabilitada.')
     return
   }
 
-  const { createClient } = await import('@supabase/supabase-js')
-  supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  if (!supabase) {
+    const { createClient } = await import('@supabase/supabase-js')
+    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  }
 
-  supabase
-    .channel('auto-print-pedidos')
-    .on(
-      'postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'pedidos' },
-      (payload) => {
-        console.log('[realtime] Novo pedido detectado:', payload.new?.id)
-        printOrder(payload.new)
-      }
-    )
-    .subscribe((status) => {
-      console.log('[realtime] Status do canal:', status)
-    })
-
+  await subscribeRealtimeOrders()
   console.log('[realtime] Escutando novos pedidos para impressão automática...')
+}
+
+async function subscribeRealtimeOrders() {
+  if (!supabase) return
+
+  // Remove canal anterior se existir
+  if (realtimeChannel) {
+    await supabase.removeChannel(realtimeChannel)
+    realtimeChannel = null
+  }
+
+  const filter = selectedLojaId
+    ? { event: 'INSERT', schema: 'public', table: 'pedidos', filter: `loja_id=eq.${selectedLojaId}` }
+    : { event: 'INSERT', schema: 'public', table: 'pedidos' }
+
+  realtimeChannel = supabase
+    .channel(`auto-print-pedidos-${selectedLojaId || 'all'}`)
+    .on('postgres_changes', filter, (payload) => {
+      console.log('[realtime] Novo pedido detectado:', payload.new?.id, '| loja:', selectedLojaId || 'todas')
+      printOrder(payload.new)
+    })
+    .subscribe((status) => {
+      console.log('[realtime] Status do canal:', status, '| loja:', selectedLojaId || 'todas')
+    })
 }
 
 // ---------------------------------------------------------------------------
@@ -567,6 +585,19 @@ ipcMain.handle('open-tv-window', () => {
   createTvWindow()
   return { ok: true }
 })
+
+// Loja selecionada no admin — filtra impressão automática
+ipcMain.handle('set-loja', async (_event, lojaId) => {
+  if (selectedLojaId === lojaId) return { ok: true }
+  selectedLojaId = lojaId || ''
+  saveConfig()
+  console.log('[loja] Loja selecionada para impressão:', selectedLojaId || '(todas)')
+  // Recria canal Realtime com o novo filtro
+  await subscribeRealtimeOrders()
+  return { ok: true }
+})
+
+ipcMain.handle('get-loja', () => selectedLojaId)
 
 // ---------------------------------------------------------------------------
 // App lifecycle

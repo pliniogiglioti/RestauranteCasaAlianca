@@ -59,6 +59,13 @@ export function AdminLayout() {
 
   const isSuperAdmin = profile?.role === 'super_admin'
 
+  // Sincroniza loja atual com Electron ao montar (caso app reiniciou)
+  useEffect(() => {
+    if (lojaId && typeof window !== 'undefined' && window.electronAPI?.setLoja) {
+      void window.electronAPI.setLoja(lojaId)
+    }
+  }, [lojaId])
+
   // Admin normal: auto-seta loja do perfil ao carregar
   useEffect(() => {
     if (profile && profile.role === 'admin' && profile.loja_id && !lojaId) {

@@ -27,6 +27,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Abrir janela TV de chamada de pedidos
   openTvWindow: () => ipcRenderer.invoke('open-tv-window'),
 
+  // Sincronizar loja selecionada com o processo principal (filtra impressão automática)
+  setLoja: (lojaId) => ipcRenderer.invoke('set-loja', lojaId),
+  getLoja: () => ipcRenderer.invoke('get-loja'),
+
   // Evento: novo pedido impresso automaticamente
   onNovoPedidoImpresso: (callback) => {
     ipcRenderer.on('novo-pedido-impresso', (_event, data) => callback(data))

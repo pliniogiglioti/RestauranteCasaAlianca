@@ -58,6 +58,8 @@ export function AdminLayout() {
   const { lojaId, setLoja } = useLoja()
 
   const isSuperAdmin = profile?.role === 'super_admin'
+  // Admin com loja_id vinculada fica fixo na loja dele; sem loja_id vê o seletor
+  const hasLojaFixed = profile?.role === 'admin' && !!profile?.loja_id
 
   // Sincroniza loja atual com Electron ao montar (caso app reiniciou)
   useEffect(() => {
@@ -161,6 +163,7 @@ export function AdminLayout() {
           onClose={() => setSidebarOpen(false)}
           pendingOrdersCount={pendingOrdersCount}
           isSuperAdmin={isSuperAdmin}
+          hasLojaFixed={hasLojaFixed}
         />
       </aside>
 
@@ -177,6 +180,7 @@ export function AdminLayout() {
               onClose={() => setSidebarOpen(false)}
               pendingOrdersCount={pendingOrdersCount}
               isSuperAdmin={isSuperAdmin}
+              hasLojaFixed={hasLojaFixed}
               showClose
             />
           </aside>
@@ -323,12 +327,14 @@ function SidebarContent({
   onClose,
   pendingOrdersCount,
   isSuperAdmin,
+  hasLojaFixed,
   showClose = false,
 }: {
   onSignOut: () => void
   onClose: () => void
   pendingOrdersCount: number
   isSuperAdmin: boolean
+  hasLojaFixed: boolean
   showClose?: boolean
 }) {
   const { nomeRestaurante } = useConfiguracoes()
@@ -353,23 +359,21 @@ function SidebarContent({
         )}
       </div>
 
-      {/* Seletor de empresa: super_admin pode trocar, admin vê fixo */}
+      {/* Seletor de empresa */}
       <div className="pt-3">
-        {isSuperAdmin
-          ? <LojaSelector onClose={onClose} />
-          : lojaNome
-            ? (
-              <div className="px-3 pb-3">
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-brand-50 border border-brand-200">
-                  <Building2 size={15} className="text-brand-500 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-brand-500/70">Empresa</p>
-                    <p className="text-sm font-semibold text-brand-700 truncate">{lojaNome}</p>
-                  </div>
+        {hasLojaFixed
+          ? (
+            <div className="px-3 pb-3">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-brand-50 border border-brand-200">
+                <Building2 size={15} className="text-brand-500 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-brand-500/70">Empresa</p>
+                  <p className="text-sm font-semibold text-brand-700 truncate">{lojaNome}</p>
                 </div>
               </div>
-            )
-            : null
+            </div>
+          )
+          : <LojaSelector onClose={onClose} />
         }
       </div>
 

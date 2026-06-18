@@ -120,6 +120,7 @@ export interface ProfileRow {
   email: string
   nome: string | null
   role: 'admin' | 'super_admin'
+  loja_id: string | null
   created_at: string
   updated_at: string
 }

@@ -17,8 +17,9 @@ import {
   ExternalLink,
   Building2,
   ChevronDown,
+  Users,
 } from 'lucide-react'
-import { signOut } from '@/hooks/useAuth'
+import { signOut, useAuth } from '@/hooks/useAuth'
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
 import { useLoja } from '@/hooks/useLoja'
 import { getLojas } from '@/services/lojas'
@@ -27,9 +28,20 @@ import { supabase } from '@/lib/supabase'
 import type { Loja } from '@/types'
 import toast from 'react-hot-toast'
 
-const navItems = [
+const superAdminNavItems = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/admin/empresas', label: 'Empresas', icon: Building2 },
+  { to: '/admin/usuarios', label: 'Usuários', icon: Users },
+  { to: '/admin/mesas', label: 'Mesas', icon: TableProperties },
+  { to: '/admin/categorias', label: 'Categorias', icon: Tag },
+  { to: '/admin/pratos', label: 'Pratos', icon: UtensilsCrossed },
+  { to: '/admin/banners', label: 'Banners', icon: Image },
+  { to: '/admin/pedidos', label: 'Pedidos', icon: ClipboardList },
+  { to: '/admin/configuracoes', label: 'Configurações', icon: Settings },
+]
+
+const adminNavItems = [
+  { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/admin/mesas', label: 'Mesas', icon: TableProperties },
   { to: '/admin/categorias', label: 'Categorias', icon: Tag },
   { to: '/admin/pratos', label: 'Pratos', icon: UtensilsCrossed },
@@ -42,6 +54,24 @@ export function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [pendingOrdersCount, setPendingOrdersCount] = useState(0)
   const navigate = useNavigate()
+  const { profile } = useAuth()
+  const { lojaId, setLoja } = useLoja()
+
+  const isSuperAdmin = profile?.role === 'super_admin'
+
+  // Admin normal: auto-seta loja do perfil ao carregar
+  useEffect(() => {
+    if (profile && profile.role === 'admin' && profile.loja_id && !lojaId) {
+      void (async () => {
+        const { data } = await supabase
+          .from('lojas')
+          .select('*')
+          .eq('id', profile.loja_id)
+          .single()
+        if (data) setLoja(data.id, data.slug, data.nome)
+      })()
+    }
+  }, [profile, lojaId, setLoja])
 
   async function handleSignOut() {
     try {
@@ -56,11 +86,17 @@ export function AdminLayout() {
     let mounted = true
 
     async function refreshPendingOrdersCount() {
-      const { count, error } = await supabase
+      let query = supabase
         .from('pedidos')
         .select('id', { count: 'exact', head: true })
         .neq('status', 'finalizado')
 
+      // Admin normal só vê pedidos da própria loja
+      if (!isSuperAdmin && lojaId) {
+        query = query.eq('loja_id', lojaId)
+      }
+
+      const { count, error } = await query
       if (!error && mounted) {
         setPendingOrdersCount(count ?? 0)
       }
@@ -107,7 +143,7 @@ export function AdminLayout() {
       mounted = false
       void supabase.removeChannel(channel)
     }
-  }, [])
+  }, [isSuperAdmin, lojaId])
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -117,6 +153,7 @@ export function AdminLayout() {
           onSignOut={handleSignOut}
           onClose={() => setSidebarOpen(false)}
           pendingOrdersCount={pendingOrdersCount}
+          isSuperAdmin={isSuperAdmin}
         />
       </aside>
 
@@ -132,6 +169,7 @@ export function AdminLayout() {
               onSignOut={handleSignOut}
               onClose={() => setSidebarOpen(false)}
               pendingOrdersCount={pendingOrdersCount}
+              isSuperAdmin={isSuperAdmin}
               showClose
             />
           </aside>
@@ -277,14 +315,18 @@ function SidebarContent({
   onSignOut,
   onClose,
   pendingOrdersCount,
+  isSuperAdmin,
   showClose = false,
 }: {
   onSignOut: () => void
   onClose: () => void
   pendingOrdersCount: number
+  isSuperAdmin: boolean
   showClose?: boolean
 }) {
   const { nomeRestaurante } = useConfiguracoes()
+  const { lojaNome } = useLoja()
+  const navItems = isSuperAdmin ? superAdminNavItems : adminNavItems
 
   return (
     <>
@@ -304,9 +346,24 @@ function SidebarContent({
         )}
       </div>
 
-      {/* Seletor de empresa */}
+      {/* Seletor de empresa: super_admin pode trocar, admin vê fixo */}
       <div className="pt-3">
-        <LojaSelector onClose={onClose} />
+        {isSuperAdmin
+          ? <LojaSelector onClose={onClose} />
+          : lojaNome
+            ? (
+              <div className="px-3 pb-3">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-brand-50 border border-brand-200">
+                  <Building2 size={15} className="text-brand-500 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-brand-500/70">Empresa</p>
+                    <p className="text-sm font-semibold text-brand-700 truncate">{lojaNome}</p>
+                  </div>
+                </div>
+              </div>
+            )
+            : null
+        }
       </div>
 
       {/* Nav */}

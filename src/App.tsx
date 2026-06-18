@@ -21,6 +21,7 @@ import { BannersPage } from '@/pages/admin/BannersPage'
 import { PedidosPage } from '@/pages/admin/PedidosPage'
 import { ConfiguracoesPage } from '@/pages/admin/ConfiguracoesPage'
 import { EmpresasPage } from '@/pages/admin/EmpresasPage'
+import { UsuariosPage } from '@/pages/admin/UsuariosPage'
 
 // Admin layout & guard
 import { AdminLayout } from '@/components/admin/AdminLayout'
@@ -116,6 +117,7 @@ export default function App() {
             <Route path="banners" element={<BannersPage />} />
             <Route path="pedidos" element={<PedidosPage />} />
             <Route path="configuracoes" element={<ConfiguracoesPage />} />
+            <Route path="usuarios" element={<UsuariosPage />} />
           </Route>
 
           {/* Default redirect */}

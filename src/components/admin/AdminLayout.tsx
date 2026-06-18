@@ -100,8 +100,8 @@ export function AdminLayout() {
         .select('id', { count: 'exact', head: true })
         .neq('status', 'finalizado')
 
-      // Admin normal só vê pedidos da própria loja
-      if (!isSuperAdmin && lojaId) {
+      // Sempre filtra pela loja selecionada, independente do role
+      if (lojaId) {
         query = query.eq('loja_id', lojaId)
       }
 

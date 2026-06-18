@@ -161,7 +161,7 @@ export function AdminLayout() {
 }
 
 function LojaSelector({ onClose }: { onClose: () => void }) {
-  const { lojaId, lojaSlug, lojaNome, setLoja } = useLoja()
+  const { lojaId, lojaNome, setLoja } = useLoja()
   const [lojas, setLojas] = useState<Loja[]>([])
   const [open, setOpen] = useState(false)
 

@@ -459,6 +459,8 @@ async function printOrder(pedidoBasico) {
         silent: true,
         printBackground: false,
         deviceName: selectedPrinter || '',
+        margins: { marginType: 'none' },
+        pageSize: { width: 80000, height: 297000 },
       },
       (success, reason) => {
         if (!success) console.warn('[print] Falha na impressão:', reason)
@@ -556,7 +558,13 @@ async function printHTML(html) {
   await printWin.loadFile(tmpFile)
 
   printWin.webContents.print(
-    { silent: true, printBackground: false, deviceName: selectedPrinter || '' },
+    {
+      silent: true,
+      printBackground: false,
+      deviceName: selectedPrinter || '',
+      margins: { marginType: 'none' },
+      pageSize: { width: 80000, height: 297000 },
+    },
     (success, reason) => {
       if (!success) console.warn('[relatorio] Falha na impressão:', reason)
       setTimeout(() => { printWin.destroy(); fs.unlink(tmpFile, () => {}) }, 2000)

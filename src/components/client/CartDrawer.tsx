@@ -18,6 +18,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     items,
     observacaoGeral,
     mesaNumero,
+    lojaSlug,
     updateQuantidade,
     removeItem,
     updateObservacaoItem,
@@ -30,7 +31,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
   function handleFinalizar() {
     onClose()
-    navigate('/pedido/resumo')
+    navigate(`/${lojaSlug}/pedido/resumo`)
   }
 
   return (
@@ -206,14 +207,14 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
 function UpsellBebidas() {
   const [bebidas, setBebidas] = useState<PratoComCategoria[]>([])
-  const { items, addItem } = useCart()
+  const { items, addItem, lojaId } = useCart()
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    getBebidasParaUpsell()
+    getBebidasParaUpsell(lojaId)
       .then(setBebidas)
       .catch(() => {})
-  }, [])
+  }, [lojaId])
 
   const bebidasParaMostrar = bebidas.filter((b) => !items.some((i) => i.prato.id === b.id))
 

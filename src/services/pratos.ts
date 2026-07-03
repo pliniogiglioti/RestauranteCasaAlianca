@@ -28,9 +28,12 @@ export async function getPratosAtivos(lojaId?: string | null): Promise<PratoComC
 }
 
 export async function getBebidasParaUpsell(lojaId?: string | null): Promise<PratoComCategoria[]> {
-  const { data: bebidasPedidas, error: erroContagem } = await supabase
+  let queryContagem = supabase
     .from('pedido_itens')
-    .select('prato_id, quantidade')
+    .select('prato_id, quantidade, pedidos!inner(loja_id)')
+  if (lojaId) queryContagem = queryContagem.eq('pedidos.loja_id', lojaId)
+
+  const { data: bebidasPedidas, error: erroContagem } = await queryContagem
 
   let idsMaisVendidos: string[] = []
 

@@ -39,11 +39,9 @@ export function WelcomePage() {
       return
     }
 
-    Promise.all([
-      getMesaBySlug(slug),
-      getLojaBySlug(lojaSlug),
-    ])
-      .then(([mesaData, lojaData]) => {
+    getLojaBySlug(lojaSlug)
+      .then(async (lojaData) => {
+        const mesaData = await getMesaBySlug(slug, lojaData.id)
         if (pedido?.status === 'finalizado') {
           limparPedido()
         }

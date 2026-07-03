@@ -12,8 +12,9 @@ import { useLoja } from '@/hooks/useLoja'
 import type { Mesa } from '@/types'
 import toast from 'react-hot-toast'
 import QRCode from 'qrcode'
+import { PUBLIC_APP_URL } from '@/lib/publicUrl'
 
-const BASE_URL = window.location.origin
+const BASE_URL = PUBLIC_APP_URL
 
 export function MesasPage() {
   const { lojaId, lojaSlug } = useLoja()

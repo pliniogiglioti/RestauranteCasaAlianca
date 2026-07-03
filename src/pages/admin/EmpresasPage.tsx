@@ -11,8 +11,9 @@ import { SectionLoading } from '@/components/ui/LoadingSpinner'
 import { useLoja } from '@/hooks/useLoja'
 import type { Loja } from '@/types'
 import toast from 'react-hot-toast'
+import { PUBLIC_APP_URL } from '@/lib/publicUrl'
 
-const BASE_URL = window.location.origin
+const BASE_URL = PUBLIC_APP_URL
 
 export function EmpresasPage() {
   const [lojas, setLojas] = useState<Loja[]>([])

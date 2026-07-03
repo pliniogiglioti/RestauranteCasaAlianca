@@ -17,6 +17,32 @@ let supabase = null
 let tray = null
 let appIcon = null  // nativeImage reutilizado na janela e no tray
 
+// Impede duas instâncias do aplicativo. Ao executar novamente, avisa o
+// usuário e traz a janela que já estava aberta para frente.
+const hasSingleInstanceLock = app.requestSingleInstanceLock()
+
+if (!hasSingleInstanceLock) {
+  app.quit()
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.show()
+      mainWindow.focus()
+    }
+
+    dialog.showMessageBox(mainWindow || undefined, {
+      type: 'info',
+      title: 'Casa Aliança Restaurante',
+      message: 'O aplicativo já está aberto.',
+      detail: 'A janela que já estava em execução foi trazida para frente.',
+      buttons: ['OK'],
+      defaultId: 0,
+      noLink: true,
+    })
+  })
+}
+
 // Selected printer (persisted to userData/config.json)
 let selectedPrinter = ''
 

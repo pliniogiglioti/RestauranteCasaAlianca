@@ -1,7 +1,7 @@
 {
   "name": "restaurante-casa-alianca",
   "private": true,
-  "version": "1.0.6",
+  "version": "1.0.9",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
@@ -28,7 +28,7 @@
       "target": "nsis",
       "icon": "electron/icon.png",
       "artifactName": "RestauranteCasaAliancaSetup.${ext}",
-      "signAndEditExecutable": false
+      "signAndEditExecutable": true
     },
     "mac": {
       "target": "dmg"

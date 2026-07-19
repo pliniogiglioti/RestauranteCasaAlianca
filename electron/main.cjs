@@ -436,7 +436,11 @@ function sendRawToPrinter(printerName, buffer) {
 
     const tmpFile = path.join(app.getPath('temp'), `escpos-${Date.now()}.bin`)
     fs.writeFileSync(tmpFile, buffer)
-    const scriptPath = path.join(__dirname, 'print-raw.ps1')
+    // In the packaged app, __dirname points inside app.asar (a virtual
+    // archive) — external processes like powershell.exe can't read from
+    // there. asarUnpack copies this file to a real app.asar.unpacked
+    // directory alongside it, so redirect the path there.
+    const scriptPath = path.join(__dirname, 'print-raw.ps1').replace('app.asar', 'app.asar.unpacked')
 
     execFile(
       'powershell.exe',

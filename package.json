@@ -21,6 +21,9 @@
       "electron/**/*",
       ".env"
     ],
+    "asarUnpack": [
+      "electron/print-raw.ps1"
+    ],
     "directories": {
       "output": "release"
     },

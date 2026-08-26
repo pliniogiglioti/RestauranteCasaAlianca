@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
   UtensilsCrossed,
@@ -28,6 +28,9 @@ import { supabase } from '@/lib/supabase'
 import type { Loja } from '@/types'
 import toast from 'react-hot-toast'
 
+const CAIXA_ALLOWED_PREFIXES = ['/admin/mesas', '/admin/pedidos']
+const CAIXA_HOME = '/admin/mesas'
+
 const superAdminNavItems = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/admin/empresas', label: 'Empresas', icon: Building2 },
@@ -50,16 +53,23 @@ const adminNavItems = [
   { to: '/admin/configuracoes', label: 'Configurações', icon: Settings },
 ]
 
+const caixaNavItems = [
+  { to: '/admin/mesas', label: 'Mesas', icon: TableProperties, end: true },
+  { to: '/admin/pedidos', label: 'Pedidos', icon: ClipboardList },
+]
+
 export function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [pendingOrdersCount, setPendingOrdersCount] = useState(0)
   const navigate = useNavigate()
+  const location = useLocation()
   const { profile } = useAuth()
   const { lojaId, setLoja } = useLoja()
 
   const isSuperAdmin = profile?.role === 'super_admin'
-  // Admin com loja_id vinculada fica fixo na loja dele; sem loja_id vê o seletor
-  const hasLojaFixed = profile?.role === 'admin' && !!profile?.loja_id
+  const isCaixa = profile?.role === 'caixa'
+  // Admin/Caixa com loja_id vinculada fica fixo na loja dele; sem loja_id vê o seletor
+  const hasLojaFixed = (profile?.role === 'admin' || profile?.role === 'caixa') && !!profile?.loja_id
 
   // Sincroniza loja atual com Electron ao montar (caso app reiniciou)
   useEffect(() => {
@@ -68,9 +78,9 @@ export function AdminLayout() {
     }
   }, [lojaId])
 
-  // Admin normal: auto-seta loja do perfil ao carregar
+  // Admin/Caixa: auto-seta loja do perfil ao carregar
   useEffect(() => {
-    if (profile && profile.role === 'admin' && profile.loja_id && !lojaId) {
+    if (profile && (profile.role === 'admin' || profile.role === 'caixa') && profile.loja_id && !lojaId) {
       void (async () => {
         const { data } = await supabase
           .from('lojas')
@@ -81,6 +91,23 @@ export function AdminLayout() {
       })()
     }
   }, [profile, lojaId, setLoja])
+
+  // Caixa só acessa Mesas e Pedidos — redireciona qualquer outra rota
+  useEffect(() => {
+    if (isCaixa && !CAIXA_ALLOWED_PREFIXES.some((prefix) => location.pathname.startsWith(prefix))) {
+      navigate(CAIXA_HOME, { replace: true })
+    }
+  }, [isCaixa, location.pathname, navigate])
+
+  // Empresas/Usuários são exclusivos de Super Admin, mesmo via URL direta
+  useEffect(() => {
+    if (
+      profile && profile.role !== 'super_admin' &&
+      (location.pathname.startsWith('/admin/empresas') || location.pathname.startsWith('/admin/usuarios'))
+    ) {
+      navigate('/admin', { replace: true })
+    }
+  }, [profile, location.pathname, navigate])
 
   async function handleSignOut() {
     try {
@@ -163,6 +190,7 @@ export function AdminLayout() {
           onClose={() => setSidebarOpen(false)}
           pendingOrdersCount={pendingOrdersCount}
           isSuperAdmin={isSuperAdmin}
+          isCaixa={isCaixa}
           hasLojaFixed={hasLojaFixed}
         />
       </aside>
@@ -180,6 +208,7 @@ export function AdminLayout() {
               onClose={() => setSidebarOpen(false)}
               pendingOrdersCount={pendingOrdersCount}
               isSuperAdmin={isSuperAdmin}
+              isCaixa={isCaixa}
               hasLojaFixed={hasLojaFixed}
               showClose
             />
@@ -327,6 +356,7 @@ function SidebarContent({
   onClose,
   pendingOrdersCount,
   isSuperAdmin,
+  isCaixa,
   hasLojaFixed,
   showClose = false,
 }: {
@@ -334,12 +364,13 @@ function SidebarContent({
   onClose: () => void
   pendingOrdersCount: number
   isSuperAdmin: boolean
+  isCaixa: boolean
   hasLojaFixed: boolean
   showClose?: boolean
 }) {
   const { nomeRestaurante } = useConfiguracoes()
   const { lojaNome } = useLoja()
-  const navItems = isSuperAdmin ? superAdminNavItems : adminNavItems
+  const navItems = isSuperAdmin ? superAdminNavItems : isCaixa ? caixaNavItems : adminNavItems
 
   return (
     <>

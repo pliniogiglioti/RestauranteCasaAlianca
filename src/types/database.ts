@@ -119,7 +119,7 @@ export interface ProfileRow {
   id: string
   email: string
   nome: string | null
-  role: 'admin' | 'super_admin'
+  role: 'admin' | 'super_admin' | 'caixa'
   loja_id: string | null
   created_at: string
   updated_at: string

@@ -21,6 +21,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Abrir diálogo nativo de seleção de impressora (via menu do tray também)
   openPrinterSelector: () => ipcRenderer.invoke('open-printer-selector'),
 
+  // Ligar/desligar impressão automática de novos pedidos
+  getAutoPrint: () => ipcRenderer.invoke('get-auto-print'),
+  setAutoPrint: (enabled) => ipcRenderer.invoke('set-auto-print', enabled),
+
   // Imprimir HTML arbitrário (relatório do dia, etc.)
   printRelatorio: (html) => ipcRenderer.invoke('print-relatorio', html),
 
@@ -41,11 +45,20 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('impressora-atualizada', (_event, name) => callback(name))
   },
 
+  // Evento: impressão automática foi alterada (via tray menu)
+  onAutoPrintAtualizado: (callback) => {
+    ipcRenderer.on('auto-print-atualizado', (_event, enabled) => callback(enabled))
+  },
+
   removeNovoPedidoImpressoListener: () => {
     ipcRenderer.removeAllListeners('novo-pedido-impresso')
   },
 
   removeImpressoraAtualizadaListener: () => {
     ipcRenderer.removeAllListeners('impressora-atualizada')
+  },
+
+  removeAutoPrintAtualizadoListener: () => {
+    ipcRenderer.removeAllListeners('auto-print-atualizado')
   },
 })

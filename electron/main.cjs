@@ -47,6 +47,9 @@ if (!hasSingleInstanceLock) {
 // Selected printer (persisted to userData/config.json)
 let selectedPrinter = ''
 
+// Impressão automática de novos pedidos (persisted to userData/config.json)
+let autoPrintEnabled = true
+
 // Loja selecionada (persisted to userData/config.json)
 let selectedLojaId = ''
 
@@ -69,13 +72,18 @@ function loadConfig() {
     const cfg = JSON.parse(raw)
     selectedPrinter = cfg.impressora || ''
     selectedLojaId = cfg.lojaId || ''
+    autoPrintEnabled = cfg.autoPrint !== false
   } catch {
     // first run — no config yet
   }
 }
 
 function saveConfig() {
-  fs.writeFileSync(configPath(), JSON.stringify({ impressora: selectedPrinter, lojaId: selectedLojaId }), 'utf8')
+  fs.writeFileSync(
+    configPath(),
+    JSON.stringify({ impressora: selectedPrinter, lojaId: selectedLojaId, autoPrint: autoPrintEnabled }),
+    'utf8'
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -165,6 +173,12 @@ function createTray(icon) {
         label: selectedPrinter ? `Impressora: ${selectedPrinter}` : 'Impressora: (padrão do sistema)',
         enabled: false,
       },
+      {
+        label: `Impressão automática: ${autoPrintEnabled ? 'Ativada' : 'Desativada'}`,
+        type: 'checkbox',
+        checked: autoPrintEnabled,
+        click: () => setAutoPrint(!autoPrintEnabled),
+      },
       { type: 'separator' },
       { label: 'Sair', click: () => app.quit() },
     ])
@@ -193,10 +207,27 @@ function refreshTrayMenu() {
         label: selectedPrinter ? `Impressora: ${selectedPrinter}` : 'Impressora: (padrão do sistema)',
         enabled: false,
       },
+      {
+        label: `Impressão automática: ${autoPrintEnabled ? 'Ativada' : 'Desativada'}`,
+        type: 'checkbox',
+        checked: autoPrintEnabled,
+        click: () => setAutoPrint(!autoPrintEnabled),
+      },
       { type: 'separator' },
       { label: 'Sair', click: () => app.quit() },
     ])
   tray.setContextMenu(buildMenu())
+}
+
+// Toggle auto-print, persist, refresh tray, and notify the renderer
+function setAutoPrint(enabled) {
+  autoPrintEnabled = !!enabled
+  saveConfig()
+  refreshTrayMenu()
+  console.log('[printer] Impressão automática:', autoPrintEnabled ? 'ativada' : 'desativada')
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('auto-print-atualizado', autoPrintEnabled)
+  }
 }
 
 function toggleWindow() {
@@ -555,6 +586,10 @@ async function subscribeRealtimeOrders() {
     .channel(`auto-print-pedidos-${selectedLojaId || 'all'}`)
     .on('postgres_changes', filter, (payload) => {
       console.log('[realtime] Novo pedido detectado:', payload.new?.id, '| loja:', selectedLojaId || 'todas')
+      if (!autoPrintEnabled) {
+        console.log('[print] Impressão automática desativada — pedido não impresso.')
+        return
+      }
       printOrder(payload.new)
     })
     .subscribe((status) => {
@@ -625,6 +660,15 @@ ipcMain.handle('set-impressora', (_event, printerName) => {
 
 // Retornar impressora atualmente selecionada
 ipcMain.handle('get-impressora', () => selectedPrinter)
+
+// Ligar/desligar impressão automática de novos pedidos
+ipcMain.handle('set-auto-print', (_event, enabled) => {
+  setAutoPrint(enabled)
+  return { ok: true }
+})
+
+// Estado atual da impressão automática
+ipcMain.handle('get-auto-print', () => autoPrintEnabled)
 
 // Abrir diálogo de seleção de impressora (acionável pelo renderer)
 ipcMain.handle('open-printer-selector', () => openPrinterSelector())

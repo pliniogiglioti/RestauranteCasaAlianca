@@ -15,12 +15,16 @@ interface ElectronAPI {
   openTvWindow: () => Promise<{ ok: boolean }>
   setLoja: (lojaId: string) => Promise<{ ok: boolean }>
   getLoja: () => Promise<string>
+  getAutoPrint: () => Promise<boolean>
+  setAutoPrint: (enabled: boolean) => Promise<{ ok: boolean }>
   onNovoPedidoImpresso: (
     callback: (data: { id: string; mesa: { numero: number } | null; valor_total: number; impressoEm: string }) => void
   ) => void
   onImpressoraAtualizada: (callback: (name: string) => void) => void
+  onAutoPrintAtualizado: (callback: (enabled: boolean) => void) => void
   removeNovoPedidoImpressoListener: () => void
   removeImpressoraAtualizadaListener: () => void
+  removeAutoPrintAtualizadoListener: () => void
 }
 
 interface Window {

@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
-import { Settings, Save, Store, Upload, X, Monitor, Download } from 'lucide-react'
+import { Settings, Save, Store, Upload, X, Monitor, Download, Printer } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { upsertConfiguracao } from '@/services/configuracoes'
 import { useConfiguracoes } from '@/hooks/useConfiguracoes'
 import { useLoja } from '@/hooks/useLoja'
+import { Toggle } from '@/components/ui/Toggle'
 import toast from 'react-hot-toast'
 
 const DOWNLOAD_URL = 'https://github.com/pliniogiglioti/RestauranteCasaAlianca/releases/latest/download/RestauranteCasaAliancaSetup.exe'
@@ -37,6 +38,57 @@ function DownloadAppCard() {
           Baixar
         </a>
       </div>
+    </div>
+  )
+}
+
+function ImpressaoCard() {
+  const isElectron = typeof window !== 'undefined' && !!window.electronAPI
+  const [autoPrint, setAutoPrint] = useState(true)
+  const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    if (!isElectron) return
+    window.electronAPI!.getAutoPrint().then((enabled) => {
+      setAutoPrint(enabled)
+      setLoaded(true)
+    })
+    window.electronAPI!.onAutoPrintAtualizado(setAutoPrint)
+    return () => window.electronAPI!.removeAutoPrintAtualizadoListener()
+  }, [isElectron])
+
+  async function handleToggle(checked: boolean) {
+    setAutoPrint(checked)
+    await window.electronAPI!.setAutoPrint(checked)
+    toast.success(checked ? 'Impressão automática ativada!' : 'Impressão automática desativada!')
+  }
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <h2 className="font-semibold text-gray-900 text-sm flex items-center gap-2 mb-4">
+        <Printer size={15} className="text-brand-500" />
+        Impressão de Pedidos
+      </h2>
+
+      {isElectron ? (
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-[#474747]">Impressão automática</p>
+            <p className="text-xs text-gray-400 mt-0.5">
+              {loaded && autoPrint
+                ? 'Novos pedidos são impressos automaticamente assim que chegam.'
+                : loaded
+                  ? 'Novos pedidos não são impressos — imprima manualmente pela lista de pedidos.'
+                  : 'Carregando...'}
+            </p>
+          </div>
+          <Toggle checked={autoPrint} onChange={handleToggle} disabled={!loaded} />
+        </div>
+      ) : (
+        <p className="text-xs text-gray-400">
+          Execute o aplicativo Windows neste computador para controlar a impressão automática.
+        </p>
+      )}
     </div>
   )
 }
@@ -299,6 +351,9 @@ export function ConfiguracoesPage() {
         </div>
 
       </div>
+
+      {/* Impressão automática de pedidos */}
+      <ImpressaoCard />
 
       {/* App Desktop Download */}
       <DownloadAppCard />
